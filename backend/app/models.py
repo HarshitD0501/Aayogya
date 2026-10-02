@@ -63,10 +63,13 @@ class Medicine(Base):
     prn = Column(Boolean, default=False)
     duration_days = Column(Integer)
     start_date = Column(String)
-    status = Column(String, default="active")  # active | expired
+    status = Column(String, default="active")  # active | stopped | expired
     confidence = Column(Float)
     needs_salt_confirmation = Column(Boolean, default=False)
     prescriber_name = Column(String)
+    reminders_enabled = Column(Boolean, default=True)  # can be paused by patient
+    stopped_at = Column(DateTime, nullable=True)
+    stopped_reason = Column(String, nullable=True)
 
     report = relationship("Report", back_populates="medicines")
 
@@ -88,6 +91,14 @@ class Patient(Base):
     emergency_contact = Column(String)
     created_at = Column(DateTime, default=_now)
 
+    # Automated reminder preferences (patient controls message frequency)
+    auto_reminders_enabled = Column(Boolean, default=True)
+    whatsapp_reminders_enabled = Column(Boolean, default=True)
+    call_reminders_enabled = Column(Boolean, default=False)
+    reminder_time_morning = Column(String, default="08:00 AM")
+    reminder_time_afternoon = Column(String, default="01:00 PM")
+    reminder_time_night = Column(String, default="08:00 PM")
+
 
 class Interaction(Base):
     """Curated salt-pair interactions (design §7.4). salt_a/salt_b stored
@@ -107,8 +118,7 @@ class Interaction(Base):
 class ReminderLog(Base):
     """Append-only log of reminders pushed to the patient (WhatsApp/voice). Counts
     ('kitne messages gaye', doses reminded) are derived from these rows, so there's
-    one source of truth. The actual sender (Twilio) isn't built yet — rows are
-    seeded/stubbed for now; wire the sender to append here later.
+    one source of truth.
     """
     __tablename__ = "reminder_logs"
     __table_args__ = (Index("ix_reminder_logs_patient_sent", "patient_id", "sent_at"),)
@@ -121,3 +131,30 @@ class ReminderLog(Base):
     body = Column(String)
     status = Column(String, default="sent")  # sent | failed | queued
     sent_at = Column(DateTime, default=_now)
+
+
+class DoseAdherence(Base):
+    """Daily dose adherence tracking for medicines.
+    Records interactive WhatsApp confirmation states ('Yes, Taken' / 'Missed').
+    """
+    __tablename__ = "dose_adherences"
+    __table_args__ = (
+        Index("ix_dose_adherence_patient_date", "patient_id", "dose_date"),
+        Index("ix_dose_adherence_patient_slot", "patient_id", "dose_date", "slot"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(String, ForeignKey("patients.id"), index=True)
+    medicine_id = Column(Integer, ForeignKey("medicines.id"), index=True)
+    dose_date = Column(String, index=True)  # YYYY-MM-DD
+    slot = Column(String, index=True)  # morning | afternoon | night | sos
+    status = Column(String, default="pending")  # pending | taken | missed | unconfirmed
+    scheduled_time = Column(String, nullable=True)
+    confirmed_at = Column(DateTime, nullable=True)
+    channel = Column(String, default="whatsapp")  # whatsapp | web | voice
+    whatsapp_message_id = Column(String, nullable=True, index=True)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=_now)
+
+    medicine = relationship("Medicine")
+    patient = relationship("Patient")

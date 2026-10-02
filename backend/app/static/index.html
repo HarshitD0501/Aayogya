@@ -356,12 +356,41 @@ async function doUpload() {
   } catch (e) { status.textContent = "Error: " + e.message; }
 }
 
-// --- views ---
 function slotHtml(title, items) {
   const body = items.length
-    ? items.map(m => `<div>${esc(m.brand)} <span class="muted">${esc(m.strength || "")}</span></div>`).join("")
+    ? items.map(m => {
+        let badge = '<span class="pill" style="font-size:10px;background:#fef3c7;color:#92400e">due</span>';
+        if (m.adherence_status === 'taken') {
+          badge = `<span class="pill ok" style="font-size:10px">taken ${m.adherence_time ? '(' + esc(m.adherence_time) + ')' : ''}</span>`;
+        } else if (m.adherence_status === 'missed') {
+          badge = '<span class="pill expired" style="font-size:10px">missed</span>';
+        }
+        let acts = '';
+        if (m.adherence_id) {
+          acts = `<div style="margin-top:4px;display:flex;gap:4px">
+            <button style="padding:2px 6px;font-size:11px" onclick="sendWa(${m.adherence_id})">🔔 Nudge</button>
+            <button style="padding:2px 6px;font-size:11px;background:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="simWa(${m.adherence_id}, 'taken')">✓ Yes</button>
+            <button style="padding:2px 6px;font-size:11px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="simWa(${m.adherence_id}, 'missed')">✕ Missed</button>
+          </div>`;
+        }
+        return `<div style="margin-bottom:8px"><b>${esc(m.brand)}</b> <span class="muted">${esc(m.strength || "")}</span> ${badge}${acts}</div>`;
+      }).join("")
     : '<div class="muted">—</div>';
   return `<div class="slot"><h4>${title}</h4>${body}</div>`;
+}
+
+async function sendWa(id) {
+  try {
+    await api('/whatsapp/send-reminder', { method: 'POST', json: { adherence_id: id } });
+    render();
+  } catch(e) { alert(e.message); }
+}
+
+async function simWa(id, act) {
+  try {
+    await api('/whatsapp/simulate-reply', { method: 'POST', json: { adherence_id: id, action: act } });
+    render();
+  } catch(e) { alert(e.message); }
 }
 const VIEWS = {
   upload: async () => `<h1>Upload prescription</h1>

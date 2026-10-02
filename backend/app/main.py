@@ -7,6 +7,7 @@ graph run (reconcile_active) and flips the gate. Per-patient isolation (design
 """
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 import logging
@@ -16,7 +17,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, Response, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from langgraph.types import Command
@@ -30,13 +31,17 @@ load_dotenv()
 from . import interactions as interaction_svc  # noqa: E402
 from . import prices as price_svc  # noqa: E402
 from . import summary as summary_svc  # noqa: E402
+from . import whatsapp as wa_svc  # noqa: E402
 from .auth import authenticate, current_patient, make_token  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
-from .models import Medicine, Patient, Report  # noqa: E402
-from .schemas import LoginIn, LoginOut, MedicineOut, PatientOut, ReportOut  # noqa: E402
+from .models import DoseAdherence, Medicine, Patient, Report  # noqa: E402
+from .schemas import (  # noqa: E402
+    LoginIn, LoginOut, MedicineOut, PatientOut, ReminderPrefsIn,
+    ReminderPrefsOut, ReportOut, StopMedicineIn,
+)
 from .seed import seed  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
@@ -78,7 +83,13 @@ async def lifespan(app: FastAPI):
     cp, pool = _make_checkpointer()
     app.state.pipeline = build_pipeline(cp)
     app.state.pool = pool
+    scheduler_task = asyncio.create_task(wa_svc.start_reminder_scheduler_loop())
     yield
+    scheduler_task.cancel()
+    try:
+        await scheduler_task
+    except asyncio.CancelledError:
+        pass
     if pool is not None:
         pool.close()
 
@@ -304,6 +315,246 @@ def voice_token(authorization: str = Header(None), patient: Patient = Depends(cu
         .to_jwt()
     )
     return {"url": settings.livekit_url, "token": jwt, "room": room}
+
+
+# --- WhatsApp Meta Cloud API & Adherence Endpoints ---
+
+class SendReminderIn(BaseModel):
+    adherence_id: int
+
+
+class SimulateReplyIn(BaseModel):
+    adherence_id: int
+    action: str  # "taken" | "missed"
+
+
+@app.get("/api/whatsapp/webhook")
+def whatsapp_webhook_verify(
+    hub_mode: str | None = Query(None, alias="hub.mode"),
+    hub_challenge: str | None = Query(None, alias="hub.challenge"),
+    hub_verify_token: str | None = Query(None, alias="hub.verify_token"),
+):
+    """Meta Webhook Challenge Verification (GET).
+    Meta tests connectivity by sending hub.mode=subscribe and hub.verify_token.
+    """
+    if hub_mode == "subscribe" and hub_verify_token == settings.whatsapp_verify_token:
+        logger.info("Meta WhatsApp Webhook successfully verified with challenge: %s", hub_challenge)
+        return Response(content=hub_challenge or "", media_type="text/plain")
+    logger.warning("WhatsApp Webhook verify mismatch: received token %s", hub_verify_token)
+    raise HTTPException(403, "Verification token mismatch")
+
+
+@app.post("/api/whatsapp/webhook")
+async def whatsapp_webhook_receive(
+    request: Request,
+    db: Session = Depends(get_db),
+    x_hub_signature_256: str | None = Header(None, alias="X-Hub-Signature-256"),
+):
+    """Meta Webhook Notifications (POST).
+    Receives interactive button clicks ('✅ Yes, Taken' / '❌ Missed') and text replies.
+    """
+    body_bytes = await request.body()
+    if not wa_svc.verify_signature(body_bytes, x_hub_signature_256):
+        raise HTTPException(401, "Invalid webhook HMAC signature")
+    try:
+        payload = json.loads(body_bytes.decode("utf-8"))
+    except Exception:
+        raise HTTPException(400, "Invalid JSON payload")
+    res = await wa_svc.process_webhook_payload(payload, db)
+    return {"status": "ok", "details": res}
+
+
+@app.post("/api/whatsapp/send-reminder")
+async def send_dose_reminder(
+    req: SendReminderIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Trigger sending an interactive WhatsApp reminder for a specific scheduled dose."""
+    adh = db.query(DoseAdherence).filter(
+        DoseAdherence.id == req.adherence_id,
+        DoseAdherence.patient_id == patient.id,
+    ).first()
+    if not adh:
+        raise HTTPException(404, "Scheduled dose adherence record not found")
+    med = adh.medicine
+    if not med:
+        raise HTTPException(404, "Associated medicine record not found")
+    return await wa_svc.send_interactive_dose_reminder(db, adh, patient, med)
+
+
+@app.post("/api/whatsapp/simulate-reply")
+async def simulate_whatsapp_reply(
+    req: SimulateReplyIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Simulate patient tapping '✅ Yes, Taken' or '❌ Missed / Forgot' in WhatsApp.
+    Allows end-to-end testing of the exact webhook flow from the dashboard.
+    """
+    adh = db.query(DoseAdherence).filter(
+        DoseAdherence.id == req.adherence_id,
+        DoseAdherence.patient_id == patient.id,
+    ).first()
+    if not adh:
+        raise HTTPException(404, "Scheduled dose adherence record not found")
+    action_type = "taken" if "take" in req.action.lower() else "missed"
+    btn_id = f"dose_{action_type}_{adh.id}"
+    mock_payload = {
+        "entry": [{
+            "changes": [{
+                "value": {
+                    "messages": [{
+                        "from": patient.phone or "919454535137",
+                        "type": "interactive",
+                        "interactive": {
+                            "type": "button_reply",
+                            "button_reply": {
+                                "id": btn_id,
+                                "title": "✅ Yes, Taken" if action_type == "taken" else "❌ Missed / Forgot",
+                            },
+                        },
+                    }],
+                },
+            }],
+        }],
+    }
+    return await wa_svc.process_webhook_payload(mock_payload, db)
+
+
+@app.get("/api/adherence/today")
+def get_today_adherence(
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Return all scheduled doses and adherence states for today."""
+    adherences = wa_svc.sync_today_adherence(db, patient.id)
+    return [
+        {
+            "id": a.id,
+            "medicine_id": a.medicine_id,
+            "brand": a.medicine.brand if a.medicine else "",
+            "strength": a.medicine.strength if a.medicine else "",
+            "slot": a.slot,
+            "scheduled_time": a.scheduled_time,
+            "status": a.status,
+            "confirmed_at": a.confirmed_at.isoformat() if a.confirmed_at else None,
+            "notes": a.notes,
+        }
+        for a in adherences
+    ]
+
+
+@app.get("/api/reminders/preferences", response_model=ReminderPrefsOut)
+def get_reminder_preferences(
+    patient: Patient = Depends(current_patient),
+):
+    """Get the patient's automated reminder settings (WhatsApp & Call)."""
+    return ReminderPrefsOut(
+        auto_reminders_enabled=patient.auto_reminders_enabled is not False,
+        whatsapp_reminders_enabled=patient.whatsapp_reminders_enabled is not False,
+        call_reminders_enabled=bool(patient.call_reminders_enabled),
+        reminder_time_morning=getattr(patient, "reminder_time_morning", "08:00 AM") or "08:00 AM",
+        reminder_time_afternoon=getattr(patient, "reminder_time_afternoon", "01:00 PM") or "01:00 PM",
+        reminder_time_night=getattr(patient, "reminder_time_night", "08:00 PM") or "08:00 PM",
+    )
+
+
+@app.post("/api/reminders/preferences", response_model=ReminderPrefsOut)
+def update_reminder_preferences(
+    body: ReminderPrefsIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Update master auto-reminder controls so the patient is not spammed."""
+    p = db.get(Patient, patient.id)
+    if not p:
+        raise HTTPException(404, "Patient not found")
+    if body.auto_reminders_enabled is not None:
+        p.auto_reminders_enabled = body.auto_reminders_enabled
+    if body.whatsapp_reminders_enabled is not None:
+        p.whatsapp_reminders_enabled = body.whatsapp_reminders_enabled
+    if body.call_reminders_enabled is not None:
+        p.call_reminders_enabled = body.call_reminders_enabled
+    if body.reminder_time_morning is not None:
+        p.reminder_time_morning = body.reminder_time_morning
+    if body.reminder_time_afternoon is not None:
+        p.reminder_time_afternoon = body.reminder_time_afternoon
+    if body.reminder_time_night is not None:
+        p.reminder_time_night = body.reminder_time_night
+    db.commit()
+    db.refresh(p)
+    return ReminderPrefsOut(
+        auto_reminders_enabled=p.auto_reminders_enabled is not False,
+        whatsapp_reminders_enabled=p.whatsapp_reminders_enabled is not False,
+        call_reminders_enabled=bool(p.call_reminders_enabled),
+        reminder_time_morning=p.reminder_time_morning or "08:00 AM",
+        reminder_time_afternoon=p.reminder_time_afternoon or "01:00 PM",
+        reminder_time_night=p.reminder_time_night or "08:00 PM",
+    )
+
+
+@app.post("/api/medicines/{medicine_id}/stop")
+def stop_patient_medicine(
+    medicine_id: int,
+    body: StopMedicineIn = StopMedicineIn(),
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Patient is fit / completed course -> stops medicine and halts all reminders."""
+    try:
+        med = wa_svc.stop_medicine(db, medicine_id, patient.id, reason=body.reason)
+        return {
+            "status": "stopped",
+            "medicine_id": med.id,
+            "brand": med.brand,
+            "reason": med.stopped_reason,
+        }
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/medicines/{medicine_id}/resume")
+def resume_patient_medicine(
+    medicine_id: int,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Resume a previously stopped medicine and restore dose reminder schedule."""
+    try:
+        med = wa_svc.resume_medicine(db, medicine_id, patient.id)
+        return {"status": "resumed", "medicine_id": med.id, "brand": med.brand}
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/medicines/{medicine_id}/toggle-reminders")
+def toggle_medicine_reminders_endpoint(
+    medicine_id: int,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Pause or unpause reminders for a specific active medicine."""
+    try:
+        med = wa_svc.toggle_medicine_reminders(db, medicine_id, patient.id)
+        return {
+            "status": "updated",
+            "medicine_id": med.id,
+            "brand": med.brand,
+            "reminders_enabled": med.reminders_enabled,
+        }
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/reminders/trigger-check")
+async def trigger_automated_reminders(
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Manually test or trigger the automated reminder scheduler immediately."""
+    res = await wa_svc.run_automated_reminders_check(db, force=True)
+    return {"status": "triggered", "details": res}
 
 
 @app.get("/")

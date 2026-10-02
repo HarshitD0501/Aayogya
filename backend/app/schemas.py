@@ -53,6 +53,9 @@ class MedicineOut(BaseModel):
     confidence: Optional[float]
     needs_salt_confirmation: bool
     prescriber_name: Optional[str]
+    reminders_enabled: bool = True
+    stopped_at: Optional[str] = None
+    stopped_reason: Optional[str] = None
     prices: Optional[dict] = None
 
     @computed_field  # derived, not stored: "the UI should ask the human to confirm this"
@@ -90,9 +93,37 @@ class PatientOut(BaseModel):
     plan: str
     lang: Optional[str] = None
     timezone: Optional[str] = None
+    auto_reminders_enabled: bool = True
+    whatsapp_reminders_enabled: bool = True
+    call_reminders_enabled: bool = False
+    reminder_time_morning: Optional[str] = "08:00 AM"
+    reminder_time_afternoon: Optional[str] = "01:00 PM"
+    reminder_time_night: Optional[str] = "08:00 PM"
 
     class Config:
         from_attributes = True
+
+
+class ReminderPrefsIn(BaseModel):
+    auto_reminders_enabled: Optional[bool] = None
+    whatsapp_reminders_enabled: Optional[bool] = None
+    call_reminders_enabled: Optional[bool] = None
+    reminder_time_morning: Optional[str] = None
+    reminder_time_afternoon: Optional[str] = None
+    reminder_time_night: Optional[str] = None
+
+
+class ReminderPrefsOut(BaseModel):
+    auto_reminders_enabled: bool
+    whatsapp_reminders_enabled: bool
+    call_reminders_enabled: bool
+    reminder_time_morning: str
+    reminder_time_afternoon: str
+    reminder_time_night: str
+
+
+class StopMedicineIn(BaseModel):
+    reason: Optional[str] = "Patient recovered / finished course"
 
 
 class LoginOut(BaseModel):

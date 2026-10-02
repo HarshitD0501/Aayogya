@@ -55,6 +55,13 @@ class Settings(BaseSettings):
     livekit_api_key: str = ""
     livekit_api_secret: str = ""
 
+    # WhatsApp Meta Cloud API (1000 free service conversations/mo from Meta).
+    # Blank token or phone_number_id => operates in safe development/simulation mode.
+    whatsapp_api_token: str = ""
+    whatsapp_phone_number_id: str = ""
+    whatsapp_verify_token: str = "aayogya_whatsapp_verify_token"
+    whatsapp_app_secret: str = ""
+
     # Postgres connection pool (ignored for sqlite).
     db_pool_size: int = 5
     db_max_overflow: int = 10

@@ -23,6 +23,8 @@ import {
   Clock,
   MessageSquare,
   Bell,
+  BellOff,
+  PhoneCall,
   Calendar,
   Search,
   BookOpen,
@@ -32,6 +34,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Sparkles,
+  RotateCcw,
+  RefreshCw,
 } from "lucide-react";
 
 // Shared GET-with-loading/error helper. Re-fetches when `deps` change.
@@ -89,7 +93,17 @@ function TimingPills({ m }) {
   );
 }
 
-function Slot({ label, Icon, color, meds }) {
+function Slot({
+  label,
+  Icon,
+  color,
+  meds,
+  onSendReminder,
+  onSimulateReply,
+  onStopMedicine,
+  onToggleReminders,
+  sendingId,
+}) {
   if (!meds || !meds.length)
     return (
       <div className="slot empty">
@@ -103,13 +117,84 @@ function Slot({ label, Icon, color, meds }) {
         <Icon size={16} color={color} /> {label}
       </h4>
       {meds.map((m, i) => (
-        <div className="med" key={i}>
-          {m.brand}
-          <small>
-            {" "}
-            · {m.salt || "—"}
-            {m.strength ? ` ${m.strength}` : ""}
-          </small>
+        <div className="med" key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+            <div>
+              <strong>{m.brand}</strong>
+              <small>
+                {" "}
+                · {m.salt || "—"}
+                {m.strength ? ` ${m.strength}` : ""}
+              </small>
+              {!m.reminders_enabled && (
+                <span className="pill tone-warn" style={{ fontSize: 10, padding: "1px 6px", marginLeft: 6 }}>
+                  🔕 Paused
+                </span>
+              )}
+            </div>
+            {m.adherence_status === "taken" ? (
+              <span className="pill tone-brand" style={{ fontSize: 11, padding: "2px 8px", whiteSpace: "nowrap" }}>
+                ✓ Taken {m.adherence_time ? `(${m.adherence_time})` : ""}
+              </span>
+            ) : m.adherence_status === "missed" ? (
+              <span className="pill tone-accent" style={{ fontSize: 11, padding: "2px 8px", background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca", whiteSpace: "nowrap" }}>
+                ✕ Missed
+              </span>
+            ) : (
+              <span className="pill" style={{ fontSize: 11, padding: "2px 8px", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", whiteSpace: "nowrap" }}>
+                ⏳ Due Today
+              </span>
+            )}
+          </div>
+          {m.adherence_id && (
+            <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                className="btn btn-sm btn-outline"
+                style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6 }}
+                disabled={sendingId === m.adherence_id || !m.reminders_enabled}
+                onClick={() => onSendReminder(m.adherence_id)}
+                title="Send interactive 2-button WhatsApp reminder to patient's phone"
+              >
+                🔔 {sendingId === m.adherence_id ? "Sending…" : "WhatsApp Nudge"}
+              </button>
+              {m.adherence_status !== "taken" && (
+                <button
+                  className="btn btn-sm btn-ghost"
+                  style={{ fontSize: 11, padding: "2px 8px", color: "var(--brand-strong)", fontWeight: 600 }}
+                  onClick={() => onSimulateReply(m.adherence_id, "taken")}
+                  title="Simulate patient clicking 'Yes, Taken' on WhatsApp"
+                >
+                  ✓ Tap &apos;Yes, Taken&apos;
+                </button>
+              )}
+              {m.adherence_status !== "missed" && (
+                <button
+                  className="btn btn-sm btn-ghost"
+                  style={{ fontSize: 11, padding: "2px 8px", color: "#b91c1c", fontWeight: 600 }}
+                  onClick={() => onSimulateReply(m.adherence_id, "missed")}
+                  title="Simulate patient clicking 'Missed / Forgot' on WhatsApp"
+                >
+                  ✕ Tap &apos;Missed&apos;
+                </button>
+              )}
+              <button
+                className="btn btn-sm btn-ghost"
+                style={{ fontSize: 11, padding: "2px 6px", color: "#64748b" }}
+                onClick={() => onToggleReminders(m.id)}
+                title={m.reminders_enabled ? "Pause reminders for this medicine" : "Resume reminders"}
+              >
+                {m.reminders_enabled ? "🔕 Pause" : "🔔 Resume"}
+              </button>
+              <button
+                className="btn btn-sm btn-ghost"
+                style={{ fontSize: 11, padding: "2px 6px", color: "#059669", fontWeight: 600 }}
+                onClick={() => onStopMedicine(m.id, m.brand)}
+                title="I'm feeling fit / recovered. Stop reminders completely for this medicine."
+              >
+                ✋ I&apos;m Fit / Stop
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -117,13 +202,101 @@ function Slot({ label, Icon, color, meds }) {
 }
 
 export function Summary() {
-  const { loading, error, data } = useData("/summary");
+  const [sendingId, setSendingId] = useState(null);
+  const [testingScheduler, setTestingScheduler] = useState(false);
+  const [adhVersion, setAdhVersion] = useState(0);
+  const { loading, error, data } = useData("/summary", [adhVersion]);
   const scope = useReveal([loading, data]);
+
+  const handleSendReminder = async (adherence_id) => {
+    setSendingId(adherence_id);
+    try {
+      await api("/whatsapp/send-reminder", { method: "POST", json: { adherence_id } });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to send WhatsApp reminder");
+    } finally {
+      setSendingId(null);
+    }
+  };
+
+  const handleSimulateReply = async (adherence_id, action) => {
+    try {
+      await api("/whatsapp/simulate-reply", { method: "POST", json: { adherence_id, action } });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to record adherence");
+    }
+  };
+
+  const handleTogglePref = async (key, currentVal) => {
+    try {
+      await api("/reminders/preferences", { method: "POST", json: { [key]: !currentVal } });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to update reminder settings");
+    }
+  };
+
+  const handleToggleReminders = async (medId) => {
+    try {
+      await api(`/medicines/${medId}/toggle-reminders`, { method: "POST" });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to toggle reminders");
+    }
+  };
+
+  const handleStopMedicine = async (medId, brand) => {
+    if (
+      !confirm(
+        `Are you feeling healthy and want to stop taking ${brand}?\n\nThis will halt all upcoming WhatsApp and call reminders for this medicine so you are not disturbed.`
+      )
+    )
+      return;
+    try {
+      await api(`/medicines/${medId}/stop`, {
+        method: "POST",
+        json: { reason: "Patient feeling healthy / completed course" },
+      });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to stop medicine");
+    }
+  };
+
+  const handleResumeMedicine = async (medId) => {
+    try {
+      await api(`/medicines/${medId}/resume`, { method: "POST" });
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to resume medicine");
+    }
+  };
+
+  const handleTriggerScheduler = async () => {
+    setTestingScheduler(true);
+    try {
+      const res = await api("/reminders/trigger-check", { method: "POST" });
+      const sentCount = res.details?.whatsapp_dispatched?.length || 0;
+      const callCount = res.details?.calls_queued?.length || 0;
+      alert(
+        `⚡ Automated Scheduler Check Complete!\n\n• Time (IST): ${res.details?.ist_time || "Now"}\n• WhatsApp Reminders Dispatched: ${sentCount}\n• Voice Call Reminders Queued: ${callCount}`
+      );
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Scheduler trigger failed");
+    } finally {
+      setTestingScheduler(false);
+    }
+  };
+
   if (loading) return <Loader label="Loading your clinical overview…" />;
   if (error) return <Note tone="err">{error}</Note>;
 
   const t = data.tracking;
   const s = data.schedule;
+  const p = data.patient;
 
   return (
     <div ref={scope} className="grid">
@@ -144,15 +317,157 @@ export function Summary() {
           value={t.whatsapp_reminders_sent}
         />
         <Stat
-          icon={<Bell size={20} />}
-          label="Total reminders sent"
-          value={t.reminders_sent}
+          icon={<CheckCircle2 size={20} />}
+          label="Adherence Rate Today"
+          value={t.adherence_rate_today_pct != null ? `${t.adherence_rate_today_pct}%` : "100%"}
         />
       </div>
 
+      {/* Smart Auto-Reminder Control Panel */}
       <Card
-        title="Daily Dose Schedule"
-        sub="Personalized regimen based on doctors' prescriptions"
+        title="Automated Medication Reminders & Call Scheduler"
+        sub="Control automatic WhatsApp nudges and Sahayak voice reminders so you only receive alerts when needed"
+        actions={
+          <button
+            className="btn btn-sm btn-outline"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}
+            disabled={testingScheduler}
+            onClick={handleTriggerScheduler}
+          >
+            <RefreshCw size={13} className={testingScheduler ? "animate-spin" : ""} />
+            {testingScheduler ? "Checking…" : "Run Auto-Scheduler Now"}
+          </button>
+        }
+      >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+          {/* WhatsApp Switch */}
+          <div
+            style={{
+              padding: 14,
+              borderRadius: 12,
+              border: "1px solid var(--line-light)",
+              background: "var(--surface-2)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: "rgba(34, 197, 94, 0.12)",
+                  color: "#16a34a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MessageSquare size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>
+                  WhatsApp Auto-Reminders
+                </div>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                  Interactive Yes/No dose alerts via Meta Cloud API
+                </div>
+              </div>
+            </div>
+            <button
+              className={`btn btn-sm ${p.whatsapp_reminders_enabled ? "btn-primary" : "btn-outline"}`}
+              style={{ fontSize: 12, minWidth: 80, fontWeight: 700 }}
+              onClick={() => handleTogglePref("whatsapp_reminders_enabled", p.whatsapp_reminders_enabled)}
+            >
+              {p.whatsapp_reminders_enabled ? "🟢 Active" : "⏸️ Paused"}
+            </button>
+          </div>
+
+          {/* Voice Call Switch */}
+          <div
+            style={{
+              padding: 14,
+              borderRadius: 12,
+              border: "1px solid var(--line-light)",
+              background: "var(--surface-2)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: "rgba(37, 99, 235, 0.12)",
+                  color: "#2563eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <PhoneCall size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>
+                  Voice Call Reminders
+                </div>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                  Automated spoken calls from Sahayak Assistant
+                </div>
+              </div>
+            </div>
+            <button
+              className={`btn btn-sm ${p.call_reminders_enabled ? "btn-primary" : "btn-outline"}`}
+              style={{ fontSize: 12, minWidth: 80, fontWeight: 700 }}
+              onClick={() => handleTogglePref("call_reminders_enabled", p.call_reminders_enabled)}
+            >
+              {p.call_reminders_enabled ? "🟢 Active" : "⏸️ Paused"}
+            </button>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 12,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
+            fontSize: 12,
+            color: "var(--muted)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Clock size={14} />
+            <span>
+              Scheduled dose times: Morning ({p.reminder_time_morning}), Afternoon ({p.reminder_time_afternoon}), Night ({p.reminder_time_night})
+            </span>
+          </div>
+          <div>
+            <button
+              className="btn btn-sm btn-ghost"
+              style={{
+                fontSize: 12,
+                color: p.auto_reminders_enabled ? "#b91c1c" : "var(--brand-strong)",
+                fontWeight: 600,
+              }}
+              onClick={() => handleTogglePref("auto_reminders_enabled", p.auto_reminders_enabled)}
+            >
+              {p.auto_reminders_enabled ? "Pause All Reminders" : "Resume All Reminders"}
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <Card
+        title="Daily Dose Schedule & WhatsApp Adherence"
+        sub="Interactive WhatsApp reminders with instant 'Yes, Taken' / 'Missed' status tracking"
       >
         <div className="schedule">
           {SLOTS.map(({ key, label, Icon, color }) => (
@@ -162,10 +477,59 @@ export function Summary() {
               Icon={Icon}
               color={color}
               meds={s[key]}
+              onSendReminder={handleSendReminder}
+              onSimulateReply={handleSimulateReply}
+              onStopMedicine={handleStopMedicine}
+              onToggleReminders={handleToggleReminders}
+              sendingId={sendingId}
             />
           ))}
         </div>
       </Card>
+
+      {/* Completed & Stopped Prescriptions section */}
+      {data.stopped_medicines && data.stopped_medicines.length > 0 && (
+        <Card
+          title="Completed & Stopped Prescriptions"
+          sub="Medicines you finished or stopped taking because you felt healthy (Reminders inactive)"
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {data.stopped_medicines.map((sm) => (
+              <div
+                key={sm.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--line-light)",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, color: "var(--ink)", fontSize: 14 }}>
+                    {sm.brand}{" "}
+                    <span style={{ fontWeight: 400, color: "var(--muted)" }}>
+                      ({sm.strength || sm.salt})
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "#059669", marginTop: 2 }}>
+                    ✓ {sm.stopped_reason} {sm.stopped_at ? `on ${sm.stopped_at}` : ""} · Reminders stopped
+                  </div>
+                </div>
+                <button
+                  className="btn btn-sm btn-outline"
+                  style={{ fontSize: 11, padding: "3px 10px", borderRadius: 6, display: "flex", alignItems: "center", gap: 4 }}
+                  onClick={() => handleResumeMedicine(sm.id)}
+                >
+                  <RotateCcw size={12} /> Resume Medicine
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid cols-2">
         <Card title="Conditions & Indications" sub="Informational, not a formal diagnosis">
@@ -228,13 +592,22 @@ export function Summary() {
   );
 }
 
-function MedCard({ m }) {
+function MedCard({ m, onStop, onToggle }) {
   const best = m.prices?.matched ? m.prices.offers[0] : null;
   return (
     <Card
       title={m.brand}
       sub={medLine(m)}
-      actions={m.needs_salt_confirmation ? <Pill tone="warn">confirm salt</Pill> : null}
+      actions={
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {m.needs_salt_confirmation && <Pill tone="warn">confirm salt</Pill>}
+          {m.reminders_enabled !== false ? (
+            <Pill tone="brand">🔔 Reminders ON</Pill>
+          ) : (
+            <Pill tone="warn">🔕 Paused</Pill>
+          )}
+        </div>
+      }
     >
       <div style={{ marginBottom: 12 }}>
         <TimingPills m={m} />
@@ -259,13 +632,70 @@ function MedCard({ m }) {
           </span>
         </div>
       )}
+      <div
+        style={{
+          marginTop: 14,
+          paddingTop: 10,
+          borderTop: "1px solid var(--line-light)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
+        <button
+          className="btn btn-sm btn-ghost"
+          style={{ fontSize: 12, color: "#64748b" }}
+          onClick={() => onToggle(m.id)}
+        >
+          {m.reminders_enabled !== false ? "🔕 Pause Reminders" : "🔔 Resume Reminders"}
+        </button>
+        <button
+          className="btn btn-sm btn-outline"
+          style={{ fontSize: 12, color: "#059669", borderColor: "rgba(5, 150, 105, 0.3)" }}
+          onClick={() => onStop(m.id, m.brand)}
+          title="Patient feeling healthy / completed course. Stops all upcoming reminders."
+        >
+          ✋ I&apos;m Fit / Stop Medicine
+        </button>
+      </div>
     </Card>
   );
 }
 
 export function Medicines() {
-  const { loading, error, data } = useData("/medicines");
+  const [version, setVersion] = useState(0);
+  const { loading, error, data } = useData("/medicines", [version]);
   const scope = useReveal([loading, data]);
+
+  const handleStop = async (id, brand) => {
+    if (
+      !confirm(
+        `Are you feeling healthy and want to stop taking ${brand}?\n\nThis will halt all upcoming WhatsApp and call reminders for this medicine so you are not disturbed.`
+      )
+    )
+      return;
+    try {
+      await api(`/medicines/${id}/stop`, {
+        method: "POST",
+        json: { reason: "Patient feeling healthy / completed course" },
+      });
+      setVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to stop medicine");
+    }
+  };
+
+  const handleToggle = async (id) => {
+    try {
+      await api(`/medicines/${id}/toggle-reminders`, { method: "POST" });
+      setVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to toggle reminders");
+    }
+  };
+
   if (loading) return <Loader label="Retrieving active prescription list…" />;
   if (error) return <Note tone="err">{error}</Note>;
   if (!data.length)
@@ -273,7 +703,7 @@ export function Medicines() {
   return (
     <div ref={scope} className="grid cols-2">
       {data.map((m) => (
-        <MedCard key={m.id} m={m} />
+        <MedCard key={m.id} m={m} onStop={handleStop} onToggle={handleToggle} />
       ))}
     </div>
   );

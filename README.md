@@ -228,6 +228,66 @@ Aayogya/
 
 ---
 
+---
+
+## 3. Meta WhatsApp Cloud API & Interactive Adherence
+
+Aayogya integrates direct 2-way medication adherence messaging via the **official Meta WhatsApp Business Cloud API (v21.0)** with **zero paid middleware or third-party fees**:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Sch as Background Dose Scheduler
+    participant WA as Meta WhatsApp Cloud API
+    participant Pat as Patient WhatsApp
+    participant API as Aayogya Backend (/api/whatsapp/webhook)
+    participant DB as SQLite / PostgreSQL (DoseAdherence)
+    participant UI as Next.js Dashboard
+
+    Sch->>WA: POST /messages (Interactive 2-Button Message)
+    WA->>Pat: 🔔 "Telma 40mg dose reminder: [✅ Yes, Taken] or [❌ Missed / Forgot]"
+    alt Patient taps "✅ Yes, Taken"
+        Pat->>WA: Click "✅ Yes, Taken"
+        WA->>API: POST /api/whatsapp/webhook (type: button_reply, id: dose_taken_12)
+        API->>DB: UPDATE dose_adherences SET status='taken', confirmed_at=NOW()
+        API->>WA: Send acknowledgment: "शाबाश! आपकी दवा दर्ज कर ली गई है। 🌟"
+        DB->>UI: Real-time update: Green "✓ Taken (8:05 AM)" badge
+    else Patient taps "❌ Missed / Forgot"
+        Pat->>WA: Click "❌ Missed / Forgot"
+        WA->>API: POST /api/whatsapp/webhook (type: button_reply, id: dose_missed_12)
+        API->>DB: UPDATE dose_adherences SET status='missed'
+        API->>WA: Send safety guidance: "छूटी खुराक के लिए दोहरी दवा ना लें।"
+        DB->>UI: Real-time update: Red "✕ Missed" badge
+    else Patient replies with text ("haan le li" / "nahi li")
+        Pat->>WA: Message "haan le li"
+        WA->>API: POST /api/whatsapp/webhook (type: text)
+        API->>DB: Intent resolved -> status='taken'
+        DB->>UI: Real-time update: Green "✓ Taken" badge
+    end
+```
+
+### Endpoints
+- `GET /api/whatsapp/webhook`: Meta Webhook challenge handshake (`hub.challenge`).
+- `POST /api/whatsapp/webhook`: Inbound button-clicks & natural language text replies.
+- `POST /api/whatsapp/send-reminder`: Trigger outbound interactive WhatsApp reminder for a dose.
+- `POST /api/whatsapp/simulate-reply`: Local testing simulation of patient tapping 'Yes' or 'Missed'.
+- `GET /api/adherence/today`: Fetch today's schedule and adherence statuses.
+- `GET /api/reminders/preferences`: Retrieve patient's auto-reminder & voice call settings.
+- `POST /api/reminders/preferences`: Toggle WhatsApp auto-reminders, voice call reminders, and dose slot timings.
+- `POST /api/medicines/{id}/stop`: Mark medicine as stopped/completed ("Patient is fit / healthy"), canceling all future reminders.
+- `POST /api/medicines/{id}/resume`: Reactivate a previously completed/stopped medicine.
+- `POST /api/medicines/{id}/toggle-reminders`: Pause or resume reminders for an individual medicine.
+- `POST /api/reminders/trigger-check`: Trigger an immediate automated check across all patients and due doses.
+
+### 4. Patient Privacy & Notification Fatigue Control
+- **Master WhatsApp & Call Toggles:** Patients can pause automated WhatsApp nudges or Sahayak phone calls with a single click so they are never spammed.
+- **"I'm Feeling Fit / Stop Medicine" Action:** When a patient recovers or completes their prescribed course, clicking *"Stop Medicine"* immediately halts all reminders, archives today's pending doses, and records the completion in their medical history.
+- **Background Async Scheduler:** An automated background worker daemon (`start_reminder_scheduler_loop()`) monitors dose slot windows in Indian Standard Time (IST) and dispatches reminders only when auto-reminders are active.
+
+> **Zero-Key Development Mode:** If `WHATSAPP_API_TOKEN` is not yet set in `.env`, the backend automatically runs in safe simulation mode, logging outbound payloads and permitting instant UI testing with zero errors.
+
+---
+
 ## Quick Start
 
 ### 1. Backend (FastAPI + LangGraph) — Port 8000
@@ -271,6 +331,9 @@ cd backend
 
 # Run comprehensive 4-agent pipeline test suite (EXIF, JSON sanitizing, fuzzy matching, LangGraph HITL)
 python test_multiagent_extraction.py
+
+# Run WhatsApp Meta Cloud API adherence and webhook test suite
+python test_whatsapp.py
 
 # Run unit tests
 python test_dosage.py
