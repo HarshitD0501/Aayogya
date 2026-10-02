@@ -1,0 +1,488 @@
+{
+  "dolo": {
+    "salt": "Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["650mg", "500mg"],
+    "category": "Antipyretic / Analgesic"
+  },
+  "crocin": {
+    "salt": "Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["500mg", "650mg"],
+    "category": "Antipyretic / Analgesic"
+  },
+  "calpol": {
+    "salt": "Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["500mg", "650mg", "250mg/5ml"],
+    "category": "Antipyretic / Analgesic"
+  },
+  "pacimol": {
+    "salt": "Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["500mg", "650mg"],
+    "category": "Antipyretic / Analgesic"
+  },
+  "pan": {
+    "salt": "Pantoprazole",
+    "form": "tablet",
+    "common_strengths": ["40mg", "20mg"],
+    "category": "PPI / Antacid"
+  },
+  "pantop": {
+    "salt": "Pantoprazole",
+    "form": "tablet",
+    "common_strengths": ["40mg", "20mg"],
+    "category": "PPI / Antacid"
+  },
+  "pantocid": {
+    "salt": "Pantoprazole",
+    "form": "tablet",
+    "common_strengths": ["40mg", "20mg"],
+    "category": "PPI / Antacid"
+  },
+  "pan-d": {
+    "salt": "Pantoprazole + Domperidone",
+    "form": "capsule",
+    "common_strengths": ["40mg/30mg"],
+    "category": "PPI + Prokinetic"
+  },
+  "pantocid-dsr": {
+    "salt": "Pantoprazole + Domperidone",
+    "form": "capsule",
+    "common_strengths": ["40mg/30mg"],
+    "category": "PPI + Prokinetic"
+  },
+  "rabekind-dsr": {
+    "salt": "Rabeprazole + Domperidone",
+    "form": "capsule",
+    "common_strengths": ["20mg/30mg"],
+    "category": "PPI + Prokinetic"
+  },
+  "razo-d": {
+    "salt": "Rabeprazole + Domperidone",
+    "form": "capsule",
+    "common_strengths": ["20mg/30mg"],
+    "category": "PPI + Prokinetic"
+  },
+  "omez": {
+    "salt": "Omeprazole",
+    "form": "capsule",
+    "common_strengths": ["20mg", "40mg"],
+    "category": "PPI / Antacid"
+  },
+  "omez-d": {
+    "salt": "Omeprazole + Domperidone",
+    "form": "capsule",
+    "common_strengths": ["20mg/10mg"],
+    "category": "PPI + Prokinetic"
+  },
+  "rantac": {
+    "salt": "Ranitidine",
+    "form": "tablet",
+    "common_strengths": ["150mg", "300mg"],
+    "category": "H2 Blocker / Antacid"
+  },
+  "digene": {
+    "salt": "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone",
+    "form": "syrup",
+    "common_strengths": ["200ml", "tablet"],
+    "category": "Antacid"
+  },
+  "gelusil": {
+    "salt": "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone",
+    "form": "syrup",
+    "common_strengths": ["200ml", "tablet"],
+    "category": "Antacid"
+  },
+  "augmentin": {
+    "salt": "Amoxicillin + Potassium Clavulanate",
+    "form": "tablet",
+    "common_strengths": ["625mg", "375mg", "1000mg"],
+    "category": "Antibiotic"
+  },
+  "moxikind-cv": {
+    "salt": "Amoxicillin + Potassium Clavulanate",
+    "form": "tablet",
+    "common_strengths": ["625mg", "375mg"],
+    "category": "Antibiotic"
+  },
+  "moxclav": {
+    "salt": "Amoxicillin + Potassium Clavulanate",
+    "form": "tablet",
+    "common_strengths": ["625mg", "375mg"],
+    "category": "Antibiotic"
+  },
+  "clamox": {
+    "salt": "Amoxicillin + Potassium Clavulanate",
+    "form": "tablet",
+    "common_strengths": ["625mg"],
+    "category": "Antibiotic"
+  },
+  "azithral": {
+    "salt": "Azithromycin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "250mg"],
+    "category": "Macrolide Antibiotic"
+  },
+  "aziwok": {
+    "salt": "Azithromycin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "250mg"],
+    "category": "Macrolide Antibiotic"
+  },
+  "zithrox": {
+    "salt": "Azithromycin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "250mg"],
+    "category": "Macrolide Antibiotic"
+  },
+  "taxim-o": {
+    "salt": "Cefixime",
+    "form": "tablet",
+    "common_strengths": ["200mg", "100mg"],
+    "category": "Cephalosporin Antibiotic"
+  },
+  "zifi": {
+    "salt": "Cefixime",
+    "form": "tablet",
+    "common_strengths": ["200mg", "100mg"],
+    "category": "Cephalosporin Antibiotic"
+  },
+  "cifran": {
+    "salt": "Ciprofloxacin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "250mg"],
+    "category": "Fluoroquinolone Antibiotic"
+  },
+  "ciplox": {
+    "salt": "Ciprofloxacin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "250mg"],
+    "category": "Fluoroquinolone Antibiotic"
+  },
+  "monocef-o": {
+    "salt": "Cefpodoxime Proxetil",
+    "form": "tablet",
+    "common_strengths": ["200mg", "100mg"],
+    "category": "Cephalosporin Antibiotic"
+  },
+  "gudcef": {
+    "salt": "Cefpodoxime Proxetil",
+    "form": "tablet",
+    "common_strengths": ["200mg", "100mg"],
+    "category": "Cephalosporin Antibiotic"
+  },
+  "glycomet": {
+    "salt": "Metformin",
+    "form": "tablet",
+    "common_strengths": ["500mg", "850mg", "1000mg"],
+    "category": "Antidiabetic (Biguanide)"
+  },
+  "glycomet-gp": {
+    "salt": "Metformin + Glimepiride",
+    "form": "tablet",
+    "common_strengths": ["500mg/1mg", "500mg/2mg"],
+    "category": "Antidiabetic Combination"
+  },
+  "glycomet-trio": {
+    "salt": "Metformin + Glimepiride + Voglibose",
+    "form": "tablet",
+    "common_strengths": ["500mg/1mg/0.2mg", "500mg/2mg/0.3mg"],
+    "category": "Antidiabetic Triple Combination"
+  },
+  "janumet": {
+    "salt": "Sitagliptin + Metformin",
+    "form": "tablet",
+    "common_strengths": ["50mg/500mg", "50mg/1000mg"],
+    "category": "Antidiabetic Combination"
+  },
+  "galvus-met": {
+    "salt": "Vildagliptin + Metformin",
+    "form": "tablet",
+    "common_strengths": ["50mg/500mg", "50mg/850mg"],
+    "category": "Antidiabetic Combination"
+  },
+  "amaryl": {
+    "salt": "Glimepiride",
+    "form": "tablet",
+    "common_strengths": ["1mg", "2mg", "3mg"],
+    "category": "Antidiabetic (Sulfonylurea)"
+  },
+  "forxiga": {
+    "salt": "Dapagliflozin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "5mg"],
+    "category": "Antidiabetic (SGLT2 inhibitor)"
+  },
+  "oxra": {
+    "salt": "Dapagliflozin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "5mg"],
+    "category": "Antidiabetic (SGLT2 inhibitor)"
+  },
+  "amlong": {
+    "salt": "Amlodipine",
+    "form": "tablet",
+    "common_strengths": ["5mg", "2.5mg", "10mg"],
+    "category": "Antihypertensive (Calcium Channel Blocker)"
+  },
+  "amlong-a": {
+    "salt": "Amlodipine + Atenolol",
+    "form": "tablet",
+    "common_strengths": ["5mg/50mg"],
+    "category": "Antihypertensive Combination"
+  },
+  "stamlo": {
+    "salt": "Amlodipine",
+    "form": "tablet",
+    "common_strengths": ["5mg", "2.5mg"],
+    "category": "Antihypertensive (Calcium Channel Blocker)"
+  },
+  "telma": {
+    "salt": "Telmisartan",
+    "form": "tablet",
+    "common_strengths": ["40mg", "20mg", "80mg"],
+    "category": "Antihypertensive (ARB)"
+  },
+  "telmikind": {
+    "salt": "Telmisartan",
+    "form": "tablet",
+    "common_strengths": ["40mg", "20mg"],
+    "category": "Antihypertensive (ARB)"
+  },
+  "telma-h": {
+    "salt": "Telmisartan + Hydrochlorothiazide",
+    "form": "tablet",
+    "common_strengths": ["40mg/12.5mg", "80mg/12.5mg"],
+    "category": "Antihypertensive Combination"
+  },
+  "telma-am": {
+    "salt": "Telmisartan + Amlodipine",
+    "form": "tablet",
+    "common_strengths": ["40mg/5mg"],
+    "category": "Antihypertensive Combination"
+  },
+  "ecosprin": {
+    "salt": "Aspirin",
+    "form": "tablet",
+    "common_strengths": ["75mg", "150mg"],
+    "category": "Antiplatelet / Cardio-protective"
+  },
+  "ecosprin-av": {
+    "salt": "Aspirin + Atorvastatin",
+    "form": "capsule",
+    "common_strengths": ["75mg/10mg", "75mg/20mg"],
+    "category": "Cardiovascular Combination"
+  },
+  "atorva": {
+    "salt": "Atorvastatin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "20mg", "40mg"],
+    "category": "Lipid Lowering (Statin)"
+  },
+  "atorlip": {
+    "salt": "Atorvastatin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "20mg"],
+    "category": "Lipid Lowering (Statin)"
+  },
+  "rosuvas": {
+    "salt": "Rosuvastatin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "5mg", "20mg"],
+    "category": "Lipid Lowering (Statin)"
+  },
+  "rozavel": {
+    "salt": "Rosuvastatin",
+    "form": "tablet",
+    "common_strengths": ["10mg", "20mg"],
+    "category": "Lipid Lowering (Statin)"
+  },
+  "concor": {
+    "salt": "Bisoprolol",
+    "form": "tablet",
+    "common_strengths": ["2.5mg", "5mg"],
+    "category": "Antihypertensive (Beta Blocker)"
+  },
+  "starpress-xl": {
+    "salt": "Metoprolol Succinate",
+    "form": "tablet",
+    "common_strengths": ["25mg", "50mg"],
+    "category": "Antihypertensive (Beta Blocker)"
+  },
+  "brufen": {
+    "salt": "Ibuprofen",
+    "form": "tablet",
+    "common_strengths": ["400mg", "200mg"],
+    "category": "NSAID / Pain Relief"
+  },
+  "combiflam": {
+    "salt": "Ibuprofen + Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["400mg/325mg"],
+    "category": "NSAID + Analgesic Combination"
+  },
+  "zerodol": {
+    "salt": "Aceclofenac",
+    "form": "tablet",
+    "common_strengths": ["100mg"],
+    "category": "NSAID / Pain Relief"
+  },
+  "zerodol-p": {
+    "salt": "Aceclofenac + Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["100mg/325mg"],
+    "category": "NSAID Combination"
+  },
+  "zerodol-sp": {
+    "salt": "Aceclofenac + Paracetamol + Serratiopeptidase",
+    "form": "tablet",
+    "common_strengths": ["100mg/325mg/15mg"],
+    "category": "NSAID + Anti-inflammatory Enzyme"
+  },
+  "voveran": {
+    "salt": "Diclofenac Sodium",
+    "form": "tablet",
+    "common_strengths": ["50mg", "75mg"],
+    "category": "NSAID / Pain Relief"
+  },
+  "voveran-sr": {
+    "salt": "Diclofenac Sodium",
+    "form": "tablet",
+    "common_strengths": ["75mg", "100mg"],
+    "category": "NSAID (Sustained Release)"
+  },
+  "chymoral-forte": {
+    "salt": "Trypsin + Chymotrypsin",
+    "form": "tablet",
+    "common_strengths": ["100000 Armour Units"],
+    "category": "Anti-inflammatory Enzyme"
+  },
+  "ultracet": {
+    "salt": "Tramadol + Paracetamol",
+    "form": "tablet",
+    "common_strengths": ["37.5mg/325mg"],
+    "category": "Moderate-Severe Pain Analgesic"
+  },
+  "montair-lc": {
+    "salt": "Montelukast + Levocetirizine",
+    "form": "tablet",
+    "common_strengths": ["10mg/5mg"],
+    "category": "Antiasthmatic / Antiallergic"
+  },
+  "montek-lc": {
+    "salt": "Montelukast + Levocetirizine",
+    "form": "tablet",
+    "common_strengths": ["10mg/5mg"],
+    "category": "Antiasthmatic / Antiallergic"
+  },
+  "allegra": {
+    "salt": "Fexofenadine",
+    "form": "tablet",
+    "common_strengths": ["120mg", "180mg"],
+    "category": "Antihistamine / Antiallergic"
+  },
+  "cetzip": {
+    "salt": "Cetirizine",
+    "form": "tablet",
+    "common_strengths": ["10mg"],
+    "category": "Antihistamine / Antiallergic"
+  },
+  "cetzine": {
+    "salt": "Cetirizine",
+    "form": "tablet",
+    "common_strengths": ["10mg"],
+    "category": "Antihistamine / Antiallergic"
+  },
+  "levocet": {
+    "salt": "Levocetirizine",
+    "form": "tablet",
+    "common_strengths": ["5mg"],
+    "category": "Antihistamine / Antiallergic"
+  },
+  "ascoril-d": {
+    "salt": "Dextromethorphan + Phenylephrine + Chlorpheniramine",
+    "form": "syrup",
+    "common_strengths": ["100ml"],
+    "category": "Cough Syrup (Dry Cough)"
+  },
+  "ascoril-ls": {
+    "salt": "Levosalbutamol + Ambroxol + Guaiphenesin",
+    "form": "syrup",
+    "common_strengths": ["100ml"],
+    "category": "Cough Syrup (Wet Cough)"
+  },
+  "cheston-cold": {
+    "salt": "Cetirizine + Paracetamol + Phenylephrine",
+    "form": "tablet",
+    "common_strengths": ["5mg/325mg/10mg"],
+    "category": "Cold / Decongestant"
+  },
+  "sinarest": {
+    "salt": "Paracetamol + Phenylephrine + Chlorpheniramine",
+    "form": "tablet",
+    "common_strengths": ["500mg/10mg/2mg"],
+    "category": "Cold / Decongestant"
+  },
+  "thyronorm": {
+    "salt": "Levothyroxine",
+    "form": "tablet",
+    "common_strengths": ["25mcg", "50mcg", "75mcg", "100mcg", "125mcg"],
+    "category": "Thyroid Hormone"
+  },
+  "eltroxin": {
+    "salt": "Levothyroxine",
+    "form": "tablet",
+    "common_strengths": ["25mcg", "50mcg", "75mcg", "100mcg"],
+    "category": "Thyroid Hormone"
+  },
+  "shelcal": {
+    "salt": "Calcium + Vitamin D3",
+    "form": "tablet",
+    "common_strengths": ["500mg/250IU"],
+    "category": "Calcium & Vitamin Supplement"
+  },
+  "shelcal-hd": {
+    "salt": "Calcium + Vitamin D3",
+    "form": "tablet",
+    "common_strengths": ["500mg/500IU"],
+    "category": "Calcium & Vitamin Supplement"
+  },
+  "cipcal": {
+    "salt": "Calcium + Vitamin D3",
+    "form": "tablet",
+    "common_strengths": ["500mg/250IU"],
+    "category": "Calcium & Vitamin Supplement"
+  },
+  "becosules": {
+    "salt": "Vitamin B-Complex + Vitamin C",
+    "form": "capsule",
+    "common_strengths": ["standard"],
+    "category": "Multivitamin"
+  },
+  "neurobion-forte": {
+    "salt": "Vitamin B1 + B2 + B3 + B5 + B6 + B12",
+    "form": "tablet",
+    "common_strengths": ["standard"],
+    "category": "Nerve Health Supplement"
+  },
+  "evion": {
+    "salt": "Vitamin E",
+    "form": "capsule",
+    "common_strengths": ["400mg", "200mg", "600mg"],
+    "category": "Antioxidant Supplement"
+  },
+  "limcee": {
+    "salt": "Vitamin C (Ascorbic Acid)",
+    "form": "chewable tablet",
+    "common_strengths": ["500mg"],
+    "category": "Immunity Supplement"
+  },
+  "folvite": {
+    "salt": "Folic Acid (Vitamin B9)",
+    "form": "tablet",
+    "common_strengths": ["5mg"],
+    "category": "Hematopoietic Supplement"
+  }
+}

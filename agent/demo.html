@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aarogya — demo</title>
+<style>
+  :root { font-family: system-ui, sans-serif; }
+  body { max-width: 680px; margin: 24px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { margin-bottom: 2px; }
+  .note { color: #666; font-size: 13px; margin-top: 0; }
+  label { display: block; font-size: 13px; color: #444; margin: 12px 0; }
+  input[type=text], input#token { width: 100%; padding: 8px; box-sizing: border-box;
+    border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  section { border: 1px solid #e2e2e2; border-radius: 10px; padding: 14px; margin: 16px 0; }
+  h2 { margin: 0 0 10px; font-size: 16px; }
+  #log { height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    padding: 4px; }
+  .m { padding: 8px 11px; border-radius: 12px; max-width: 85%; white-space: pre-wrap;
+    line-height: 1.35; font-size: 14px; }
+  .m.user { align-self: flex-end; background: #2563eb; color: #fff; }
+  .m.model { align-self: flex-start; background: #f0f0f2; }
+  .m.error { align-self: center; background: #fde2e1; color: #8a1c14; font-size: 12px; }
+  #chat-form { display: flex; gap: 8px; margin-top: 10px; }
+  #chat-form button, #voice-card button { padding: 8px 14px; border: 0; border-radius: 6px;
+    background: #2563eb; color: #fff; font-size: 14px; cursor: pointer; }
+  button:disabled { background: #9db8ef; cursor: default; }
+  #vstatus { margin-left: 10px; font-size: 13px; color: #444; }
+  #hangup { background: #b91c1c; }
+</style>
+</head>
+<body>
+  <h1>Aarogya — demo</h1>
+  <p class="note">Local testing only. The backend (System A) must be running.</p>
+
+  <label>Patient token (optional — leave blank to use demo creds)
+    <input id="token" type="text" placeholder="paste patient bearer token" />
+  </label>
+
+  <section id="chat-card">
+    <h2>Chat</h2>
+    <div id="log"></div>
+    <form id="chat-form">
+      <input id="msg" type="text" placeholder="मेरी दवाइयाँ कौन सी हैं?" autocomplete="off" />
+      <button>Send</button>
+    </form>
+  </section>
+
+  <section id="voice-card">
+    <h2>Voice</h2>
+    <button id="call">Start call</button>
+    <button id="hangup" disabled>End call</button>
+    <span id="vstatus">idle</span>
+    <div id="audio"></div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <!--SCRIPT-->
+  <script>
+    const $ = (s) => document.querySelector(s);
+
+    // --- Chat: POST /chat, keep the returned history so the brain has context ---
+    let history = [];
+    function append(role, text) {
+      const d = document.createElement("div");
+      d.className = "m " + role;
+      d.textContent = text;
+      $("#log").appendChild(d);
+      $("#log").scrollTop = $("#log").scrollHeight;
+    }
+    $("#chat-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("#msg").value.trim();
+      if (!msg) return;
+      $("#msg").value = "";
+      append("user", msg);
+      try {
+        const r = await fetch("/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: msg, token: $("#token").value.trim() || null, history }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || ("HTTP " + r.status));
+        history = data.history;
+        append("model", data.reply);
+      } catch (err) {
+        append("error", String(err));
+      }
+    });
+
+    // --- Voice: get a LiveKit token, connect, publish mic, play the agent's audio ---
+    let room = null;
+    const setV = (s) => ($("#vstatus").textContent = s);
+    $("#call").addEventListener("click", async () => {
+      setV("connecting…");
+      try {
+        const r = await fetch("/token");
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || ("HTTP " + r.status));
+        room = new LivekitClient.Room();
+        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+          if (track.kind === "audio") $("#audio").appendChild(track.attach());
+        });
+        room.on(LivekitClient.RoomEvent.Disconnected, () => {
+          $("#call").disabled = false; $("#hangup").disabled = true; setV("idle");
+        });
+        await room.connect(data.url, data.token);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        $("#call").disabled = true; $("#hangup").disabled = false;
+        setV("connected — start speaking");
+      } catch (err) {
+        setV("error: " + err);
+      }
+    });
+    $("#hangup").addEventListener("click", async () => {
+      if (room) await room.disconnect();
+      room = null;
+    });
+  </script>
+</body>
+</html>

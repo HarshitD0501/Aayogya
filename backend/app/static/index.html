@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aarogya — Backend Test Dashboard</title>
+<!-- Leaflet (open-source map) — pinned version, from CDN. Tiles: OpenStreetMap. -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- LiveKit browser client — voice call to the agent (mic in, agent speech out). -->
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+<style>
+  :root { --bg:#f5f7fa; --panel:#fff; --ink:#1f2a37; --muted:#6b7280;
+          --line:#e5e7eb; --brand:#0e7c66; --brandink:#0a5b4b; --warn:#b45309; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;
+         color:var(--ink); background:var(--bg); }
+  .app { display:grid; grid-template-columns:250px 1fr; min-height:100vh; }
+  aside { background:var(--panel); border-right:1px solid var(--line); padding:20px 12px;
+          display:flex; flex-direction:column; }
+  .logo { font-weight:700; font-size:18px; color:var(--brandink); padding:6px 10px 14px; }
+  .logo small { display:block; font-weight:400; color:var(--muted); font-size:12px; }
+  .who { background:#eef2f1; border-radius:9px; padding:9px 11px; margin:0 4px 12px; font-size:13px; }
+  .who b { color:var(--brandink); } .who .plan { float:right; text-transform:uppercase; font-size:11px;
+           background:var(--brand); color:#fff; padding:1px 8px; border-radius:999px; }
+  nav button { display:flex; gap:10px; width:100%; text-align:left; border:0; background:none;
+    padding:11px 12px; border-radius:9px; cursor:pointer; color:var(--ink); font-size:15px; }
+  nav button:hover { background:#eef2f1; }
+  nav button.active { background:var(--brand); color:#fff; }
+  .logout { margin-top:auto; border:1px solid var(--line); background:none; color:var(--muted);
+    padding:9px; border-radius:9px; cursor:pointer; font-size:13px; }
+  main { padding:26px 30px; }
+  h1 { font-size:20px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+          padding:18px 20px; margin-bottom:16px; }
+  table { width:100%; border-collapse:collapse; }
+  th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); font-size:14px;
+          vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; }
+  .ok { background:#dcfce7; color:#166534; }
+  .expired { background:#f3f4f6; color:#6b7280; }
+  .flag { background:#fef3c7; color:var(--warn); }
+  .cheap { color:var(--brandink); font-weight:700; }
+  .sev-major { background:#fee2e2; color:#991b1b; } .sev-moderate { background:#fef3c7; color:var(--warn); }
+  .sev-minor { background:#f3f4f6; color:#6b7280; }
+  button.act { background:var(--brand); color:#fff; border:0; padding:9px 16px; border-radius:9px;
+    cursor:pointer; font-size:14px; } button.act:disabled { background:#9ca3af; cursor:default; }
+  input { font:14px system-ui,sans-serif; padding:9px 11px; border:1px solid var(--line); border-radius:8px; }
+  .banner { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:8px 12px;
+    border-radius:8px; font-size:13px; margin-bottom:14px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .offers { display:flex; gap:8px; flex-wrap:wrap; }
+  .offer { border:1px solid var(--line); border-radius:8px; padding:4px 10px; font-size:13px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .kpi { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .kpi .n { font-size:26px; font-weight:700; color:var(--brandink); } .kpi .l { color:var(--muted); font-size:13px; }
+  .sched { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .slot { border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .slot h4 { margin:0 0 8px; font-size:13px; text-transform:uppercase; color:var(--muted); }
+  .slot div { font-size:14px; padding:3px 0; }
+  /* login */
+  .gate { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .gate .box { background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:28px 30px; width:360px; box-shadow:0 10px 40px rgba(0,0,0,.08); }
+  .gate h1 { color:var(--brandink); } .gate .field { display:flex; flex-direction:column; gap:6px; margin:12px 0; }
+  .gate input { width:100%; } .gate .act { width:100%; margin-top:6px; padding:11px; }
+  .gate .quick { display:flex; gap:8px; margin-top:14px; }
+  .gate .quick button { flex:1; border:1px solid var(--line); background:#f9fafb; border-radius:8px;
+    padding:8px; cursor:pointer; font-size:13px; }
+  .err { color:#991b1b; font-size:13px; min-height:18px; }
+  .hidden { display:none; }
+  /* pharmacy map */
+  #map { height:520px; border-radius:12px; border:1px solid var(--line); }
+  .plist { list-style:none; margin:14px 0 0; padding:0; }
+  .plist li { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px;
+    display:flex; justify-content:space-between; gap:10px; align-items:center; }
+  .plist .meta { font-size:13px; color:var(--muted); }
+  .plist a, .leaflet-popup-content a { color:var(--brand); text-decoration:none; font-weight:600; }
+  .row-actions { display:flex; gap:12px; white-space:nowrap; }
+  .btn2 { background:#374151 !important; }
+
+  /* engaging custom map markers */
+  .custom-user-marker, .custom-pharmacy-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+  .user-location-marker {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .user-pulse {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(30, 64, 175, 0.45);
+    animation: user-radar 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    z-index: 1;
+  }
+  .user-pin {
+    font-size: 32px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+    animation: bounce-pin 2s ease-in-out infinite;
+    z-index: 2;
+    cursor: pointer;
+    user-select: none;
+  }
+  @keyframes bounce-pin {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes user-radar {
+    0% { transform: scale(0.6); opacity: 1; }
+    75% { transform: scale(2.8); opacity: 0; }
+    100% { transform: scale(3.0); opacity: 0; }
+  }
+
+  .pharmacy-marker-pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    user-select: none;
+  }
+  .pharmacy-marker-pin:hover {
+    transform: scale(1.22) translateY(-4px);
+    z-index: 9999 !important;
+  }
+  .pharmacy-icon-badge {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #0e7c66 0%, #059669 100%);
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px rgba(14, 124, 102, 0.35);
+  }
+  .pharmacy-emoji {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .pharmacy-pointer {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #059669;
+    margin-top: -2px;
+  }
+  /* assistant chat */
+  #chatlog { height:calc(100vh - 320px); min-height:260px; overflow-y:auto; display:flex;
+    flex-direction:column; gap:10px; padding:4px; }
+  .m { padding:9px 13px; border-radius:14px; max-width:80%; white-space:pre-wrap; line-height:1.4; }
+  .m.user { align-self:flex-end; background:var(--brand); color:#fff; }
+  .m.model { align-self:flex-start; background:#eef2f1; color:var(--ink); }
+  .m.error { align-self:center; background:#fee2e2; color:#991b1b; font-size:13px; }
+  #chatform { display:flex; gap:8px; margin-top:12px; }
+  #chatform input { flex:1; }
+  /* voice call bar */
+  #voicebar { display:flex; align-items:center; gap:10px; margin:0 0 12px; }
+  #voicebar button { border:0; border-radius:8px; padding:9px 15px; font-size:14px; cursor:pointer; color:#fff; }
+  #voicecall { background:var(--brand); }
+  #voicehang { background:#b91c1c; }
+  #voicebar button:disabled { opacity:.5; cursor:default; }
+  #voicestatus { font-size:13px; color:var(--muted); }
+  #voicestatus.live { color:var(--brand); font-weight:600; }
+</style>
+</head>
+<body>
+<!-- LOGIN GATE -->
+<div id="gate" class="gate">
+  <div class="box">
+    <h1>Aarogya</h1>
+    <p class="sub">Backend test dashboard — log in to a demo patient.</p>
+    <div class="field">
+      <label class="muted">Email or phone</label>
+      <input id="identifier" value="aarav@demo.in" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label class="muted">Password</label>
+      <input id="password" type="password" value="pass1234" autocomplete="current-password" />
+    </div>
+    <button class="act" onclick="submitLogin()">Log in</button>
+    <div class="err" id="loginErr"></div>
+    <div class="quick">
+      <button onclick="quick('ramesh@demo.in')">Ramesh (free)</button>
+      <button onclick="quick('shanti@demo.in')">Shanti (pro · 3 doctors)</button>
+      <button onclick="quick('aarav@demo.in')">Aarav (free)</button>
+    </div>
+    <div id="creds">
+      <p class="muted" style="margin:14px 0 6px">Demo logins — tap to sign in. Password <b>pass1234</b> for all.</p>
+      <table><tbody>
+        <tr style="cursor:pointer" onclick="quick('ramesh@demo.in')">
+          <td><b>Ramesh Kulkarni</b> <span class="pill expired">free</span><br>
+            <span class="muted">prescription_test.jpg · hypertension + type-2 diabetes</span></td>
+          <td class="muted">ramesh@demo.in<br>+919454535137</td>
+        </tr>
+        <tr style="cursor:pointer" onclick="quick('shanti@demo.in')">
+          <td><b>Shanti Devi</b> <span class="pill ok">pro</span><br>
+            <span class="muted">3 doctors · cross-doctor safety demo</span></td>
+          <td class="muted">shanti@demo.in<br>+919000000002</td>
+        </tr>
+        <tr style="cursor:pointer" onclick="quick('aarav@demo.in')">
+          <td><b>Aarav Sharma</b> <span class="pill expired">free</span><br>
+            <span class="muted">single prescription</span></td>
+          <td class="muted">aarav@demo.in<br>+919000000001</td>
+        </tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" class="app hidden">
+  <aside>
+    <div class="logo">Aarogya <small>Backend test dashboard</small></div>
+    <div class="who" id="who"></div>
+    <nav id="nav"></nav>
+    <button class="logout" onclick="logout()">Log out</button>
+  </aside>
+  <main id="main"></main>
+</div>
+</body>
+<script>
+const NAV = [
+  ["upload", "📷 Upload & extract"],
+  ["summary", "🩺 Summary"],
+  ["assistant", "💬 Assistant"],
+  ["interactions", "⚠️ Interactions"],
+  ["prices", "🏷️ Prices"],
+  ["pharmacies", "📍 Pharmacies"],
+  ["reports", "🗂️ Reports"],
+];
+const main = document.getElementById("main");
+const navEl = document.getElementById("nav");
+const gate = document.getElementById("gate");
+const appEl = document.getElementById("app");
+let token = localStorage.getItem("aarogya_token") || "";
+let current = "upload";
+
+function esc(s) {
+  return (s == null ? "" : String(s)).replace(/[&<>"]/g,
+    c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+async function api(path, opts = {}) {
+  const headers = { ...(opts.headers || {}) };
+  if (token) headers.Authorization = "Bearer " + token;
+  const r = await fetch("/api" + path, { ...opts, headers });
+  if (r.status === 401) { logout(); throw new Error("Session expired — log in again."); }
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+}
+
+// --- auth ---
+function quick(id) {
+  document.getElementById("identifier").value = id;
+  document.getElementById("password").value = "pass1234";
+  submitLogin();
+}
+async function submitLogin() {
+  const identifier = document.getElementById("identifier").value.trim();
+  const password = document.getElementById("password").value;
+  const err = document.getElementById("loginErr");
+  err.textContent = "";
+  try {
+    const r = await fetch("/api/auth/login", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier, password }),
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Login failed");
+    const data = await r.json();
+    token = data.token;
+    localStorage.setItem("aarogya_token", token);
+    enterApp(data.patient);
+  } catch (e) { err.textContent = e.message; }
+}
+function logout() {
+  token = ""; localStorage.removeItem("aarogya_token");
+  appEl.classList.add("hidden"); gate.classList.remove("hidden");
+}
+function enterApp(patient) {
+  document.getElementById("who").innerHTML =
+    `<span class="plan">${esc(patient.plan)}</span><b>${esc(patient.name || patient.id)}</b>`;
+  gate.classList.add("hidden"); appEl.classList.remove("hidden");
+  show(current);
+}
+
+// --- render helpers ---
+function offersHtml(prices) {
+  if (!prices || !prices.matched) return '<span class="muted">confirm salt to price</span>';
+  const min = prices.offers[0]?.price;
+  return '<div class="offers">' + prices.offers.map(o =>
+    `<span class="offer ${o.price === min ? "cheap" : ""}">${esc(o.platform)} ₹${o.price}</span>`
+  ).join("") + "</div>";
+}
+function medRow(m) {
+  const salt = m.needs_salt_confirmation
+    ? '<span class="pill flag">⚠ confirm salt</span>' : esc(m.salt || "—");
+  const sched = m.prn ? "SOS (as needed)" : ((m.timing || []).join(", ") || "—");
+  const stCls = m.status === "active" ? "ok" : (m.status === "expired" ? "expired" : "flag");
+  return `<tr>
+    <td><b>${esc(m.brand)}</b><br><span class="muted">${esc(m.strength || "")} · ${esc(m.prescriber_name || "—")}</span></td>
+    <td>${salt}</td>
+    <td>${esc(m.dosage_notation || "")}<br><span class="muted">${esc(sched)}</span></td>
+    <td><span class="pill ${stCls}">${esc(m.status)}</span></td>
+    <td>${offersHtml(m.prices)}</td>
+  </tr>`;
+}
+function medTable(meds) {
+  if (!meds.length) return '<p class="muted">No medicines yet.</p>';
+  return `<table><thead><tr><th>Medicine</th><th>Salt</th><th>Dosage</th>
+    <th>Status</th><th>Prices (indicative)</th></tr></thead>
+    <tbody>${meds.map(medRow).join("")}</tbody></table>`;
+}
+function reportCard(r, showConfirm) {
+  const doc = [r.prescriber_name, r.prescriber_specialty].filter(Boolean).join(" · ") || "Unknown prescriber";
+  const mock = r.mock ? '<div class="banner">Demo mode — canned extraction (no GEMINI_API_KEY set).</div>' : "";
+  const conf = r.confirmed
+    ? '<span class="pill ok">✓ confirmed</span>'
+    : (showConfirm ? `<button class="act" onclick="confirmReport(${r.id})">Confirm these meds</button>`
+        : '<span class="pill flag">awaiting confirmation</span>');
+  return `<div class="card">${mock}
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><b>${esc(doc)}</b> <span class="muted">· report #${r.id}${r.filename ? " · " + esc(r.filename) : ""}</span></div>
+      <div>${conf}</div>
+    </div>
+    <p class="muted">OCR confidence ${Math.round((r.ocr_confidence || 0) * 100)}% — nothing is scheduled until you confirm.</p>
+    ${medTable(r.medicines)}</div>`;
+}
+async function confirmReport(id) {
+  await api(`/reports/${id}/confirm`, { method: "POST" });
+  show(current);
+}
+async function doUpload() {
+  const f = document.getElementById("file").files[0];
+  const status = document.getElementById("ustatus");
+  if (!f) { status.textContent = "Pick an image first."; return; }
+  status.textContent = "Extracting…";
+  const fd = new FormData(); fd.append("file", f);
+  try {
+    const r = await api("/reports/upload", { method: "POST", body: fd });
+    status.textContent = "";
+    document.getElementById("uresult").innerHTML = reportCard(r, true);
+  } catch (e) { status.textContent = "Error: " + e.message; }
+}
+
+// --- views ---
+function slotHtml(title, items) {
+  const body = items.length
+    ? items.map(m => `<div>${esc(m.brand)} <span class="muted">${esc(m.strength || "")}</span></div>`).join("")
+    : '<div class="muted">—</div>';
+  return `<div class="slot"><h4>${title}</h4>${body}</div>`;
+}
+const VIEWS = {
+  upload: async () => `<h1>Upload prescription</h1>
+    <p class="sub">Photo of any prescription → OCR → structured medicines + prices.</p>
+    <div class="card">
+      <input type="file" id="file" accept="image/*" />
+      <button class="act" onclick="doUpload()">Upload &amp; extract</button>
+      <span class="muted" id="ustatus" style="margin-left:10px"></span>
+      <p class="muted" style="margin:12px 0 0">No GEMINI_API_KEY → returns a canned demo report (any image works). With a key it OCRs the real image.</p>
+    </div>
+    <div id="uresult"></div>`,
+  summary: async () => {
+    const s = await api("/summary");
+    const t = s.tracking || {};
+    const kpis = [
+      [t.active_medicines, "Active medicines"], [t.doses_per_day, "Doses / day"],
+      [t.whatsapp_reminders_sent, "WhatsApp reminders"], [t.reminders_sent, "Total reminders"],
+    ].map(([n, l]) => `<div class="kpi"><div class="n">${n ?? 0}</div><div class="l">${l}</div></div>`).join("");
+    const nf = s.next_followup
+      ? `<div class="card"><b>Next visit:</b> ${esc(s.next_followup.date)} · ${esc(s.next_followup.doctor || "—")} <span class="muted">(report #${s.next_followup.report_id})</span></div>`
+      : "";
+    const sched = `<div class="card"><h3 style="margin:0 0 12px">Daily schedule</h3><div class="sched">
+      ${slotHtml("Morning", s.schedule.morning)}${slotHtml("Afternoon", s.schedule.afternoon)}
+      ${slotHtml("Night", s.schedule.night)}${slotHtml("SOS", s.schedule.sos)}</div></div>`;
+    const cond = (s.conditions || []).map(c =>
+      `<tr><td><b>${esc(c.medicine)}</b></td><td>${esc(c.salt || "—")}</td><td>${esc(c.used_for || "—")}</td></tr>`).join("");
+    const condCard = `<div class="card"><h3 style="margin:0 0 8px">Medicines — commonly used for</h3>
+      <table><thead><tr><th>Medicine</th><th>Salt</th><th>Used for (info only)</th></tr></thead><tbody>${cond}</tbody></table>
+      <p class="muted" style="margin-top:8px">${esc(s.conditions_disclaimer || "")}</p></div>`;
+    return `<h1>Summary</h1><p class="sub">Snapshot for ${esc(s.patient.name || "")} (${esc(s.patient.plan)}).</p>
+      <div class="kpis" style="margin-bottom:16px">${kpis}</div>${nf}${sched}${condCard}`;
+  },
+  interactions: async () => {
+    const d = await api("/interactions");
+    const rows = (d.findings || []).map(f => {
+      const meds = f.medicines.map(m => `${esc(m.brand)} <span class="muted">(${esc(m.prescriber || "—")})</span>`).join(" + ");
+      const xd = f.cross_doctor ? ' <span class="pill flag">cross-doctor</span>' : "";
+      return `<div class="card">
+        <div><span class="pill sev-${esc(f.severity)}">${esc(f.severity)}</span>${xd} &nbsp; <b>${meds}</b></div>
+        <p style="margin:8px 0 4px">${esc(f.note)}</p>
+        <p class="muted">Source: ${esc(f.source)}</p></div>`;
+    }).join("");
+    return `<h1>Drug interactions</h1>
+      <p class="sub">Checked ${d.checked_pairs} salt-pairs against ${d.known_interactions_in_db} known interactions.</p>
+      ${rows || '<div class="card"><p class="muted">No known interactions among your active medicines.</p></div>'}
+      <p class="muted">${esc(d.disclaimer || "")}</p>`;
+  },
+  prices: async () => {
+    const meds = await api("/medicines");
+    return `<h1>Prices</h1><p class="sub">Indicative — confirm on the platform.</p>
+      <div class="card">${medTable(meds)}</div>`;
+  },
+  pharmacies: async () => `<h1>Nearby pharmacies</h1>
+    <p class="sub">Where to buy your meds — OpenStreetMap data, free &amp; open. Prices are indicative; confirm stock by calling.</p>
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="act" onclick="locateMe()">📍 Use my location</button>
+        <button class="act btn2" onclick="searchArea()">🔎 Search this area</button>
+        <span class="muted" id="mapStatus"></span>
+      </div>
+      <div id="map" style="margin-top:12px"></div>
+      <ul class="plist" id="plist"></ul>
+    </div>`,
+  reports: async () => {
+    const reports = await api("/reports");
+    return `<h1>Reports</h1><p class="sub">Your uploaded prescriptions.</p>` +
+      (reports.length ? reports.map(r => reportCard(r, !r.confirmed)).join("")
+        : '<p class="muted">Nothing uploaded yet.</p>');
+  },
+  assistant: async () => `<h1>Assistant</h1>
+    <p class="sub">Ask about your medicines, prescriptions, or interactions — in Hindi, Hinglish, or English. Not medical advice.</p>
+    <div class="card">
+      <div id="chatlog"></div>
+      <form id="chatform" onsubmit="return sendChat(event)">
+        <input id="chatmsg" placeholder="मेरी दवाइयाँ कौन सी हैं?" autocomplete="off" />
+        <button class="act" type="submit">Send</button>
+      </form>
+    </div>`,
+};
+
+// --- pharmacy map (Leaflet + OpenStreetMap / Overpass, design §7.5) ---
+const PUNE = [18.5204, 73.8567];        // fallback centre (demo clinic city)
+const OVERPASS = [                       // public instances are flaky → try in order
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+];
+let pmap = null, pmarkers = null;
+
+function mapStatus(msg) { const el = document.getElementById("mapStatus"); if (el) el.textContent = msg; }
+
+function initPharmacyMap() {
+  pmap = L.map("map").setView(PUNE, 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: "© OpenStreetMap contributors",
+  }).addTo(pmap);
+  pmarkers = L.layerGroup().addTo(pmap);
+  setTimeout(() => pmap.invalidateSize(), 150);  // container just became visible
+  locateMe();
+}
+
+let meMarker = null;   // single "you are here" dot (avoid stacking on repeat clicks)
+
+function showMe(c) {
+  pmap.setView(c, 15);
+  if (meMarker) pmap.removeLayer(meMarker);
+  const userIcon = L.divIcon({
+    className: "custom-user-marker",
+    html: `<div class="user-location-marker"><div class="user-pulse"></div><div class="user-pin" title="You are here">📍</div></div>`,
+    iconSize: [48, 48],
+    iconAnchor: [24, 42],
+    popupAnchor: [0, -40]
+  });
+  meMarker = L.marker(c, { icon: userIcon, zIndexOffset: 1000 })
+    .addTo(pmap).bindPopup("<b>📍 You are here</b>");
+  searchPharmacies(c[0], c[1]);
+}
+
+function geoFail(err) {
+  const why = err && err.code === 1 ? "Location permission was blocked - allow it for this site in the browser"
+    : err && err.code === 2 ? "Position unavailable right now"
+    : err && err.code === 3 ? "Location timed out"
+    : "Couldn't get your location";
+  mapStatus(why + " - showing Pune. Pan the map, then Search this area.");
+  searchPharmacies(PUNE[0], PUNE[1]);
+}
+
+function locateMe() {
+  if (!pmap) return;
+  if (!navigator.geolocation) {
+    mapStatus("This browser has no geolocation - showing Pune. Pan the map, then Search this area.");
+    return searchPharmacies(PUNE[0], PUNE[1]);
+  }
+  if (!window.isSecureContext) {   // browsers block geolocation on insecure origins; localhost is exempt, a LAN IP over http is not
+    mapStatus("Live location needs a secure page - open http://localhost:8000 (not the LAN IP), or serve over https/ngrok. Showing Pune.");
+    return searchPharmacies(PUNE[0], PUNE[1]);
+  }
+  mapStatus("Finding your location...");
+  const ok = p => showMe([p.coords.latitude, p.coords.longitude]);
+  navigator.geolocation.getCurrentPosition(ok, err => {
+    if (err.code === 3) {   // high-accuracy (GPS) often times out on laptops -> retry coarse (wifi/IP)
+      mapStatus("Still locating (coarse)...");
+      return navigator.geolocation.getCurrentPosition(ok, geoFail,
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
+    }
+    geoFail(err);
+  }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+}
+
+function searchArea() { if (pmap) { const c = pmap.getCenter(); searchPharmacies(c.lat, c.lng); } }
+
+async function overpass(query) {
+  for (const url of OVERPASS) {               // mirror fallback: public Overpass 504s often
+    try {
+      const r = await fetch(url, {
+        method: "POST", body: "data=" + encodeURIComponent(query),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      if (r.ok) return await r.json();
+    } catch (e) { /* network/CORS — try next mirror */ }
+  }
+  throw new Error("Map data servers are busy — try again in a moment.");
+}
+
+async function searchPharmacies(lat, lng) {
+  mapStatus("Searching nearby chemists…");
+  const q = `[out:json][timeout:25];(node["amenity"="pharmacy"](around:3000,${lat},${lng});`
+    + `way["amenity"="pharmacy"](around:3000,${lat},${lng}););out center 40;`;
+  let data;
+  try { data = await overpass(q); }
+  catch (e) { mapStatus(e.message); return; }
+
+  const items = (data.elements || []).map(e => ({
+    name: (e.tags && e.tags.name) || "Chemist / Pharmacy",
+    lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon,
+    addr: [e.tags?.["addr:street"], e.tags?.["addr:city"]].filter(Boolean).join(", "),
+    phone: e.tags?.phone || e.tags?.["contact:phone"] || "",
+  })).filter(x => x.lat && x.lng);
+
+  pmarkers.clearLayers();
+  const list = document.getElementById("plist");
+  if (list) list.innerHTML = "";
+  if (!items.length) { mapStatus("No chemists tagged nearby — pan the map and “Search this area”."); return; }
+
+  mapStatus(`${items.length} chemists near here (OpenStreetMap). Call to confirm stock.`);
+  const dir = x => `https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}`;
+  const pharmacyIcon = L.divIcon({
+    className: "custom-pharmacy-marker",
+    html: `
+      <div class="pharmacy-marker-pin">
+        <div class="pharmacy-icon-badge">
+          <span class="pharmacy-emoji">💊</span>
+        </div>
+        <div class="pharmacy-pointer"></div>
+      </div>
+    `,
+    iconSize: [38, 44],
+    iconAnchor: [19, 43],
+    popupAnchor: [0, -40]
+  });
+  items.forEach(x => {
+    L.marker([x.lat, x.lng], { icon: pharmacyIcon })
+      .addTo(pmarkers)
+      .bindPopup(`<b>${esc(x.name)}</b>${x.addr ? "<br>" + esc(x.addr) : ""}`
+        + `<br><a target="_blank" rel="noopener" href="${dir(x)}">Directions</a>`
+        + (x.phone ? ` · <a href="tel:${esc(x.phone)}">Call</a>` : ""));
+  });
+  if (list) list.innerHTML = items.map(x => `<li>
+    <div><b>${esc(x.name)}</b><div class="meta">${esc(x.addr || "address not listed")}</div></div>
+    <div class="row-actions">
+      <a target="_blank" rel="noopener" href="${dir(x)}">Directions</a>
+      ${x.phone ? `<a href="tel:${esc(x.phone)}">Call</a>` : ""}
+    </div></li>`).join("");
+}
+
+const AFTER = { pharmacies: initPharmacyMap, assistant: initChat };  // post-render hooks (need the DOM node)
+
+// --- assistant chat (proxies to the agent brain via /api/chat; token added by api()) ---
+let chatHistory = [];  // [{role:"user"|"model", text}] — kept per session for context
+function chatAppend(role, text) {
+  const log = document.getElementById("chatlog");
+  const d = document.createElement("div");
+  d.className = "m " + role; d.textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+}
+function initChat() {
+  const log = document.getElementById("chatlog");
+  chatHistory.forEach(h => chatAppend(h.role, h.text));  // repaint on revisit
+  if (!chatHistory.length) chatAppend("model", "Namaste! I can explain your prescription, list your medicines, and check for interactions. How can I help?");
+}
+async function sendChat(e) {
+  e.preventDefault();
+  const inp = document.getElementById("chatmsg");
+  const msg = inp.value.trim();
+  if (!msg) return false;
+  inp.value = ""; inp.disabled = true;
+  chatAppend("user", msg);
+  try {
+    const data = await api("/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, history: chatHistory }),
+    });
+    chatHistory = data.history || chatHistory;
+    chatAppend("model", data.reply || "Sorry, I couldn't answer that.");
+  } catch (err) { chatAppend("error", err.message); }
+  finally { inp.disabled = false; inp.focus(); }
+  return false;
+}
+
+async function show(view) {
+  current = view;
+  [...navEl.children].forEach(b => b.classList.toggle("active", b.dataset.v === view));
+  main.innerHTML = '<p class="muted">Loading…</p>';
+  try { main.innerHTML = await VIEWS[view](); AFTER[view]?.(); }
+  catch (e) { main.innerHTML = `<p class="muted">Error: ${esc(e.message)}</p>`; }
+}
+
+NAV.forEach(([v, label]) => {
+  const b = document.createElement("button");
+  b.dataset.v = v; b.textContent = label;
+  b.onclick = () => show(v);
+  navEl.appendChild(b);
+});
+
+// boot: reuse a stored token if still valid, else show the login gate.
+(async () => {
+  if (!token) return;
+  try { enterApp(await api("/auth/me")); }
+  catch { logout(); }
+})();
+</script>
+</html>

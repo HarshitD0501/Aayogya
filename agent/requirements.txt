@@ -1,0 +1,22 @@
+# System B — Aarogya voice + chat agent. Separate from the backend (System A);
+# merged in later. Versions are lower-bounds on the 1.x LiveKit Agents line —
+# see README "Verifying the SDK surface" before pinning exact ==.
+
+# Voice pipeline (LiveKit Agents 1.x) + plugins via extras. ~=1.8 (>=1.8,<2.0):
+# the `murf` extra + preemptive_generation/prewarm_fnc/text_pacing are all present,
+# and <2.0 keeps the turn_detection= param. Code also runs on 1.5.x if you're pinned there.
+livekit-agents[deepgram,google,murf,silero,turn-detector]~=1.8
+
+# Background-voice + noise cancellation (BVC) — runs on LiveKit Cloud.
+livekit-plugins-noise-cancellation~=0.2
+
+# Text chatbot brain (google-genai; async automatic function calling)
+google-genai>=1.0.0
+
+# Text chatbot frontend
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+
+# Shared: HTTP to the backend + env loading
+httpx>=0.27.0
+python-dotenv>=1.0.0
