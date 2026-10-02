@@ -1,20 +1,20 @@
 # Postgres for local scale testing. pgvector image so the future RAG table
 # (design §7.6 explain) needs no image swap.
 #   docker compose up -d
-#   DATABASE_URL=postgresql+psycopg://aarogya:aarogya@localhost:5432/aarogya
+#   DATABASE_URL=postgresql+psycopg://aayogya:aayogya@localhost:5432/aayogya
 services:
   db:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_USER: aarogya
-      POSTGRES_PASSWORD: aarogya
-      POSTGRES_DB: aarogya
+      POSTGRES_USER: aayogya
+      POSTGRES_PASSWORD: aayogya
+      POSTGRES_DB: aayogya
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aarogya"]
+      test: ["CMD-SHELL", "pg_isready -U aayogya"]
       interval: 5s
       timeout: 3s
       retries: 10

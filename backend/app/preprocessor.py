@@ -16,7 +16,7 @@ from typing import Tuple
 
 from PIL import Image, ImageEnhance, ImageOps
 
-logger = logging.getLogger("aarogya.preprocessor")
+logger = logging.getLogger("aayogya.preprocessor")
 
 MAX_DIMENSION = 2048
 MIN_DIMENSION = 256

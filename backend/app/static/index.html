@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Aarogya — Backend Test Dashboard</title>
+<title>Aayogya — Backend Test Dashboard</title>
 <!-- Leaflet (open-source map) — pinned version, from CDN. Tiles: OpenStreetMap. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -181,7 +181,7 @@
 <!-- LOGIN GATE -->
 <div id="gate" class="gate">
   <div class="box">
-    <h1>Aarogya</h1>
+    <h1>Aayogya</h1>
     <p class="sub">Backend test dashboard — log in to a demo patient.</p>
     <div class="field">
       <label class="muted">Email or phone</label>
@@ -224,7 +224,7 @@
 <!-- APP SHELL -->
 <div id="app" class="app hidden">
   <aside>
-    <div class="logo">Aarogya <small>Backend test dashboard</small></div>
+    <div class="logo">Aayogya <small>Backend test dashboard</small></div>
     <div class="who" id="who"></div>
     <nav id="nav"></nav>
     <button class="logout" onclick="logout()">Log out</button>
@@ -246,7 +246,7 @@ const main = document.getElementById("main");
 const navEl = document.getElementById("nav");
 const gate = document.getElementById("gate");
 const appEl = document.getElementById("app");
-let token = localStorage.getItem("aarogya_token") || "";
+let token = localStorage.getItem("aayogya_token") || localStorage.getItem("aarogya_token") || "";
 let current = "upload";
 
 function esc(s) {
@@ -282,12 +282,12 @@ async function submitLogin() {
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Login failed");
     const data = await r.json();
     token = data.token;
-    localStorage.setItem("aarogya_token", token);
+    localStorage.setItem("aayogya_token", token);
     enterApp(data.patient);
   } catch (e) { err.textContent = e.message; }
 }
 function logout() {
-  token = ""; localStorage.removeItem("aarogya_token");
+  token = ""; localStorage.removeItem("aayogya_token"); localStorage.removeItem("aarogya_token");
   appEl.classList.add("hidden"); gate.classList.remove("hidden");
 }
 function enterApp(patient) {

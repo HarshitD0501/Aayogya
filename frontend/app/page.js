@@ -29,9 +29,11 @@ export default function Home() {
       setPatient(null);
       setView("landing");
     };
+    window.addEventListener("aayogya:logout", onLogout);
     window.addEventListener("aarogya:logout", onLogout);
     return () => {
       alive = false;
+      window.removeEventListener("aayogya:logout", onLogout);
       window.removeEventListener("aarogya:logout", onLogout);
     };
   }, []);

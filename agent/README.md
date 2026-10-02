@@ -1,6 +1,6 @@
-# Aarogya Agent (System B) — voice + text, one brain
+# Aayogya Agent (System B) — voice + text, one brain
 
-A non-clinical health **companion** for the Aarogya app: it explains a patient's
+A non-clinical health **companion** for the Aayogya app: it explains a patient's
 prescriptions, lists their current medicines and timings, runs the cross-doctor
 drug-interaction check, and shares indicative prices — in Hindi / Hinglish / English.
 It **never diagnoses, prescribes, or changes a dose** (India Telemedicine Practice
@@ -38,7 +38,7 @@ cp .env.example .env      # fill in the keys
 
 Keys needed: `GOOGLE_API_KEY` (Gemini), `DEEPGRAM_API_KEY`, `MURF_API_KEY`, and
 `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` for voice. The backend
-(System A) must be running at `AAROGYA_BACKEND_URL` (default `http://localhost:8000`).
+(System A) must be running at `AAYOGYA_BACKEND_URL` (default `http://localhost:8000`).
 
 ## Run
 
@@ -56,7 +56,7 @@ python voice.py dev      # dev/hot-reload   ·   python voice.py start  # prod
 authorization — every tool call runs as that patient and the backend enforces
 isolation. `/chat` has no auth of its own, so keep it behind your app's origin/gateway;
 don't expose it publicly unauthenticated. With no token it falls back to demo creds
-(`AAROGYA_DEMO_*`) so you can run it headless: seeded `aarav@demo.in` / `pass1234`.
+(`AAYOGYA_DEMO_*`) so you can run it headless: seeded `aarav@demo.in` / `pass1234`.
 
 For voice, the app passes the token in LiveKit **job metadata** when it dispatches the
 agent: `{"backend_token": "<token>"}` (a bare token string is also accepted).
@@ -70,7 +70,7 @@ uvicorn demo:app --port 8080      # then open http://localhost:8080
 ```
 
 - **Chat** works with just the backend running + `GOOGLE_API_KEY`. Leave the token box
-  blank to talk as the demo patient (needs `AAROGYA_DEMO_*`), or paste a patient token.
+  blank to talk as the demo patient (needs `AAYOGYA_DEMO_*`), or paste a patient token.
 - **Voice** additionally needs `LIVEKIT_URL/API_KEY/API_SECRET` set and a worker running
   in another terminal (`python voice.py dev`). Click **Start call** and speak — the
   worker auto-joins the room and logs in with demo creds. (BVC needs LiveKit Cloud.)

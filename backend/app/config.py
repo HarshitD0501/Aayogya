@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
 
     # SQLite by default (zero setup). Postgres for scale:
-    #   postgresql+psycopg://aarogya:aarogya@localhost:5432/aarogya
+    #   postgresql+psycopg://aayogya:aayogya@localhost:5432/aayogya
     database_url: str = "sqlite:///./aayogya.db"
 
     # Extraction VLM chain (OpenAI-compatible vision /chat/completions), tried in
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # Text chatbot ("the brain") runs as the separate agent service (its own venv,
     # google-genai + livekit deps). The backend proxies /api/chat to it so the
     # dashboard talks to one origin (no CORS) and auth is enforced here first.
-    agent_chat_url: str = "http://localhost:8080/chat"
+    agent_chat_url: str = "http://localhost:8081/chat"
 
     # LiveKit voice: the backend mints a room-join token for the patient's browser
     # (key+secret sign it locally, no server call). Same project the voice.py worker

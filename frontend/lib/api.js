@@ -2,17 +2,20 @@
 
 // Thin fetch wrapper: attaches the Bearer token, unwraps FastAPI's {detail},
 // and broadcasts a logout on 401 so the app can drop back to the login screen.
-const TOKEN_KEY = "aarogya_token";
+const TOKEN_KEY = "aayogya_token";
 
 export function getToken() {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(TOKEN_KEY);
+  return window.localStorage.getItem(TOKEN_KEY) || window.localStorage.getItem("aarogya_token");
 }
 export function setToken(t) {
   window.localStorage.setItem(TOKEN_KEY, t);
 }
 export function clearToken() {
-  if (typeof window !== "undefined") window.localStorage.removeItem(TOKEN_KEY);
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(TOKEN_KEY);
+    window.localStorage.removeItem("aarogya_token");
+  }
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "";
@@ -47,8 +50,10 @@ export async function api(path, opts = {}) {
 
   if (res.status === 401) {
     clearToken();
-    if (typeof window !== "undefined")
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("aayogya:logout"));
       window.dispatchEvent(new Event("aarogya:logout"));
+    }
     throw new Error("Session expired — please sign in again.");
   }
   if (!res.ok) {
@@ -102,7 +107,7 @@ export async function askAssistant(message, history = []) {
   } catch (e) {
     if (e.name === "AbortError")
       throw new Error("The assistant took too long to respond — please try again.");
-    throw new Error("Assistant is offline. Start it with: uvicorn chat:app --port 8080");
+    throw new Error("Assistant is offline. Start it with: uvicorn chat:app --port 8081");
   } finally {
     clearTimeout(timer);
   }

@@ -39,7 +39,7 @@ const SECTIONS = [
   },
   {
     key: "assistant",
-    label: "Ask Aarogya",
+    label: "Ask Sahayak",
     Icon: Bot,
     Comp: Assistant,
     title: "Voice Assistant",
@@ -186,7 +186,7 @@ export default function Dashboard({ patient, onLogout }) {
             <button
               className="btn btn-ghost btn-sm"
               onClick={onLogout}
-              title="Sign out of Aarogya"
+              title="Sign out of Aayogya"
               style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px" }}
             >
               <LogOut size={14} />

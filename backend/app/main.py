@@ -85,7 +85,7 @@ async def lifespan(app: FastAPI):
 
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Aarogya - extraction backend", lifespan=lifespan)
+app = FastAPI(title="Aayogya - extraction backend", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -295,7 +295,7 @@ def voice_token(authorization: str = Header(None), patient: Patient = Depends(cu
     from livekit import api  # local import: voice is optional, keep it off the hot path
 
     backend_token = authorization.split(" ", 1)[1]  # current_patient already checked the Bearer prefix
-    room = f"aarogya-{patient.id}-{uuid4().hex[:8]}"  # per-call room, namespaced by patient
+    room = f"aayogya-{patient.id}-{uuid4().hex[:8]}"  # per-call room, namespaced by patient
     jwt = (
         api.AccessToken(settings.livekit_api_key, settings.livekit_api_secret)
         .with_identity(patient.id)

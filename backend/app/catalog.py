@@ -18,7 +18,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
-logger = logging.getLogger("aarogya.catalog")
+logger = logging.getLogger("aayogya.catalog")
 
 # Base fallback catalog in case JSON file is inaccessible
 _FALLBACK_CATALOG: dict[str, dict[str, Any]] = {

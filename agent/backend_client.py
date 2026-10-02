@@ -12,11 +12,11 @@ import httpx
 
 import config
 
-logger = logging.getLogger("aarogya.agent")
+logger = logging.getLogger("aayogya.agent")
 
 
 class BackendClient:
-    """Per-patient HTTP client for the Aarogya backend. Holds one patient's token."""
+    """Per-patient HTTP client for the Aayogya backend. Holds one patient's token."""
 
     def __init__(self, token: str, *, http: httpx.AsyncClient | None = None) -> None:
         self._token = token

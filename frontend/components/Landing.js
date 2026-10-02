@@ -108,7 +108,7 @@ export default function Landing({ onEnter }) {
             <span className="lp-h1-muted">made clear.</span>
           </h1>
           <p className="lp-sub" data-reveal>
-            Aarogya reads your prescriptions, explains them in plain language, and
+            Aayogya reads your prescriptions, explains them in plain language, and
             flags dangerous interactions across every doctor you see &mdash; while
             leaving every clinical decision with your own doctor.
           </p>
@@ -214,7 +214,7 @@ export default function Landing({ onEnter }) {
               A navigator, <span className="lp-muted-txt">not a doctor.</span>
             </h2>
             <p className="lp-section-sub">
-              Aarogya never diagnoses, never prescribes, and never changes a dose.
+              Aayogya never diagnoses, never prescribes, and never changes a dose.
               It explains what your prescription says and defers every clinical
               call to a registered medical practitioner.
             </p>
@@ -296,7 +296,7 @@ export default function Landing({ onEnter }) {
           </div>
         </div>
         <p className="lp-footer-note">
-          &copy; 2026 Aarogya. Not a substitute for professional medical advice.
+          &copy; 2026 Aayogya. Not a substitute for professional medical advice.
           Always consult your doctor. In an emergency, call 108.
         </p>
       </footer>

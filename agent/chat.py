@@ -27,9 +27,9 @@ import config
 import prompt
 from backend_client import BackendClient, login_demo, safe
 
-logger = logging.getLogger("aarogya.agent")
+logger = logging.getLogger("aayogya.agent")
 
-app = FastAPI(title="Aarogya — text chatbot")
+app = FastAPI(title="Sahayak — Aayogya text chatbot")
 _genai = genai.Client(api_key=config.GOOGLE_API_KEY)
 
 # Codes worth OUR extra retry: transient 5xx overload only. We deliberately do NOT

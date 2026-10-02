@@ -8,7 +8,7 @@ CORS restriction; keep it on localhost). Serves a one-page UI that:
 Chat needs the backend (System A) running + GOOGLE_API_KEY. Voice additionally needs
 LIVEKIT_URL / LIVEKIT_API_KEY / LIVEKIT_API_SECRET set and a voice worker running
 (`python voice.py dev`); that worker auto-joins the room and logs in with demo creds
-(AAROGYA_DEMO_*), so leave the token box blank to test as the demo patient.
+(AAYOGYA_DEMO_*), so leave the token box blank to test as the demo patient.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import uuid
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 
-app = FastAPI(title="Aarogya — demo UI")
+app = FastAPI(title="Aayogya — demo UI")
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -37,7 +37,7 @@ async def chat_proxy(req: Request):
 
 
 @app.get("/token")
-async def token(room: str = "aarogya-demo"):
+async def token(room: str = "aayogya-demo"):
     """Mint a LiveKit join token for the browser. The voice.py worker auto-joins the
     same room and authenticates to the backend itself (demo creds)."""
     url = os.getenv("LIVEKIT_URL", "")

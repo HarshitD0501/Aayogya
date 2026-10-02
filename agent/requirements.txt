@@ -1,4 +1,4 @@
-# System B — Aarogya voice + chat agent. Separate from the backend (System A);
+# System B — Aayogya voice + chat agent. Separate from the backend (System A);
 # merged in later. Versions are lower-bounds on the 1.x LiveKit Agents line —
 # see README "Verifying the SDK surface" before pinning exact ==.
 

@@ -18,7 +18,7 @@ import urllib.request
 from datetime import datetime, timezone
 from typing import Any
 
-logger = logging.getLogger("aarogya.prices")
+logger = logging.getLogger("aayogya.prices")
 
 DISCLAIMER = (
     "Market price from PharmEasy. Legal ceiling from NPPA. "

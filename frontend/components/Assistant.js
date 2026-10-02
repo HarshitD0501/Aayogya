@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// Aarogya Assistant: Combines real-time 2-way WebRTC Live Voice Agent
+// Aayogya Assistant: Combines real-time 2-way WebRTC Live Voice Agent
 // (LiveKit + Deepgram Nova-3 + Gemini 2.5 + Murf Falcon) with text chat fallback.
 const STARTERS = [
   "मेरी दवाइयाँ कौन सी हैं?",
@@ -199,7 +199,7 @@ export default function Assistant({ patient }) {
   return (
     <div ref={scope} className="grid">
       <Card
-        title={mode === "voice" ? "Aarogya Live Voice Agent" : "Aarogya Assistant"}
+        title={mode === "voice" ? "Sahayak Live Voice Agent" : "Sahayak Assistant"}
         sub={
           mode === "voice"
             ? "Two-way live interactive voice call with sub-second latency and instant interruption."
@@ -263,7 +263,7 @@ export default function Assistant({ patient }) {
                         color: m.role === "user" ? "var(--brand-strong)" : "var(--ink)",
                       }}
                     >
-                      <strong>{m.role === "user" ? "You: " : "Aarogya: "}</strong>
+                      <strong>{m.role === "user" ? "You: " : "Sahayak: "}</strong>
                       {m.text}
                     </div>
                   ))}

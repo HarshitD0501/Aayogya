@@ -315,7 +315,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
             <span className="voice-status-label">
               {callState === "connected"
                 ? agentSpeaking
-                  ? "Aarogya Speaking…"
+                  ? "Sahayak Speaking…"
                   : userSpeaking
                   ? "Listening to you…"
                   : "Live 2-Way Connected"
@@ -386,7 +386,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
             />
             {callState === "idle" && (
               <div className="voice-idle-text">
-                <h3>Talk with Aarogya Live</h3>
+                <h3>Talk with Sahayak Live</h3>
                 <p>
                   Speak naturally in Hindi, Hinglish, or English. Instant voice answers for your
                   medicines, dosage timing, and safety interactions.

@@ -640,7 +640,7 @@ export function Upload({ goto }) {
               {confirming ? "Saving to Medical Records…" : "Confirm & Save to Dashboard →"}
             </button>
             <Disclaimer>
-              Aarogya extracts data to assist you; always adhere to your prescribing doctor&apos;s physical instructions.
+              Aayogya extracts data to assist you; always adhere to your prescribing doctor&apos;s physical instructions.
             </Disclaimer>
           </>
         )}

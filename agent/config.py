@@ -1,4 +1,4 @@
-"""Env-driven config for the Aarogya voice+chat agent (design §6).
+"""Env-driven config for the Aayogya voice+chat agent (design §6).
 
 One key note: the LiveKit Google plugin looks up GOOGLE_API_KEY, while the
 backend uses GEMINI_API_KEY. We accept either so a single key works across both
@@ -24,7 +24,7 @@ if GOOGLE_API_KEY:
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")  # ultra-fast, low-latency, active Google model
 
 # --- Backend (System A) — the single source of truth. Tools call it over HTTP. ---
-BACKEND_URL = os.getenv("AAROGYA_BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = os.getenv("AAYOGYA_BACKEND_URL") or os.getenv("AAROGYA_BACKEND_URL", "http://localhost:8000")
 
 # --- STT (Deepgram) — Hindi / Hinglish per design §6. nova-3 is required: with
 # language="multi", nova-2 only code-switches Spanish+English (no Hindi). ---
@@ -41,8 +41,8 @@ MURF_MODEL = os.getenv("MURF_MODEL", "")
 
 # --- Standalone/demo: if the frontend didn't pass a patient token, log in with
 # these demo creds so the agent runs without a UI (e.g. aarav@demo.in / pass1234). ---
-DEMO_IDENTIFIER = os.getenv("AAROGYA_DEMO_IDENTIFIER", "")
-DEMO_PASSWORD = os.getenv("AAROGYA_DEMO_PASSWORD", "")
+DEMO_IDENTIFIER = os.getenv("AAYOGYA_DEMO_IDENTIFIER") or os.getenv("AAROGYA_DEMO_IDENTIFIER", "")
+DEMO_PASSWORD = os.getenv("AAYOGYA_DEMO_PASSWORD") or os.getenv("AAROGYA_DEMO_PASSWORD", "")
 
 # Preferred reply language when the patient's profile doesn't specify: hi | en
-DEFAULT_LANG = os.getenv("AAROGYA_DEFAULT_LANG", "hi")
+DEFAULT_LANG = os.getenv("AAYOGYA_DEFAULT_LANG") or os.getenv("AAROGYA_DEFAULT_LANG", "hi")

@@ -1,4 +1,4 @@
-# Aarogya — Design Document
+# Aayogya — Design Document
 
 > **One-liner:** Click your prescription → AI reads it, explains it in your language, flags cross-doctor drug interactions, finds cheapest meds nearby, sets WhatsApp reminders, and gives you a voice companion that checks in — deferring every clinical decision to your real doctor.
 
@@ -88,7 +88,7 @@ Two systems that share state but run independently. The voice loop needs sub-sec
       │  (FastAPI+LangGraph)│  HTTP   │  (LiveKit Agents + SIP) │
       │                     │  shared │  multi-agent handoff    │
       │  - OCR pipeline     │  RAG+DB │  - Saathi (front door)  │
-      │  - reconciliation   │        │  - Aarogya Assistant     │
+      │  - reconciliation   │        │  - Aayogya Assistant     │
       │  - interaction chk  │        │  - Escalation handler    │
       │  - RAG explain      │        │  - Check-in (outbound)   │
       │  - price compare    │        └─────────────────────────┘
@@ -150,11 +150,11 @@ Four agents with shared session state (`patient_id`, report context) so the pati
 ROLE: Warm receptionist. First voice heard.
 KNOWS: name, active meds, next appointment, today's reminders. Small talk, navigation.
 CANNOT: any clinical opinion, lab interpretation, dose changes.
-HANDOFF: symptoms/"why"/pain/side-effects/report questions → Aarogya Assistant.
+HANDOFF: symptoms/"why"/pain/side-effects/report questions → Aayogya Assistant.
 TONE: casual, vernacular, reassuring.
 ```
 
-### Agent 2 — Aarogya Assistant (explainer — NOT a doctor)
+### Agent 2 — Aayogya Assistant (explainer — NOT a doctor)
 
 ```
 ROLE: Non-clinical explainer. Explains what the report/prescription SAYS and what terms MEAN.

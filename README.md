@@ -1,8 +1,8 @@
-# Aarogya (आरोग्य)
+# Aayogya (आयोग्या)
 
 > Click your prescription -> AI deciphers doctor handwriting, explains it in your language, flags cross-doctor drug interactions, compares real-time medicine prices across Jan Aushadhi & PharmEasy, and sends WhatsApp / voice reminders — while deferring every clinical decision to your real doctor.
 
-**Aarogya** is an India-first medication-adherence and prescription-intelligence platform. It is deliberately **non-clinical**: under India's Telemedicine Practice Guidelines 2020 (§5.4), an AI platform may not diagnose or prescribe. Aarogya only *explains, navigates, compares prices, and reminds* — keeping every clinical decision in the hands of a registered medical practitioner.
+**Aayogya** is an India-first medication-adherence and prescription-intelligence platform. It is deliberately **non-clinical**: under India's Telemedicine Practice Guidelines 2020 (§5.4), an AI platform may not diagnose or prescribe. Aayogya only *explains, navigates, compares prices, and reminds* — keeping every clinical decision in the hands of a registered medical practitioner.
 
 Full architecture and compliance specifications live in [`DESIGN.md`](../DESIGN.md).
 
@@ -56,7 +56,7 @@ graph TD
 
 ## 1. The 4-Agent Extraction Pipeline
 
-Handwritten Indian prescriptions are notorious for illegible doctor cursive, inconsistent dosage shorthand, and combination brand names. Aarogya solves this using a specialized **4-Agent LangGraph Pipeline**:
+Handwritten Indian prescriptions are notorious for illegible doctor cursive, inconsistent dosage shorthand, and combination brand names. Aayogya solves this using a specialized **4-Agent LangGraph Pipeline**:
 
 ```mermaid
 flowchart TD
@@ -148,7 +148,7 @@ flowchart TD
 
 ## 2. Tri-Pillar Medicine Pricing Engine
 
-Aarogya integrates a **Tri-Pillar Pricing Engine** ([`app/prices.py`](backend/app/prices.py)) that gives patients total transparency over medicine costs across retail pharmacies and government generic initiatives with **zero paid API keys**:
+Aayogya integrates a **Tri-Pillar Pricing Engine** ([`app/prices.py`](backend/app/prices.py)) that gives patients total transparency over medicine costs across retail pharmacies and government generic initiatives with **zero paid API keys**:
 
 ```mermaid
 flowchart TD
@@ -288,4 +288,4 @@ python test_confidence.py
 
 ## Disclaimer
 
-Aarogya is **not a substitute for professional medical advice, diagnosis, or treatment**. Under India's Telemedicine Practice Guidelines 2020, Aarogya never prescribes medication or alters dosages. Always consult a registered medical practitioner with any health-related questions. In a medical emergency, call **108** immediately.
+Aayogya is **not a substitute for professional medical advice, diagnosis, or treatment**. Under India's Telemedicine Practice Guidelines 2020, Aayogya never prescribes medication or alters dosages. Always consult a registered medical practitioner with any health-related questions. In a medical emergency, call **108** immediately.

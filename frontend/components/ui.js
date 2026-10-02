@@ -15,7 +15,7 @@ export function BrandMark() {
         <Sparkles size={20} strokeWidth={2.5} />
       </span>
       <ShinyText
-        text="Aarogya"
+        text="Aayogya"
         className="brand-title"
         gradient="linear-gradient(135deg, #111827 0%, #2563eb 60%, #1e3a8a 100%)"
       />

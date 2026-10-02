@@ -10,7 +10,7 @@ Run a worker:
 
 The patient's backend token is read from the job metadata that your app sets when
 it dispatches the agent (JSON: {"backend_token": "..."}). For standalone runs it
-falls back to demo creds (set AAROGYA_DEMO_IDENTIFIER / AAROGYA_DEMO_PASSWORD).
+falls back to demo creds (set AAYOGYA_DEMO_IDENTIFIER / AAYOGYA_DEMO_PASSWORD).
 """
 from __future__ import annotations
 
@@ -18,16 +18,17 @@ import json
 import logging
 
 from livekit.agents import (
-    Agent, AgentSession, JobContext, JobProcess, RoomInputOptions, RunContext, WorkerOptions,
+    Agent, AgentSession, JobContext, JobProcess, RunContext, WorkerOptions,
     cli, function_tool, tokenize,
 )
+from livekit.agents.voice import room_io
 from livekit.plugins import deepgram, google, murf, silero
 
 import config
 import prompt
 from backend_client import BackendClient, login_demo, safe
 
-logger = logging.getLogger("aarogya.agent")
+logger = logging.getLogger("aayogya.agent")
 
 # Turn detection: uses Silero VAD by default for snappy, instant (<100ms) turns.
 # The heavy multilingual turn-detector ONNX model is optional and can be enabled via ENABLE_TURN_DETECTOR=1.
@@ -53,7 +54,7 @@ except Exception:  # noqa: BLE001
     noise_cancellation = None
 
 
-class AarogyaAssistant(Agent):
+class SahayakAssistant(Agent):
     """The brain, wearing its voice frontend. Instructions + tools are shared."""
 
     def __init__(self, client: BackendClient, profile: dict | None = None) -> None:
@@ -102,6 +103,9 @@ class AarogyaAssistant(Agent):
         return json.dumps(reports, ensure_ascii=False)
 
 
+AayogyaAssistant = SahayakAssistant  # backward-compatibility alias
+
+
 def _token_from_metadata(ctx: JobContext) -> str | None:
     """Pull the patient's backend token from job metadata set by the app."""
     raw = getattr(ctx.job, "metadata", None)
@@ -127,14 +131,20 @@ def _token_from_participant(participant) -> str | None:
 
 
 def prewarm(proc: JobProcess) -> None:
-    """Load Silero VAD once per worker process (not per call), so it's warm before a
-    call arrives — keeps model-load latency off the call path. min_silence_duration
-    tuned down for snappier end-of-turn detection."""
+    """Prewarm models and clients once per worker process (not per call), so model-load
+    and SSL/Pydantic initialization latency is kept off the live call path.
+    Minimizes loop stalls on Windows."""
     proc.userdata["vad"] = silero.VAD.load(min_silence_duration=0.5)
+    proc.userdata["llm"] = google.LLM(model=config.GEMINI_MODEL)
+    proc.userdata["stt"] = deepgram.STT(model=config.DEEPGRAM_MODEL, language=config.STT_LANGUAGE)
 
 
 async def entrypoint(ctx: JobContext) -> None:
     await ctx.connect()
+
+    vad = ctx.proc.userdata.get("vad") or silero.VAD.load(min_silence_duration=0.5)
+    llm = ctx.proc.userdata.get("llm") or google.LLM(model=config.GEMINI_MODEL)
+    stt = ctx.proc.userdata.get("stt") or deepgram.STT(model=config.DEEPGRAM_MODEL, language=config.STT_LANGUAGE)
 
     # Token source, in order: explicit dispatch job metadata -> the browser's join-token
     # metadata (website path) -> demo creds (standalone). Each binds the agent to ONE
@@ -147,7 +157,7 @@ async def entrypoint(ctx: JobContext) -> None:
     if not token:
         raise RuntimeError(
             "No patient token. The website sets it via /api/voice/token metadata; "
-            "for a standalone run set AAROGYA_DEMO_IDENTIFIER/PASSWORD."
+            "for a standalone run set AAYOGYA_DEMO_IDENTIFIER/PASSWORD."
         )
     client = BackendClient(token)
     ctx.add_shutdown_callback(client.aclose)
@@ -165,13 +175,17 @@ async def entrypoint(ctx: JobContext) -> None:
     if config.MURF_MODEL:
         murf_kwargs["model"] = config.MURF_MODEL
 
+    turn_opts = {
+        "turn_detection": _turn_detection if _turn_detection else "vad",
+        "preemptive_generation": {"preemptive_tts": True},
+    }
+
     session = AgentSession(
-        stt=deepgram.STT(model=config.DEEPGRAM_MODEL, language=config.STT_LANGUAGE),
-        llm=google.LLM(model=config.GEMINI_MODEL),
+        stt=stt,
+        llm=llm,
         tts=murf.TTS(**murf_kwargs),
-        vad=ctx.proc.userdata.get("vad") or silero.VAD.load(min_silence_duration=0.5),
-        preemptive_generation=True,  # start the LLM on the partial transcript, don't wait for the final
-        **({"turn_detection": _turn_detection} if _turn_detection else {}),
+        vad=vad,
+        turn_handling=turn_opts,
     )
 
     # Fetch profile to greet patient by their name in their preferred language
@@ -180,23 +194,26 @@ async def entrypoint(ctx: JobContext) -> None:
     preferred_lang = profile.get("language", config.DEFAULT_LANG or "hi")
     first_name = patient_name.split()[0] if patient_name else ""
 
-    # BVC() suits in-app RTC audio; switch to noise_cancellation.BVCTelephony() if you
-    # route this over SIP/phone (8 kHz).
-    room_input = RoomInputOptions(
-        noise_cancellation=noise_cancellation.BVC() if noise_cancellation else None
+    # Modern RoomOptions replaces deprecated RoomInputOptions
+    room_options = room_io.RoomOptions(
+        audio_input=room_io.AudioInputOptions(
+            noise_cancellation=noise_cancellation.BVC() if noise_cancellation else None
+        )
     )
     await session.start(
-        agent=AarogyaAssistant(client, profile=profile), room=ctx.room, room_input_options=room_input
+        agent=SahayakAssistant(client, profile=profile),
+        room=ctx.room,
+        room_options=room_options,
     )
 
     if not preferred_lang or preferred_lang == "hi" or preferred_lang.startswith("hi"):
         greeting_msg = (
-            f"नमस्ते {first_name or patient_name}! मैं आरोग्य हूँ, आपकी सेहत का साथी। "
+            f"नमस्ते {first_name or patient_name}! मैं सहायक हूँ, आयोग्या से आपकी सेहत का साथी। "
             f"आज मैं आपकी दवाओं या सेहत के बारे में क्या मदद कर सकता हूँ?"
         )
     else:
         greeting_msg = (
-            f"Namaste {first_name or patient_name}! I am Aarogya, your health companion. "
+            f"Namaste {first_name or patient_name}! I am Sahayak, your health companion from Aayogya. "
             f"How can I help you with your medicines or prescription today?"
         )
 

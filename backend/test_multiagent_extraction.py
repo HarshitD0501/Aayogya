@@ -1,4 +1,4 @@
-"""Comprehensive Production-Grade Test Suite for Aarogya Multi-Agent Extraction Pipeline.
+"""Comprehensive Production-Grade Test Suite for Aayogya Multi-Agent Extraction Pipeline.
 
 Tests all 4 agents and safety edge cases:
 1. Agent 1: Vision Preprocessor (EXIF, contrast, ink sharpening, corrupt/tiny/RGBA images).
@@ -289,7 +289,7 @@ def test_langgraph_pipeline_e2e():
 
 if __name__ == "__main__":
     print("\n=======================================================")
-    print("RUNNING AAROGYA MULTI-AGENT EXTRACTION TEST SUITE")
+    print("RUNNING AAYOGYA MULTI-AGENT EXTRACTION TEST SUITE")
     print("=======================================================\n")
     test_agent_1_preprocessor()
     test_agent_2_json_cleaner()

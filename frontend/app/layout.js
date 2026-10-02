@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Aarogya — your medicines, made clear",
+  title: "Aayogya — your medicines, made clear",
   description:
     "Understand your prescriptions, daily schedule, interactions, and nearby pharmacies. Not a substitute for your doctor.",
 };
