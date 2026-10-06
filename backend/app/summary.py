@@ -73,7 +73,9 @@ def build(db: Session, patient) -> dict:
     ]
 
     # Next visit / report review: earliest follow-up date that is still upcoming.
-    today = date.today().isoformat()
+    from datetime import timedelta
+    today_dt = date.today()
+    today = today_dt.isoformat()
     upcoming = (
         db.query(Report)
         .filter(Report.patient_id == patient.id, Report.follow_up_date.isnot(None),
@@ -83,8 +85,37 @@ def build(db: Session, patient) -> dict:
     )
     next_followup = None
     if upcoming:
-        next_followup = {"date": upcoming.follow_up_date,
-                         "doctor": upcoming.prescriber_name, "report_id": upcoming.id}
+        try:
+            visit_dt = date.fromisoformat(upcoming.follow_up_date)
+            days_until = (visit_dt - today_dt).days
+            call_dt = visit_dt - timedelta(days=2)
+            call_date_str = call_dt.isoformat()
+            if upcoming.follow_up_status == "reschedule_requested" and upcoming.reschedule_preferred_date:
+                call_status = f"Reschedule Requested: {upcoming.reschedule_preferred_date}"
+            elif days_until == 2:
+                call_status = "Due Today (Sahayak Automated Voice Call)"
+            elif days_until < 2:
+                call_status = "Call dispatched / Visit imminent"
+            else:
+                call_status = f"Scheduled on {call_date_str} (2 days before meet)"
+        except Exception:
+            days_until = None
+            call_date_str = None
+            call_status = "Scheduled 2 days before meet"
+
+        next_followup = {
+            "date": upcoming.follow_up_date,
+            "doctor": upcoming.prescriber_name or "Doctor",
+            "report_id": upcoming.id,
+            "days_until": days_until,
+            "call_reminder_date": call_date_str,
+            "call_reminder_status": call_status,
+            "reminder_channel": "voice",
+            "follow_up_status": upcoming.follow_up_status or "scheduled",
+            "reschedule_preferred_date": upcoming.reschedule_preferred_date,
+            "reschedule_notes": upcoming.reschedule_notes,
+            "last_call_at": upcoming.last_call_at.isoformat() if upcoming.last_call_at else None,
+        }
 
     # Reminder tracking (kitne WhatsApp messages gaye, last kab).
     base = db.query(ReminderLog).filter(ReminderLog.patient_id == patient.id)

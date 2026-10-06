@@ -1,6 +1,6 @@
 # Aayogya (आयोग्या)
 
-> Click your prescription -> AI deciphers doctor handwriting, explains it in your language, flags cross-doctor drug interactions, compares real-time medicine prices across Jan Aushadhi & PharmEasy, and sends WhatsApp / voice reminders — while deferring every clinical decision to your real doctor.
+> Click your prescription -> AI deciphers doctor handwriting, explains it in your language, flags drug interactions, compares real-time medicine prices across Jan Aushadhi & PharmEasy, and sends WhatsApp / voice reminders — while deferring every clinical decision to your real doctor.
 
 **Aayogya** is an India-first medication-adherence and prescription-intelligence platform. It is deliberately **non-clinical**: under India's Telemedicine Practice Guidelines 2020 (§5.4), an AI platform may not diagnose or prescribe. Aayogya only *explains, navigates, compares prices, and reminds* — keeping every clinical decision in the hands of a registered medical practitioner.
 
@@ -13,7 +13,7 @@ Full architecture and compliance specifications live in [`DESIGN.md`](../DESIGN.
 - **4-Agent Handwriting Extraction Pipeline** — Multi-agent system that enhances smartphone photos, deciphers messy doctor cursive, fuzzy-matches against 100+ Indian drug brands, parses Indian dosage notations (`1-0-1`, `1/0/1`, `BBF`, `SOS`), and halts at a Human-in-the-Loop gate.
 - **Tri-Pillar Medicine Pricing Engine** — Real-time price discovery comparing **PharmEasy** commercial rates, **NPPA (DPCO)** statutory ceiling prices, and **PMBJP Jan Aushadhi** generic store prices (up to 90% savings) with 24-hour caching.
 - **Extraction Confidence Grounding** — Composite 0–1 confidence score based on external catalog validation, dosage parsability, and strength detection. Cursive approximations automatically trigger review flags.
-- **Cross-Doctor Interaction Check** — The safety moat: detects salt-level interactions across *all* active prescriptions from different doctors that no individual physician can see.
+- **Drug Interaction Check** — Safety feature: detects salt-level interactions across *all* active medicines that no individual physician can see.
 - **Plain-Language Multilingual Explanations** — Clarifies why each medicine was prescribed in native Indian languages (Hindi, English, etc.).
 - **Nearby Chemists & Jan Aushadhi Kendras** — Live OpenStreetMap / Overpass geolocation map of nearby retail and generic pharmacies.
 - **Voice Companion (Saathi)** — Ultra-low latency voice companion powered by LiveKit and Gemini for daily adherence check-ins.

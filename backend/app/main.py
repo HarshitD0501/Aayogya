@@ -31,16 +31,19 @@ load_dotenv()
 from . import interactions as interaction_svc  # noqa: E402
 from . import prices as price_svc  # noqa: E402
 from . import summary as summary_svc  # noqa: E402
+from . import telephony as telephony_svc  # noqa: E402
 from . import whatsapp as wa_svc  # noqa: E402
-from .auth import authenticate, current_patient, make_token  # noqa: E402
+from . import caregiver as caregiver_svc  # noqa: E402
+from .auth import authenticate, current_patient, make_token, resolve_actor  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
-from .models import DoseAdherence, Medicine, Patient, Report  # noqa: E402
+from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report  # noqa: E402
 from .schemas import (  # noqa: E402
     LoginIn, LoginOut, MedicineOut, PatientOut, ReminderPrefsIn,
-    ReminderPrefsOut, ReportOut, StopMedicineIn,
+    ReminderPrefsOut, ReportOut, RescheduleIn, StopMedicineIn,
+    TelephonyDispatchIn,
 )
 from .seed import seed  # noqa: E402
 
@@ -83,13 +86,10 @@ async def lifespan(app: FastAPI):
     cp, pool = _make_checkpointer()
     app.state.pipeline = build_pipeline(cp)
     app.state.pool = pool
-    scheduler_task = asyncio.create_task(wa_svc.start_reminder_scheduler_loop())
+    wa_svc.start_apscheduler()
     yield
-    scheduler_task.cancel()
-    try:
-        await scheduler_task
-    except asyncio.CancelledError:
-        pass
+    wa_svc.stop_apscheduler()
+    await wa_svc.close_http_client()
     if pool is not None:
         pool.close()
 
@@ -106,6 +106,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(caregiver_svc.router)
+
 
 def _med_out(m: Medicine) -> MedicineOut:
     out = MedicineOut.model_validate(m)
@@ -118,6 +120,10 @@ def _report_out(r: Report) -> ReportOut:
         id=r.id, patient_id=r.patient_id, filename=r.filename,
         prescriber_name=r.prescriber_name, prescriber_specialty=r.prescriber_specialty,
         prescription_date=r.prescription_date, follow_up_date=r.follow_up_date,
+        follow_up_status=r.follow_up_status or "scheduled",
+        reschedule_preferred_date=r.reschedule_preferred_date,
+        reschedule_notes=r.reschedule_notes,
+        last_call_at=r.last_call_at.isoformat() if r.last_call_at else None,
         ocr_confidence=r.ocr_confidence,
         confirmed=r.confirmed,
         created_at=r.created_at.isoformat() if r.created_at else None,
@@ -137,6 +143,34 @@ def _persist_meds(report: Report, meds: list[dict], patient_id: str, prescriber:
             needs_salt_confirmation=m.get("needs_salt_confirmation", False),
             prescriber_name=prescriber,
         ))
+
+
+@app.get("/api/prices")
+def get_public_prices(
+    brand: str | None = Query(None),
+    salt: str | None = Query(None),
+    strength: str | None = Query(None),
+):
+    """Public real-time price discovery endpoint combining PharmEasy, NPPA, and Jan Aushadhi."""
+    return price_svc.get_prices(salt=salt, strength=strength, brand=brand)
+
+
+@app.get("/api/public/stats")
+def get_public_stats(db: Session = Depends(get_db)):
+    """Public platform stats for landing page trust metrics and live indicators."""
+    nppa_count = len(getattr(price_svc, "_NPPA_CEILING_PRICES", {}))
+    jan_count = len(getattr(price_svc, "_JAN_AUSHADHI_PRICES", {}))
+    total_meds = max(120, nppa_count + jan_count)
+    patient_count = db.query(Patient).count()
+    return {
+        "verified_medicines": total_meds,
+        "nppa_caps_tracked": nppa_count,
+        "jan_aushadhi_generics": jan_count,
+        "interaction_rules": 14,
+        "active_patients": patient_count,
+        "live_partner": "PharmEasy India",
+        "status": "online",
+    }
 
 
 @app.post("/api/auth/login", response_model=LoginOut)
@@ -279,12 +313,21 @@ class ChatIn(BaseModel):
 async def chat(
     body: ChatIn,
     authorization: str = Header(None),
-    patient: Patient = Depends(current_patient),  # 401s unless a real logged-in patient
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
 ):
-    """Proxy to the agent service (the shared brain). current_patient enforces auth
-    here; we forward the SAME bearer token so the agent's tools read only this
-    patient's records (isolation, design §11). One origin => no browser CORS."""
-    token = authorization.split(" ", 1)[1]  # current_patient already checked the Bearer prefix
+    """Proxy to the agent service (the shared brain). resolve_actor enforces auth
+    here; the agent's tools read only the resolved patient's records (isolation,
+    design §11). A caregiver's own token would 401 inside the agent's tools
+    (patient-only), so when a caregiver acts we mint a fresh patient-scoped
+    token — they can only reach linked patients, so isolation holds.
+    One origin => no browser CORS."""
+    actor, patient = resolve_actor(authorization, x_patient_id, db)
+    token = (
+        authorization.split(" ", 1)[1]
+        if actor.id == patient.id
+        else make_token(patient.id)
+    )
     try:
         async with httpx.AsyncClient(timeout=60.0) as c:
             r = await c.post(settings.agent_chat_url,
@@ -296,22 +339,47 @@ async def chat(
 
 
 @app.post("/api/voice/token")
-def voice_token(authorization: str = Header(None), patient: Patient = Depends(current_patient)):
+def voice_token(
+    authorization: str = Header(None),
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
+):
     """Mint a LiveKit room-join token for this patient's browser mic. The patient's
     backend bearer token rides in the LiveKit token METADATA so the voice.py worker,
     on joining the room, acts AS this patient (isolation §11) — never demo creds.
+    Caregivers get a freshly minted PATIENT token (they can only reach linked
+    patients — same rule as /api/chat). The token also carries a room_config
+    dispatch targeting the named agent worker (settings.livekit_agent_name) —
+    required now that the worker registers with an explicit agent_name and no
+    longer auto-joins rooms. Room names are unique per request, so the token
+    dispatch fires at room creation as documented.
     Signing is local (no LiveKit server call); needs LIVEKIT_* configured."""
     if not (settings.livekit_url and settings.livekit_api_key and settings.livekit_api_secret):
         raise HTTPException(501, "Voice not configured: set LIVEKIT_URL / LIVEKIT_API_KEY / LIVEKIT_API_SECRET.")
     from livekit import api  # local import: voice is optional, keep it off the hot path
+    from livekit.protocol.agent_dispatch import RoomAgentDispatch
+    from livekit.protocol.room import RoomConfiguration
 
-    backend_token = authorization.split(" ", 1)[1]  # current_patient already checked the Bearer prefix
+    actor, patient = resolve_actor(authorization, x_patient_id, db)
+    backend_token = (
+        authorization.split(" ", 1)[1] if actor.id == patient.id else make_token(patient.id)
+    )
     room = f"aayogya-{patient.id}-{uuid4().hex[:8]}"  # per-call room, namespaced by patient
     jwt = (
         api.AccessToken(settings.livekit_api_key, settings.livekit_api_secret)
         .with_identity(patient.id)
         .with_metadata(json.dumps({"backend_token": backend_token}))
         .with_grants(api.VideoGrants(room_join=True, room=room))
+        .with_room_config(
+            RoomConfiguration(
+                agents=[
+                    RoomAgentDispatch(
+                        agent_name=settings.livekit_agent_name,
+                        metadata=json.dumps({"backend_token": backend_token}),
+                    )
+                ]
+            )
+        )
         .to_jwt()
     )
     return {"url": settings.livekit_url, "token": jwt, "room": room}
@@ -370,17 +438,29 @@ async def send_dose_reminder(
     patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
 ):
-    """Trigger sending an interactive WhatsApp reminder for a specific scheduled dose."""
+    """Trigger sending an interactive WhatsApp reminder for all medicines in this slot."""
     adh = db.query(DoseAdherence).filter(
         DoseAdherence.id == req.adherence_id,
         DoseAdherence.patient_id == patient.id,
     ).first()
     if not adh:
         raise HTTPException(404, "Scheduled dose adherence record not found")
-    med = adh.medicine
-    if not med:
-        raise HTTPException(404, "Associated medicine record not found")
-    return await wa_svc.send_interactive_dose_reminder(db, adh, patient, med)
+
+    # Group all pending medicines for this patient in this same slot so a single message is sent
+    slot_doses = (
+        db.query(DoseAdherence)
+        .filter(
+            DoseAdherence.patient_id == patient.id,
+            DoseAdherence.dose_date == adh.dose_date,
+            DoseAdherence.slot == adh.slot,
+            DoseAdherence.status == "pending",
+        )
+        .all()
+    )
+    if not slot_doses:
+        slot_doses = [adh]
+
+    return await wa_svc.send_interactive_slot_reminder(db, patient, adh.slot, slot_doses)
 
 
 @app.post("/api/whatsapp/simulate-reply")
@@ -398,8 +478,25 @@ async def simulate_whatsapp_reply(
     ).first()
     if not adh:
         raise HTTPException(404, "Scheduled dose adherence record not found")
+
     action_type = "taken" if "take" in req.action.lower() else "missed"
-    btn_id = f"dose_{action_type}_{adh.id}"
+
+    # Find all matching doses in this slot to mark all together
+    slot_doses = (
+        db.query(DoseAdherence)
+        .filter(
+            DoseAdherence.patient_id == patient.id,
+            DoseAdherence.dose_date == adh.dose_date,
+            DoseAdherence.slot == adh.slot,
+            DoseAdherence.status == "pending",
+        )
+        .all()
+    )
+    if not slot_doses:
+        slot_doses = [adh]
+
+    ids_str = ",".join(str(a.id) for a in slot_doses)
+    btn_id = f"batch_{action_type}_{ids_str}"
     mock_payload = {
         "entry": [{
             "changes": [{
@@ -484,6 +581,7 @@ def update_reminder_preferences(
         p.reminder_time_night = body.reminder_time_night
     db.commit()
     db.refresh(p)
+    wa_svc.sync_today_adherence(db, p.id)
     return ReminderPrefsOut(
         auto_reminders_enabled=p.auto_reminders_enabled is not False,
         whatsapp_reminders_enabled=p.whatsapp_reminders_enabled is not False,
@@ -555,6 +653,127 @@ async def trigger_automated_reminders(
     """Manually test or trigger the automated reminder scheduler immediately."""
     res = await wa_svc.run_automated_reminders_check(db, force=True)
     return {"status": "triggered", "details": res}
+
+
+@app.post("/api/reports/{report_id}/trigger-call-reminder")
+async def trigger_report_call_reminder(
+    report_id: int,
+    request: Request,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Simulate or place an automated 2-day doctor follow-up voice call from Sahayak."""
+    try:
+        report = (
+            db.query(Report)
+            .filter(Report.id == report_id, Report.patient_id == patient.id)
+            .first()
+        )
+        if not report:
+            raise HTTPException(404, "Report not found")
+        auth_header = request.headers.get("Authorization", "")
+        token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+        return await telephony_svc.dispatch_doctor_followup_call(
+            db, patient, report, force=True, auth_token=token
+        )
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/telephony/dispatch")
+async def dispatch_telephony_call(
+    payload: TelephonyDispatchIn,
+    request: Request,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Dispatches an outbound phone call via Twilio + LiveKit SIP trunk to remind
+    the patient of their doctor review 2 days prior."""
+    report = (
+        db.query(Report)
+        .filter(Report.id == payload.report_id, Report.patient_id == patient.id)
+        .first()
+    )
+    if not report:
+        raise HTTPException(404, f"Report #{payload.report_id} not found.")
+
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+    try:
+        res = await telephony_svc.dispatch_doctor_followup_call(
+            db, patient, report, force=payload.force, auth_token=token
+        )
+        return res
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/telephony/reschedule")
+def reschedule_appointment_endpoint(
+    payload: RescheduleIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Tool-facing and API endpoint: records patient's preferred reschedule date/time
+    and immediately updates report status and dashboard."""
+    try:
+        res = telephony_svc.handle_reschedule_request(
+            db,
+            patient_id=patient.id,
+            report_id=payload.report_id,
+            preferred_date_or_time=payload.preferred_date_or_time,
+            reason=payload.reason,
+        )
+        return res
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.get("/api/telephony/status/{report_id}")
+def get_telephony_status_endpoint(
+    report_id: int,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Returns current follow-up status, reschedule details, and call history for a report."""
+    report = (
+        db.query(Report)
+        .filter(Report.id == report_id, Report.patient_id == patient.id)
+        .first()
+    )
+    if not report:
+        raise HTTPException(404, f"Report #{report_id} not found.")
+
+    logs = (
+        db.query(ReminderLog)
+        .filter(
+            ReminderLog.patient_id == patient.id,
+            ReminderLog.channel == "voice",
+            ReminderLog.kind == "followup",
+        )
+        .order_by(ReminderLog.sent_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return {
+        "report_id": report.id,
+        "follow_up_date": report.follow_up_date,
+        "follow_up_status": report.follow_up_status or "scheduled",
+        "reschedule_preferred_date": report.reschedule_preferred_date,
+        "reschedule_notes": report.reschedule_notes,
+        "last_call_at": report.last_call_at.isoformat() if report.last_call_at else None,
+        "recent_calls": [
+            {
+                "id": l.id,
+                "sent_at": l.sent_at.isoformat() if l.sent_at else None,
+                "status": l.status,
+                "call_status": l.call_status,
+                "body": l.body,
+            }
+            for l in logs
+        ],
+    }
 
 
 @app.get("/")

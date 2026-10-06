@@ -63,7 +63,7 @@ export default function Login({ onLogin, onBack }) {
           Your medicines, <ShinyText text="made clear." />
         </h1>
         <p className="sub" data-reveal>
-          Sign in to analyze prescriptions, monitor your daily schedule, check cross-doctor interactions, and compare local pharmacy prices.
+          Sign in to analyze prescriptions, monitor your daily schedule, check medicine interactions, and compare local pharmacy prices.
         </p>
 
         <form

@@ -2,6 +2,10 @@
 no PyJWT/bcrypt dep). Swap for Supabase Auth (design §7.1) later — the
 `current_patient` dependency is the seam. Per-patient isolation (design §11) is
 enforced by every data query filtering on current_patient.id.
+
+Caregiver flow: a role='caregiver' token acts on a LINKED patient named by the
+X-Patient-Id header (link-checked, 403 otherwise). Patient tokens ignore the
+header entirely — they can only ever be themselves.
 """
 from __future__ import annotations
 
@@ -70,7 +74,8 @@ def _verify_token(token: str) -> str:
 
 
 def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
-    """Look up by email OR phone (elderly-friendly, design §7.1), verify password."""
+    """Look up by email OR phone (elderly-friendly, design §7.1), verify password.
+    Returns patients and caregivers alike; role decides the dashboard."""
     patient = (
         db.query(Patient)
         .filter((Patient.email == identifier) | (Patient.phone == identifier))
@@ -81,13 +86,71 @@ def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
     return None
 
 
-def current_patient(
-    authorization: str = Header(None), db: Session = Depends(get_db)
-) -> Patient:
+def _linked_patient_ids(db: Session, caregiver_id: str) -> set[str]:
+    from .models import CaregiverLink  # local import: avoid circular module load
+
+    rows = (
+        db.query(CaregiverLink.patient_id)
+        .filter(CaregiverLink.caregiver_id == caregiver_id)
+        .all()
+    )
+    return {r[0] for r in rows}
+
+
+def resolve_actor(
+    authorization: str = Header(None),
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
+) -> tuple[Patient, Patient]:
+    """Auth + caregiver routing. Returns (actor, patient):
+    actor = the logged-in row (patient or caregiver), patient = the row whose
+    data is acted on. For patients: actor is patient, X-Patient-Id is IGNORED
+    (no self-impersonation escape hatch). For caregivers: patient must be a
+    linked, consented patient — defaulting to the first link when no header.
+    """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "Login required")
     pid = _verify_token(authorization.split(" ", 1)[1])
-    patient = db.get(Patient, pid)
+    actor = db.get(Patient, pid)
+    if not actor:
+        raise HTTPException(401, "Unknown account")
+
+    if (actor.role or "patient") != "caregiver":
+        return actor, actor  # patient role: always self
+
+    linked = _linked_patient_ids(db, actor.id)
+    if not linked:
+        raise HTTPException(403, "No patients linked to this caregiver yet")
+
+    target_id = x_patient_id or next(iter(sorted(linked)))
+    if target_id not in linked:
+        raise HTTPException(403, "Not a linked patient of this caregiver")
+    patient = db.get(Patient, target_id)
     if not patient:
-        raise HTTPException(401, "Unknown patient")
-    return patient
+        raise HTTPException(404, "Linked patient no longer exists")
+    return actor, patient
+
+
+def current_patient(
+    authorization: str = Header(None),
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
+) -> Patient:
+    """Same object as before (the resolved patient), so every existing route
+    keeps working. Caregiver tokens resolve to their linked target."""
+    return resolve_actor(authorization, x_patient_id, db)[1]
+
+
+def current_caregiver(
+    authorization: str = Header(None), db: Session = Depends(get_db)
+) -> Patient:
+    """403 unless the token belongs to a caregiver. For caregiver-only routes."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Login required")
+    pid = _verify_token(authorization.split(" ", 1)[1])
+    actor = db.get(Patient, pid)
+    if not actor:
+        raise HTTPException(401, "Unknown account")
+    if (actor.role or "patient") != "caregiver":
+        raise HTTPException(403, "Caregiver login required")
+    return actor

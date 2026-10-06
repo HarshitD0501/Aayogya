@@ -208,7 +208,7 @@
         </tr>
         <tr style="cursor:pointer" onclick="quick('shanti@demo.in')">
           <td><b>Shanti Devi</b> <span class="pill ok">pro</span><br>
-            <span class="muted">3 doctors · cross-doctor safety demo</span></td>
+            <span class="muted">3 prescriptions · interaction-check demo</span></td>
           <td class="muted">shanti@demo.in<br>+919000000002</td>
         </tr>
         <tr style="cursor:pointer" onclick="quick('aarav@demo.in')">
@@ -427,9 +427,8 @@ const VIEWS = {
     const d = await api("/interactions");
     const rows = (d.findings || []).map(f => {
       const meds = f.medicines.map(m => `${esc(m.brand)} <span class="muted">(${esc(m.prescriber || "—")})</span>`).join(" + ");
-      const xd = f.cross_doctor ? ' <span class="pill flag">cross-doctor</span>' : "";
       return `<div class="card">
-        <div><span class="pill sev-${esc(f.severity)}">${esc(f.severity)}</span>${xd} &nbsp; <b>${meds}</b></div>
+        <div><span class="pill sev-${esc(f.severity)}">${esc(f.severity)}</span> &nbsp; <b>${meds}</b></div>
         <p style="margin:8px 0 4px">${esc(f.note)}</p>
         <p class="muted">Source: ${esc(f.source)}</p></div>`;
     }).join("");

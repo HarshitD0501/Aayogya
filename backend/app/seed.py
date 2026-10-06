@@ -1,5 +1,5 @@
-"""Demo seed (design §14): two DPDP-safe synthetic patients + curated
-interactions. Idempotent — skips if already seeded. Passwords are the demo
+"""Demo seed (design §14): DPDP-safe synthetic patients + curated
+interactions. Idempotent per-patient. Passwords are the demo
 creds; disable/rotate in prod.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from .auth import hash_password
 from .dosage import parse_dosage
-from .models import Interaction, Medicine, Patient, ReminderLog, Report
+from .models import CaregiverLink, Interaction, Medicine, Patient, ReminderLog, Report
 
 DEMO_PASSWORD = "pass1234"
 
@@ -56,12 +56,15 @@ def _report(db: Session, patient_id: str, doctor: str, specialty: str,
 
 def seed(db: Session) -> None:
     """Idempotent per-patient: base demo set (Aarav + Shanti), then Ramesh
-    (single-doctor free patient matching the demo handwritten prescription)."""
+    (single-doctor free patient matching the demo handwritten prescription),
+    then the caregiver family (Sunita + Meera with consented links)."""
     pw = hash_password(DEMO_PASSWORD)
     if not db.get(Patient, "shanti"):
         _seed_base(db, pw)
     if not db.get(Patient, "ramesh"):
         _seed_ramesh(db, pw)
+    if not db.get(Patient, "meera"):
+        _seed_caregiver(db, pw)
 
 
 def _seed_base(db: Session, pw: str) -> None:
@@ -79,7 +82,7 @@ def _seed_base(db: Session, pw: str) -> None:
     r.medicines.append(_med(r, "aarav", "Pan 40", "Pantoprazole", "40mg", "1-0-0", 14, "Dr. Verma"))
     r.medicines.append(_med(r, "aarav", "Digene", "Antacid (Magnesium/Aluminium hydroxide)", "", "SOS", None, "Dr. Verma"))
 
-    # Shanti (pro): three doctors - the cross-doctor safety demo. Cardio review in 2 weeks.
+    # Shanti (pro): three prescriptions - the interaction-check demo. Cardio review in 2 weeks.
     r1 = _report(db, "shanti", "Dr. Mehta", "Cardiology", follow_up_in=14)
     r1.medicines.append(_med(r1, "shanti", "Ecosprin 75", "Aspirin", "75mg", "0-1-0", None, "Dr. Mehta"))
     r1.medicines.append(_med(r1, "shanti", "Amlong 5", "Amlodipine", "5mg", "1-0-0", None, "Dr. Mehta"))
@@ -108,6 +111,26 @@ def _seed_ramesh(db: Session, pw: str) -> None:
     rr.medicines.append(_med(rr, "ramesh", "Ecosprin 75", "Aspirin", "75mg", "0-0-1", 30, doc))
     rr.medicines.append(_med(rr, "ramesh", "Pan 40", "Pantoprazole", "40mg", "1-0-0", 15, doc))
     _reminders(db, (("ramesh", 4),))
+    db.commit()
+
+
+def _seed_caregiver(db: Session, pw: str) -> None:
+    """Caregiver demo (design: caregiver.md): Meera (Ramesh's daughter, Bengaluru)
+    manages four family members — Ramesh, Shanti, Aarav, Sunita — through
+    consented links. Sunita is seeded here (thyroid) so the family card grid
+    shows four patients; the other three reuse the existing rich demo data."""
+    db.add(Patient(id="sunita", name="Sunita Kulkarni", email="sunita@demo.in",
+                   phone="+919454535135", password_hash=pw, plan="free"))
+    doc = "Dr. Kavita Rao"
+    rs = _report(db, "sunita", doc, "Endocrinology", follow_up_in=10)
+    rs.medicines.append(_med(rs, "sunita", "Thyronorm 50", "Levothyroxine", "50mcg", "1-0-0", None, doc))
+    _reminders(db, (("sunita", 2),))
+
+    db.add(Patient(id="meera", name="Meera Kulkarni", email="meera@demo.in",
+                   phone="+919454535136", password_hash=pw, plan="pro", role="caregiver"))
+    for pid, relation in (("ramesh", "father"), ("shanti", "grandmother"),
+                          ("aarav", "brother"), ("sunita", "mother")):
+        db.add(CaregiverLink(caregiver_id="meera", patient_id=pid, relation=relation))
     db.commit()
 
 

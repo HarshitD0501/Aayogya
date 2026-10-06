@@ -57,7 +57,7 @@ def _make_tools(client: BackendClient) -> list:
         return await safe(client.get_medicines())
 
     async def check_drug_interactions() -> dict:
-        """Check for dangerous interactions across ALL the patient's active medicines (cross-doctor safety check)."""
+        """Check for dangerous interactions across ALL the patient's active medicines."""
         return await safe(client.check_interactions())
 
     async def get_prescription_history() -> list | dict:

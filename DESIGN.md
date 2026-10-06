@@ -1,6 +1,6 @@
 # Aayogya — Design Document
 
-> **One-liner:** Click your prescription → AI reads it, explains it in your language, flags cross-doctor drug interactions, finds cheapest meds nearby, sets WhatsApp reminders, and gives you a voice companion that checks in — deferring every clinical decision to your real doctor.
+> **One-liner:** Click your prescription → AI reads it, explains it in your language, flags drug interactions, finds cheapest meds nearby, sets WhatsApp reminders, and gives you a voice companion that checks in — deferring every clinical decision to your real doctor.
 
 **Status:** Design locked + **production-hardened via deep research (2026)** — see §19 for verified sources & open questions. Pre-scaffold.
 **Region:** India (data localized in-region).
@@ -36,7 +36,7 @@
 
 Patients — especially the elderly with chronic conditions — juggle multiple prescriptions from **different doctors** who don't see each other's notes. This causes: missed doses, dangerous drug interactions no one catches, confusion about what a report means, overpaying for medicines, and missed follow-ups. Caregivers (often distant, often NRI children) have no visibility.
 
-**What we solve:** parse prescriptions, explain them plainly, **flag cross-doctor interactions**, compare prices, remind via WhatsApp, and proactively check in by voice — while keeping every clinical decision with a real doctor.
+**What we solve:** parse prescriptions, explain them plainly, **flag drug interactions**, compare prices, remind via WhatsApp, and proactively check in by voice — while keeping every clinical decision with a real doctor.
 
 **Hard positioning constraint (legal):** Under India's Telemedicine Practice Guidelines 2020 §5.4, an AI/ML platform **may not counsel or prescribe**; only a Registered Medical Practitioner (RMP) may. So the product is explicitly a **non-clinical explainer + navigator + adherence tool**. It never diagnoses, never changes doses, always defers to the patient's doctor.
 
@@ -50,7 +50,7 @@ Single premium tier: **₹99/month**.
 | --------------------------------------------------------------- | -------------------------------- | ------------------------------ |
 | Report/prescription upload + OCR parse                          | ✅                               | ✅                             |
 | Plain-language explanation (RAG-grounded)                       | ✅                               | ✅                             |
-| **Cross-doctor interaction safety flag**                  | ✅ (kept free — safety + trust) | ✅                             |
+| **Drug interaction safety flag**                  | ✅ (kept free — safety + trust) | ✅                             |
 | Health records timeline                                         | ✅                               | ✅                             |
 | **Medicine price comparison** (+ nearby shop + map/route) | 🔒 blurred teaser                | ✅                             |
 | **WhatsApp dose reminders**                               | 🔒                               | ✅                             |
@@ -220,7 +220,7 @@ Photo → Gemini Vision → extract → **catalog validate** → **human confirm
 
 `1-0-1`→morning+night · `1-1-1`→TDS · `BD`→2×/day · `TDS`→3× · `HS`→bedtime · `SOS`→as-needed (**no auto-reminder**) · `OD`→once · `½ tab`→half dose. Feeds the scheduler. **Safety-critical → has unit tests.**
 
-### 7.4 Cross-doctor interaction check (the moat)
+### 7.4 Drug-interaction check
 
 Runs on **salts of active meds** across **all** the patient's prescriptions (not just the latest). Severity + plain explanation + "confirm with your doctor." Never "guaranteed safe." Ideally pharmacist-vetted.
 
@@ -437,12 +437,12 @@ Two synthetic patients (DPDP-safe), one-click credential fill from the login box
 **👤 Aarav Sharma — 34, "Normal" (free tier).** Lucknow. One prescription (Dr. Verma): Pantoprazole 40mg `1-0-0` empty-stomach 14d; Digene syrup `SOS`. Shows: parse + explain + "✓ no interaction" + timeline; prices/reminders/calls **locked & blurred** (upsell).
 Login: `aarav@demo.in` / `pass1234`.
 
-**⭐ Shanti Devi — 68, "Pro" (full).** Lucknow. **Three prescriptions from three doctors** (the cross-doctor safety demo):
+**⭐ Shanti Devi — 68, "Pro" (full).** Lucknow. **Three prescriptions from three doctors** (the interaction-check demo):
 
 - Dr. Mehta (Cardio): Ecosprin 75 (Aspirin) `0-1-0`; Amlong 5 (Amlodipine) `1-0-0`.
 - Dr. Singh (Physician): Glycomet 500 (Metformin) `1-0-1`; Thyronorm 50 (Thyroxine) `1-0-0` empty-stomach.
 - Dr. Rao (Ortho, new): Brufen 400 (**Ibuprofen**) `1-0-1` 5d.
-- 🚨 **WOW:** adding Ortho triggers cross-doctor flag — Ibuprofen + Aspirin → bleeding risk + reduced cardio-protection.
+- 🚨 **WOW:** adding Ortho triggers an interaction flag — Ibuprofen + Aspirin → bleeding risk + reduced cardio-protection.
 - Full: prices, live reminder schedule, adherence 94%, rich timeline, lab trend (HbA1c 8.1→7.6→7.2), a check-in call note, upcoming Dr. Mehta appointment.
   Login: `shanti@demo.in` / `pass1234`.
 
@@ -515,7 +515,7 @@ Production hygiene (mostly deferrable/mockable in prototype):
 
 ## 18. Roadmap / phasing
 
-- **Phase 0 (prototype/hackathon):** auth + demo boxes, OCR→confirm→interaction flag, timeline, WhatsApp reminders (DONE-reply), one demoable check-in/appointment call, mock prices where needed. Pro unlocked via mock toggle (no payments). Depth on 3 features (cross-doctor safety + live reminder + check-in call) beats breadth.
+- **Phase 0 (prototype/hackathon):** auth + demo boxes, OCR→confirm→interaction flag, timeline, WhatsApp reminders (DONE-reply), one demoable check-in/appointment call, mock prices where needed. Pro unlocked via mock toggle (no payments). Depth on 3 features (interaction safety + live reminder + check-in call) beats breadth.
 - **Phase 1:** WhatsApp template approval, real Deepgram/TTS, NRI caregiver targeting.
 - **Phase 2:** pharmacy affiliate + partnered RMP escalation + teleconsult referral.
 - **Phase 3:** hospital post-discharge B2B, ABDM/ABHA integration, caregiver role, de-identified analytics.

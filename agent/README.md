@@ -1,7 +1,7 @@
 # Aayogya Agent (System B) — voice + text, one brain
 
 A non-clinical health **companion** for the Aayogya app: it explains a patient's
-prescriptions, lists their current medicines and timings, runs the cross-doctor
+prescriptions, lists their current medicines and timings, runs the
 drug-interaction check, and shares indicative prices — in Hindi / Hinglish / English.
 It **never diagnoses, prescribes, or changes a dose** (India Telemedicine Practice
 Guidelines 2020 §5.4). See `../DESIGN.md` §6.

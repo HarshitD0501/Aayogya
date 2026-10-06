@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, getToken, clearToken } from "@/lib/api";
+import { api, getToken, clearToken, loginAsDemo } from "@/lib/api";
 import Landing from "@/components/Landing";
 import Login from "@/components/Login";
 import Dashboard from "@/components/Dashboard";
 
 export default function Home() {
   const [patient, setPatient] = useState(null);
-  const [view, setView] = useState("landing"); // landing | login
+  const [view, setView] = useState("landing"); // "landing" | "login" | "dashboard"
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -17,7 +17,10 @@ export default function Home() {
       if (getToken()) {
         try {
           const me = await api("/auth/me");
-          if (alive) setPatient(me);
+          if (alive) {
+            setPatient(me);
+            setView("dashboard");
+          }
         } catch {
           clearToken();
         }
@@ -38,27 +41,66 @@ export default function Home() {
     };
   }, []);
 
-  if (!ready)
+  const handleLogout = () => {
+    clearToken();
+    setPatient(null);
+    setView("landing");
+  };
+
+  const handleSelectDemo = async (patientId) => {
+    try {
+      const p = await loginAsDemo(patientId);
+      setPatient(p);
+      setView("dashboard");
+    } catch (e) {
+      alert("Failed to sign in demo patient: " + (e.message || "Unknown error"));
+    }
+  };
+
+  const handleLoginSuccess = (p) => {
+    setPatient(p);
+    setView("dashboard");
+  };
+
+  if (!ready) {
     return (
       <div className="boot">
         <span className="spinner" />
       </div>
     );
+  }
 
-  if (patient)
+  // If in dashboard view and authenticated, show Dashboard
+  if (view === "dashboard" && patient) {
     return (
       <Dashboard
         patient={patient}
-        onLogout={() => {
-          clearToken();
-          setPatient(null);
-          setView("landing");
-        }}
+        onLogout={handleLogout}
+        onGoHome={() => setView("landing")}
+        onSwitchPatient={handleSelectDemo}
       />
     );
+  }
 
-  if (view === "login")
-    return <Login onLogin={setPatient} onBack={() => setView("landing")} />;
+  // Fallback explicit login view
+  if (view === "login") {
+    return (
+      <Login
+        onLogin={handleLoginSuccess}
+        onBack={() => setView("landing")}
+      />
+    );
+  }
 
-  return <Landing onEnter={() => setView("login")} />;
+  // Default Landing page with live REST API integration
+  return (
+    <Landing
+      patient={patient}
+      onEnter={() => setView("login")}
+      onSelectDemo={handleSelectDemo}
+      onOpenDashboard={() => setView("dashboard")}
+      onLoginSuccess={handleLoginSuccess}
+      onLogout={handleLogout}
+    />
+  );
 }

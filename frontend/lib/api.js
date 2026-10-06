@@ -79,6 +79,63 @@ export async function login(identifier, password) {
   return data.patient;
 }
 
+export async function getPublicStats() {
+  try {
+    return await api("/public/stats", { timeoutMs: 8000 });
+  } catch {
+    return {
+      verified_medicines: 120,
+      nppa_caps_tracked: 38,
+      jan_aushadhi_generics: 34,
+      interaction_rules: 14,
+      status: "online",
+    };
+  }
+}
+
+export async function getPublicPrices({ brand, salt, strength }) {
+  const params = new URLSearchParams();
+  if (brand) params.set("brand", brand);
+  if (salt) params.set("salt", salt);
+  if (strength) params.set("strength", strength);
+  return api(`/prices?${params.toString()}`);
+}
+
+export const DEMO_USERS = [
+  {
+    id: "ramesh",
+    name: "Ramesh Kulkarni",
+    email: "ramesh@demo.in",
+    password: "pass1234",
+    tag: "Cardio & Diabetes",
+    desc: "Amlodipine, Metformin, Ecosprin, Pantoprazole (Single Doctor)",
+    color: "#2563eb",
+  },
+  {
+    id: "shanti",
+    name: "Shanti Devi",
+    email: "shanti@demo.in",
+    password: "pass1234",
+    tag: "Safety Alert Demo",
+    desc: "Multi-doctor prescriptions with flagged NSAID + Aspirin alert",
+    color: "#dc2626",
+  },
+  {
+    id: "aarav",
+    name: "Aarav Sharma",
+    email: "aarav@demo.in",
+    password: "pass1234",
+    tag: "Schedule & SOS",
+    desc: "Active Pan 40 & Digene course with automated WhatsApp tracking",
+    color: "#059669",
+  },
+];
+
+export async function loginAsDemo(patientId = "ramesh") {
+  const user = DEMO_USERS.find((u) => u.id === patientId) || DEMO_USERS[0];
+  return login(user.email, user.password);
+}
+
 export async function uploadReport(file) {
   const fd = new FormData();
   fd.append("file", file);

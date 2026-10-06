@@ -19,8 +19,12 @@ from backend_client import BackendClient, safe
 
 def test_prompt_has_safety_rules() -> None:
     p = prompt.SYSTEM_PROMPT.lower()
-    for must in ["never diagnose", "108", "confirm with your doctor", "not medical advice"]:
+    for must in ["never diagnose", "108", "not medical advice", "escalation rules"]:
         assert must in p, f"SYSTEM_PROMPT missing safety rule: {must!r}"
+    # The blanket per-reply disclaimer is GONE — the doctor is mentioned only on
+    # escalation (new/worse symptoms, dose changes, results meaning, interactions).
+    assert "end every clinical-adjacent answer" not in p
+    assert "without any doctor disclaimer" in p
 
 
 def _mock_client(token: str = "tok-123") -> BackendClient:

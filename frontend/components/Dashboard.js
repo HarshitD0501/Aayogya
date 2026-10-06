@@ -26,6 +26,8 @@ import {
   User,
   HeartPulse,
   Bot,
+  Home,
+  Users,
 } from "lucide-react";
 
 const SECTIONS = [
@@ -66,7 +68,7 @@ const SECTIONS = [
     label: "Safety Check",
     Icon: ShieldAlert,
     Comp: Interactions,
-    title: "Cross-Doctor Safety Check",
+    title: "Drug Interaction Safety Check",
     sub: "Automated conflict detection to prevent dangerous drug-drug interactions.",
   },
   {
@@ -95,7 +97,7 @@ const SECTIONS = [
   },
 ];
 
-export default function Dashboard({ patient, onLogout }) {
+export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient }) {
   const [active, setActive] = useState("summary");
   const mainRef = useRef(null);
   const current = SECTIONS.find((s) => s.key === active) || SECTIONS[0];
@@ -128,6 +130,33 @@ export default function Dashboard({ patient, onLogout }) {
     <div className="shell">
       <aside className="sidebar">
         <BrandMark />
+
+        {onGoHome && (
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={onGoHome}
+            title="Return to Public Landing Page"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              width: "100%",
+              justifyContent: "flex-start",
+              marginTop: 10,
+              marginBottom: 4,
+              color: "var(--ink-secondary)",
+              fontSize: 12,
+              fontWeight: 600,
+              padding: "6px 10px",
+              borderRadius: 8,
+              background: "var(--surface-2)",
+              border: "1px solid var(--line)",
+            }}
+          >
+            <Home size={14} color="#2563eb" />
+            <span>← Landing Page</span>
+          </button>
+        )}
 
         <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
           {SECTIONS.map((s) => {
@@ -193,6 +222,37 @@ export default function Dashboard({ patient, onLogout }) {
               <span>Sign out</span>
             </button>
           </div>
+
+          {onSwitchPatient && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed var(--line)" }}>
+              <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600, marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
+                <Users size={12} />
+                <span>Switch Demo Patient:</span>
+              </div>
+              <div style={{ display: "flex", gap: 4 }}>
+                {[
+                  { id: "ramesh", label: "Ramesh" },
+                  { id: "shanti", label: "Shanti" },
+                  { id: "aarav", label: "Aarav" },
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`lp-chip ${patient?.id === p.id ? "active" : ""}`}
+                    onClick={() => onSwitchPatient(p.id)}
+                    style={{
+                      padding: "3px 8px",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      borderRadius: 6,
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 

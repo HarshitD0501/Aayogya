@@ -62,6 +62,21 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "aayogya_whatsapp_verify_token"
     whatsapp_app_secret: str = ""
 
+    # Twilio Voice & Telephony
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_phone_number: str = ""
+    twilio_sip_domain: str = ""  # e.g., aayogya.pstn.twilio.com
+    twilio_sip_username: str = ""
+    twilio_sip_password: str = ""
+    twilio_enable_amd: bool = True  # Answering Machine Detection (AMD)
+    twilio_status_callback_url: str = ""  # Public webhook URL for status callbacks
+    livekit_sip_trunk_id: str = ""  # LiveKit Outbound SIP Trunk ID (if using LiveKit SIP)
+    # Agent name under which the voice worker (agent/voice.py) registers with
+    # LiveKit Cloud. Outbound dispatches target THIS name so the right worker
+    # gets the job. Must match agent_name in WorkerOptions (voice.py).
+    livekit_agent_name: str = "aayogya-telephony"
+
     # Postgres connection pool (ignored for sqlite).
     db_pool_size: int = 5
     db_max_overflow: int = 10

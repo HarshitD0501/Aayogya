@@ -26,6 +26,15 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")  # ultra-fast,
 # --- Backend (System A) — the single source of truth. Tools call it over HTTP. ---
 BACKEND_URL = os.getenv("AAYOGYA_BACKEND_URL") or os.getenv("AAROGYA_BACKEND_URL", "http://localhost:8000")
 
+# --- Outbound telephony (matches backend settings.livekit_agent_name) ---
+# Worker registers under this name; the backend's CreateAgentDispatch targets it
+# for outbound doctor-reminder calls. Must equal backend livekit_agent_name.
+AGENT_NAME = os.getenv("AAYOGYA_AGENT_NAME", "aayogya-telephony")
+LIVEKIT_SIP_TRUNK_ID = os.getenv("LIVEKIT_SIP_TRUNK_ID", "")
+TWILIO_SIP_DOMAIN = os.getenv("TWILIO_SIP_DOMAIN", "")
+TWILIO_SIP_USERNAME = os.getenv("TWILIO_SIP_USERNAME", "")
+TWILIO_SIP_PASSWORD = os.getenv("TWILIO_SIP_PASSWORD", "")
+
 # --- STT (Deepgram) — Hindi / Hinglish per design §6. nova-3 is required: with
 # language="multi", nova-2 only code-switches Spanish+English (no Hindi). ---
 DEEPGRAM_MODEL = os.getenv("DEEPGRAM_MODEL", "nova-3")

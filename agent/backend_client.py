@@ -43,12 +43,28 @@ class BackendClient:
         return await self._get("/api/medicines")
 
     async def check_interactions(self) -> dict:
-        """Cross-doctor drug-interaction check across ALL active medicines."""
+        """Drug-interaction check across ALL active medicines."""
         return await self._get("/api/interactions")
 
     async def list_reports(self) -> list[dict]:
         """Prescription/report history, newest first."""
         return await self._get("/api/reports")
+
+    async def request_reschedule(
+        self, report_id: int, preferred_date_or_time: str, reason: str = ""
+    ) -> dict:
+        """Register patient's preferred date or time if they cannot attend the doctor review."""
+        r = await self._http.post(
+            "/api/telephony/reschedule",
+            json={
+                "report_id": report_id,
+                "preferred_date_or_time": preferred_date_or_time,
+                "reason": reason,
+            },
+            headers={"Authorization": f"Bearer {self._token}"},
+        )
+        r.raise_for_status()
+        return r.json()
 
 
 async def safe(coro):

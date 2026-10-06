@@ -75,6 +75,10 @@ class ReportOut(BaseModel):
     prescriber_specialty: Optional[str]
     prescription_date: Optional[str]
     follow_up_date: Optional[str] = None
+    follow_up_status: Optional[str] = "scheduled"
+    reschedule_preferred_date: Optional[str] = None
+    reschedule_notes: Optional[str] = None
+    last_call_at: Optional[str] = None
     ocr_confidence: Optional[float]
     confirmed: bool
     created_at: Optional[str] = None
@@ -91,6 +95,7 @@ class PatientOut(BaseModel):
     id: str
     name: Optional[str]
     plan: str
+    role: str = "patient"
     lang: Optional[str] = None
     timezone: Optional[str] = None
     auto_reminders_enabled: bool = True
@@ -129,3 +134,14 @@ class StopMedicineIn(BaseModel):
 class LoginOut(BaseModel):
     token: str
     patient: PatientOut
+
+
+class RescheduleIn(BaseModel):
+    report_id: int
+    preferred_date_or_time: str
+    reason: Optional[str] = None
+
+
+class TelephonyDispatchIn(BaseModel):
+    report_id: int
+    force: bool = False

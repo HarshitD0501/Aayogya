@@ -1,0 +1,1787 @@
+[
+  {
+    "salt_composition": "Aceclofenac + Paracetamol + Serratiopeptidase 100Mg/325Mg/15Mg",
+    "popular_brands": "Zerodol-sp, Zerodol",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 162.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aceclofenac + Paracetamol 100Mg/325Mg",
+    "popular_brands": "Zerodol, Zerodol-p",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 39.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aceclofenac 100Mg",
+    "popular_brands": "Zerodol",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 22.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone 200Ml",
+    "popular_brands": "Gelusil",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 63.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone Tablet",
+    "popular_brands": "Gelusil",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 97.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amlodipine",
+    "popular_brands": "Stamlo, Amlong",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Amlodipine Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amlodipine + Atenolol 5Mg/50Mg",
+    "popular_brands": "Stamlo, Amlong, Amlong-a",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Amlodipine Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amlodipine 10Mg",
+    "popular_brands": "Stamlo, Amlong",
+    "nppa_ceiling_price_inr": 55.0,
+    "jan_aushadhi_price_inr": 9.0,
+    "jan_aushadhi_generic_name": "Amlodipine Tablets IP 10 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 57.75,
+    "potential_generic_savings_pct": "84.4%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amlodipine 2.5Mg",
+    "popular_brands": "Stamlo, Amlong",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Amlodipine Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amlodipine 5Mg",
+    "popular_brands": "Stamlo, Amlong",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 5.5,
+    "jan_aushadhi_generic_name": "Amlodipine Tablets IP 5 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "83.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amoxicillin + Potassium Clavulanate 1000Mg",
+    "popular_brands": "Augmentin",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 119.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amoxicillin + Potassium Clavulanate 375Mg",
+    "popular_brands": "Moxikind-cv, Augmentin, Moxclav",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 133.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amoxicillin + Potassium Clavulanate 625Mg",
+    "popular_brands": "Moxikind-cv, Clamox, Augmentin, Moxclav",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 140.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amoxicillin Clavulanic Acid",
+    "popular_brands": "Generic / Branded",
+    "nppa_ceiling_price_inr": 138.0,
+    "jan_aushadhi_price_inr": 58.0,
+    "jan_aushadhi_generic_name": "Amoxicillin and Potassium Clavulanate Tablets",
+    "pack_size": "6 Tablets",
+    "pharmeasy_estimated_mrp_inr": 144.9,
+    "potential_generic_savings_pct": "60.0%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Amoxicillin Clavulanic Acid 625Mg",
+    "popular_brands": "Generic / Branded",
+    "nppa_ceiling_price_inr": 138.0,
+    "jan_aushadhi_price_inr": 58.0,
+    "jan_aushadhi_generic_name": "Amoxicillin and Potassium Clavulanate Tablets IP 625 mg",
+    "pack_size": "6 Tablets",
+    "pharmeasy_estimated_mrp_inr": 144.9,
+    "potential_generic_savings_pct": "60.0%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aspirin",
+    "popular_brands": "Ecosprin",
+    "nppa_ceiling_price_inr": 16.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Aspirin Tablets IP",
+    "pack_size": "14 Tablets",
+    "pharmeasy_estimated_mrp_inr": 16.8,
+    "potential_generic_savings_pct": "64.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aspirin + Atorvastatin 75Mg/10Mg",
+    "popular_brands": "Ecosprin-av, Ecosprin",
+    "nppa_ceiling_price_inr": 16.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Aspirin Tablets IP",
+    "pack_size": "14 Tablets",
+    "pharmeasy_estimated_mrp_inr": 16.8,
+    "potential_generic_savings_pct": "64.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aspirin + Atorvastatin 75Mg/20Mg",
+    "popular_brands": "Ecosprin-av, Ecosprin",
+    "nppa_ceiling_price_inr": 16.0,
+    "jan_aushadhi_price_inr": 6.0,
+    "jan_aushadhi_generic_name": "Aspirin Tablets IP",
+    "pack_size": "14 Tablets",
+    "pharmeasy_estimated_mrp_inr": 16.8,
+    "potential_generic_savings_pct": "64.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aspirin 150Mg",
+    "popular_brands": "Ecosprin",
+    "nppa_ceiling_price_inr": 22.0,
+    "jan_aushadhi_price_inr": 8.0,
+    "jan_aushadhi_generic_name": "Aspirin Gastro-resistant Tablets IP 150 mg",
+    "pack_size": "14 Tablets",
+    "pharmeasy_estimated_mrp_inr": 23.1,
+    "potential_generic_savings_pct": "65.4%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Aspirin 75Mg",
+    "popular_brands": "Ecosprin",
+    "nppa_ceiling_price_inr": 14.5,
+    "jan_aushadhi_price_inr": 5.0,
+    "jan_aushadhi_generic_name": "Aspirin Gastro-resistant Tablets IP 75 mg",
+    "pack_size": "14 Tablets",
+    "pharmeasy_estimated_mrp_inr": 15.23,
+    "potential_generic_savings_pct": "67.2%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Atorvastatin",
+    "popular_brands": "Atorlip, Atorva",
+    "nppa_ceiling_price_inr": 85.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Atorvastatin Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 89.25,
+    "potential_generic_savings_pct": "84.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Atorvastatin 10Mg",
+    "popular_brands": "Atorlip, Atorva",
+    "nppa_ceiling_price_inr": 78.0,
+    "jan_aushadhi_price_inr": 12.0,
+    "jan_aushadhi_generic_name": "Atorvastatin Tablets IP 10 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 81.9,
+    "potential_generic_savings_pct": "85.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Atorvastatin 20Mg",
+    "popular_brands": "Atorlip, Atorva",
+    "nppa_ceiling_price_inr": 135.0,
+    "jan_aushadhi_price_inr": 22.0,
+    "jan_aushadhi_generic_name": "Atorvastatin Tablets IP 20 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 141.75,
+    "potential_generic_savings_pct": "84.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Atorvastatin 40Mg",
+    "popular_brands": "Atorlip, Atorva",
+    "nppa_ceiling_price_inr": 85.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Atorvastatin Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 89.25,
+    "potential_generic_savings_pct": "84.3%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Azithromycin",
+    "popular_brands": "Zithrox, Aziwok, Azithral",
+    "nppa_ceiling_price_inr": 84.5,
+    "jan_aushadhi_price_inr": 34.0,
+    "jan_aushadhi_generic_name": "Azithromycin Tablets IP",
+    "pack_size": "3 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.73,
+    "potential_generic_savings_pct": "61.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Azithromycin 250Mg",
+    "popular_brands": "Zithrox, Aziwok, Azithral",
+    "nppa_ceiling_price_inr": 84.5,
+    "jan_aushadhi_price_inr": 34.0,
+    "jan_aushadhi_generic_name": "Azithromycin Tablets IP",
+    "pack_size": "3 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.73,
+    "potential_generic_savings_pct": "61.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Azithromycin 500Mg",
+    "popular_brands": "Zithrox, Aziwok, Azithral",
+    "nppa_ceiling_price_inr": 84.5,
+    "jan_aushadhi_price_inr": 34.0,
+    "jan_aushadhi_generic_name": "Azithromycin Tablets IP 500 mg",
+    "pack_size": "3 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.73,
+    "potential_generic_savings_pct": "61.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Bisoprolol 2.5Mg",
+    "popular_brands": "Concor",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 21.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Bisoprolol 5Mg",
+    "popular_brands": "Concor",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 82.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Calcium + Vitamin D3 500Mg/250Iu",
+    "popular_brands": "Shelcal, Cipcal",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 138.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Calcium + Vitamin D3 500Mg/500Iu",
+    "popular_brands": "Shelcal-hd",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 116.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cefixime 100Mg",
+    "popular_brands": "Taxim-o, Zifi",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 182.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cefixime 200Mg",
+    "popular_brands": "Taxim-o, Zifi",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 62.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cefpodoxime Proxetil 100Mg",
+    "popular_brands": "Gudcef, Monocef-o",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 71.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cefpodoxime Proxetil 200Mg",
+    "popular_brands": "Gudcef, Monocef-o",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 41.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cetirizine",
+    "popular_brands": "Cetzip, Cetzine",
+    "nppa_ceiling_price_inr": 24.0,
+    "jan_aushadhi_price_inr": 4.5,
+    "jan_aushadhi_generic_name": "Cetirizine Hydrochloride Tablets",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.2,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cetirizine + Paracetamol + Phenylephrine 5Mg/325Mg/10Mg",
+    "popular_brands": "Cheston-cold, Cetzip, Cetzine",
+    "nppa_ceiling_price_inr": 24.0,
+    "jan_aushadhi_price_inr": 4.5,
+    "jan_aushadhi_generic_name": "Cetirizine Hydrochloride Tablets",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.2,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Cetirizine 10Mg",
+    "popular_brands": "Cetzip, Cetzine",
+    "nppa_ceiling_price_inr": 24.0,
+    "jan_aushadhi_price_inr": 4.5,
+    "jan_aushadhi_generic_name": "Cetirizine Hydrochloride Tablets IP 10 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.2,
+    "potential_generic_savings_pct": "82.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ciprofloxacin 250Mg",
+    "popular_brands": "Ciplox, Cifran",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 115.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ciprofloxacin 500Mg",
+    "popular_brands": "Ciplox, Cifran",
+    "nppa_ceiling_price_inr": 48.0,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 50.4,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Dapagliflozin 10Mg",
+    "popular_brands": "Forxiga, Oxra",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 41.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Dapagliflozin 5Mg",
+    "popular_brands": "Forxiga, Oxra",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 59.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Dextromethorphan + Phenylephrine + Chlorpheniramine 100Ml",
+    "popular_brands": "Ascoril-d",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 161.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Diclofenac 50Mg",
+    "popular_brands": "Generic / Branded",
+    "nppa_ceiling_price_inr": 26.5,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 27.83,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Diclofenac Sodium 100Mg",
+    "popular_brands": "Voveran-sr",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 64.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Diclofenac Sodium 50Mg",
+    "popular_brands": "Voveran",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 29.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Diclofenac Sodium 75Mg",
+    "popular_brands": "Voveran, Voveran-sr",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 181.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Fexofenadine 120Mg",
+    "popular_brands": "Allegra",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 74.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Fexofenadine 180Mg",
+    "popular_brands": "Allegra",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 193.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Folic Acid (Vitamin B9) 5Mg",
+    "popular_brands": "Folvite",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 62.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Glimepiride 1Mg",
+    "popular_brands": "Amaryl",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 151.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Glimepiride 2Mg",
+    "popular_brands": "Amaryl",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 50.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Glimepiride 3Mg",
+    "popular_brands": "Amaryl",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 49.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ibuprofen",
+    "popular_brands": "Brufen",
+    "nppa_ceiling_price_inr": 24.5,
+    "jan_aushadhi_price_inr": 7.0,
+    "jan_aushadhi_generic_name": "Ibuprofen Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.73,
+    "potential_generic_savings_pct": "72.8%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ibuprofen + Paracetamol 400Mg/325Mg",
+    "popular_brands": "Combiflam, Brufen",
+    "nppa_ceiling_price_inr": 24.5,
+    "jan_aushadhi_price_inr": 7.0,
+    "jan_aushadhi_generic_name": "Ibuprofen Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.73,
+    "potential_generic_savings_pct": "72.8%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ibuprofen 200Mg",
+    "popular_brands": "Brufen",
+    "nppa_ceiling_price_inr": 24.5,
+    "jan_aushadhi_price_inr": 7.0,
+    "jan_aushadhi_generic_name": "Ibuprofen Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.73,
+    "potential_generic_savings_pct": "72.8%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ibuprofen 400Mg",
+    "popular_brands": "Brufen",
+    "nppa_ceiling_price_inr": 24.5,
+    "jan_aushadhi_price_inr": 7.0,
+    "jan_aushadhi_generic_name": "Ibuprofen Tablets IP 400 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 25.73,
+    "potential_generic_savings_pct": "72.8%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ibuprofen Paracetamol",
+    "popular_brands": "Brufen",
+    "nppa_ceiling_price_inr": 38.0,
+    "jan_aushadhi_price_inr": 12.0,
+    "jan_aushadhi_generic_name": "Ibuprofen and Paracetamol Tablets",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 39.9,
+    "potential_generic_savings_pct": "69.9%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levocetirizine 5Mg",
+    "popular_brands": "Levocet",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 90.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levosalbutamol + Ambroxol + Guaiphenesin 100Ml",
+    "popular_brands": "Ascoril-ls",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 117.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 165.0,
+    "jan_aushadhi_price_inr": 65.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 173.25,
+    "potential_generic_savings_pct": "62.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine 100Mcg",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 185.0,
+    "jan_aushadhi_price_inr": 75.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP 100 mcg",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 194.25,
+    "potential_generic_savings_pct": "61.4%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine 125Mcg",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 165.0,
+    "jan_aushadhi_price_inr": 65.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 173.25,
+    "potential_generic_savings_pct": "62.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine 25Mcg",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 165.0,
+    "jan_aushadhi_price_inr": 65.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 173.25,
+    "potential_generic_savings_pct": "62.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine 50Mcg",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 145.0,
+    "jan_aushadhi_price_inr": 60.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP 50 mcg",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 152.25,
+    "potential_generic_savings_pct": "60.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Levothyroxine 75Mcg",
+    "popular_brands": "Eltroxin, Thyronorm",
+    "nppa_ceiling_price_inr": 165.0,
+    "jan_aushadhi_price_inr": 65.0,
+    "jan_aushadhi_generic_name": "Levothyroxine Sodium Tablets IP",
+    "pack_size": "100 Tablets",
+    "pharmeasy_estimated_mrp_inr": 173.25,
+    "potential_generic_savings_pct": "62.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Losartan 50Mg",
+    "popular_brands": "Generic / Branded",
+    "nppa_ceiling_price_inr": 62.0,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 65.1,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone 200Ml",
+    "popular_brands": "Digene",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 80.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone Tablet",
+    "popular_brands": "Digene",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 25.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin",
+    "popular_brands": "Glycomet",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 8.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "74.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin + Glimepiride + Voglibose 500Mg/1Mg/0.2Mg",
+    "popular_brands": "Glycomet, Glycomet-trio",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 8.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "74.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin + Glimepiride + Voglibose 500Mg/2Mg/0.3Mg",
+    "popular_brands": "Glycomet, Glycomet-trio",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 8.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "74.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin + Glimepiride 500Mg/1Mg",
+    "popular_brands": "Glycomet-gp, Glycomet",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 8.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "74.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin + Glimepiride 500Mg/2Mg",
+    "popular_brands": "Glycomet-gp, Glycomet",
+    "nppa_ceiling_price_inr": 32.0,
+    "jan_aushadhi_price_inr": 8.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.6,
+    "potential_generic_savings_pct": "74.7%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin 1000Mg",
+    "popular_brands": "Glycomet",
+    "nppa_ceiling_price_inr": 45.0,
+    "jan_aushadhi_price_inr": 12.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Prolonged-release 1000 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 47.25,
+    "potential_generic_savings_pct": "73.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin 500Mg",
+    "popular_brands": "Glycomet",
+    "nppa_ceiling_price_inr": 28.5,
+    "jan_aushadhi_price_inr": 7.5,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP 500 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 29.93,
+    "potential_generic_savings_pct": "74.9%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metformin 850Mg",
+    "popular_brands": "Glycomet",
+    "nppa_ceiling_price_inr": 38.0,
+    "jan_aushadhi_price_inr": 10.0,
+    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP 850 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 39.9,
+    "potential_generic_savings_pct": "74.9%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metoprolol Succinate 25Mg",
+    "popular_brands": "Starpress-xl",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 86.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Metoprolol Succinate 50Mg",
+    "popular_brands": "Starpress-xl",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 59.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Montelukast + Levocetirizine 10Mg/5Mg",
+    "popular_brands": "Montek-lc, Montair-lc",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 119.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Montelukast Levocetirizine",
+    "popular_brands": "Generic / Branded",
+    "nppa_ceiling_price_inr": 120.0,
+    "jan_aushadhi_price_inr": 24.0,
+    "jan_aushadhi_generic_name": "Montelukast Sodium and Levocetirizine Tablets",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 126.0,
+    "potential_generic_savings_pct": "81.0%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Omeprazole + Domperidone 20Mg/10Mg",
+    "popular_brands": "Omez, Omez-d",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 95.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Omeprazole 20Mg",
+    "popular_brands": "Omez",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 165.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Omeprazole 40Mg",
+    "popular_brands": "Omez",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 101.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Pantoprazole",
+    "popular_brands": "Pantop, Pan, Pantocid",
+    "nppa_ceiling_price_inr": 89.5,
+    "jan_aushadhi_price_inr": 14.5,
+    "jan_aushadhi_generic_name": "Pantoprazole Tablets 40 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 93.98,
+    "potential_generic_savings_pct": "84.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Pantoprazole + Domperidone 40Mg/30Mg",
+    "popular_brands": "Pan-d, Pantop, Pantocid-dsr, Pan",
+    "nppa_ceiling_price_inr": 89.5,
+    "jan_aushadhi_price_inr": 14.5,
+    "jan_aushadhi_generic_name": "Pantoprazole Tablets 40 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 93.98,
+    "potential_generic_savings_pct": "84.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Pantoprazole 20Mg",
+    "popular_brands": "Pantop, Pan, Pantocid",
+    "nppa_ceiling_price_inr": 89.5,
+    "jan_aushadhi_price_inr": 14.5,
+    "jan_aushadhi_generic_name": "Pantoprazole Tablets 40 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 93.98,
+    "potential_generic_savings_pct": "84.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Pantoprazole 40Mg",
+    "popular_brands": "Pantop, Pan, Pantocid",
+    "nppa_ceiling_price_inr": 89.5,
+    "jan_aushadhi_price_inr": 14.5,
+    "jan_aushadhi_generic_name": "Pantoprazole Gastro-resistant Tablets IP 40 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 93.98,
+    "potential_generic_savings_pct": "84.6%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Pantoprazole Domperidone",
+    "popular_brands": "Pantop, Pan, Pantocid",
+    "nppa_ceiling_price_inr": 135.0,
+    "jan_aushadhi_price_inr": 22.0,
+    "jan_aushadhi_generic_name": "Pantoprazole and Domperidone SR Capsules",
+    "pack_size": "10 Capsules",
+    "pharmeasy_estimated_mrp_inr": 141.75,
+    "potential_generic_savings_pct": "84.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Paracetamol",
+    "popular_brands": "Dolo, Crocin, Calpol, Pacimol",
+    "nppa_ceiling_price_inr": 25.0,
+    "jan_aushadhi_price_inr": 8.0,
+    "jan_aushadhi_generic_name": "Paracetamol Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 26.25,
+    "potential_generic_savings_pct": "69.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Paracetamol + Phenylephrine + Chlorpheniramine 500Mg/10Mg/2Mg",
+    "popular_brands": "Sinarest, Pacimol, Dolo, Crocin",
+    "nppa_ceiling_price_inr": 25.0,
+    "jan_aushadhi_price_inr": 8.0,
+    "jan_aushadhi_generic_name": "Paracetamol Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 26.25,
+    "potential_generic_savings_pct": "69.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Paracetamol 250Mg/5Ml",
+    "popular_brands": "Dolo, Crocin, Calpol, Pacimol",
+    "nppa_ceiling_price_inr": 25.0,
+    "jan_aushadhi_price_inr": 8.0,
+    "jan_aushadhi_generic_name": "Paracetamol Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 26.25,
+    "potential_generic_savings_pct": "69.5%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Paracetamol 500Mg",
+    "popular_brands": "Dolo, Crocin, Calpol, Pacimol",
+    "nppa_ceiling_price_inr": 18.2,
+    "jan_aushadhi_price_inr": 6.5,
+    "jan_aushadhi_generic_name": "Paracetamol Tablets IP 500 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 19.11,
+    "potential_generic_savings_pct": "66.0%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Paracetamol 650Mg",
+    "popular_brands": "Dolo, Crocin, Calpol, Pacimol",
+    "nppa_ceiling_price_inr": 32.28,
+    "jan_aushadhi_price_inr": 10.5,
+    "jan_aushadhi_generic_name": "Paracetamol Tablets IP 650 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 33.89,
+    "potential_generic_savings_pct": "69.0%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Rabeprazole + Domperidone 20Mg/30Mg",
+    "popular_brands": "Razo-d, Rabekind-dsr",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 126.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ranitidine 150Mg",
+    "popular_brands": "Rantac",
+    "nppa_ceiling_price_inr": 18.0,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 18.9,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Ranitidine 300Mg",
+    "popular_brands": "Rantac",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 29.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Rosuvastatin 10Mg",
+    "popular_brands": "Rozavel, Rosuvas",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 18.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Rosuvastatin 20Mg",
+    "popular_brands": "Rozavel, Rosuvas",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 21.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Rosuvastatin 5Mg",
+    "popular_brands": "Rozavel, Rosuvas",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 30.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Sitagliptin + Metformin 50Mg/1000Mg",
+    "popular_brands": "Janumet",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 172.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Sitagliptin + Metformin 50Mg/500Mg",
+    "popular_brands": "Janumet",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 108.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan",
+    "popular_brands": "Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan + Amlodipine 40Mg/5Mg",
+    "popular_brands": "Telma, Telmikind, Telma-am",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan + Hydrochlorothiazide 40Mg/12.5Mg",
+    "popular_brands": "Telma-h, Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan + Hydrochlorothiazide 80Mg/12.5Mg",
+    "popular_brands": "Telma-h, Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan 20Mg",
+    "popular_brands": "Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan 40Mg",
+    "popular_brands": "Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP 40 mg",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Telmisartan 80Mg",
+    "popular_brands": "Telma, Telmikind",
+    "nppa_ceiling_price_inr": 84.0,
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "pack_size": "10 Tablets",
+    "pharmeasy_estimated_mrp_inr": 88.2,
+    "potential_generic_savings_pct": "84.1%",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Tramadol + Paracetamol 37.5Mg/325Mg",
+    "popular_brands": "Ultracet",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 174.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Trypsin + Chymotrypsin 100000 Armour Units",
+    "popular_brands": "Chymoral-forte",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 39.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vildagliptin + Metformin 50Mg/500Mg",
+    "popular_brands": "Galvus-met",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 154.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vildagliptin + Metformin 50Mg/850Mg",
+    "popular_brands": "Galvus-met",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 59.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin B Complex + Vitamin C Standard",
+    "popular_brands": "Becosules",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 185.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin B1 + B2 + B3 + B5 + B6 + B12 Standard",
+    "popular_brands": "Neurobion-forte",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 57.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin C (Ascorbic Acid) 500Mg",
+    "popular_brands": "Limcee",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 157.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin E 200Mg",
+    "popular_brands": "Evion",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 183.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin E 400Mg",
+    "popular_brands": "Evion",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 151.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  },
+  {
+    "salt_composition": "Vitamin E 600Mg",
+    "popular_brands": "Evion",
+    "nppa_ceiling_price_inr": null,
+    "jan_aushadhi_price_inr": null,
+    "jan_aushadhi_generic_name": "",
+    "pack_size": "Standard Strip",
+    "pharmeasy_estimated_mrp_inr": 121.0,
+    "potential_generic_savings_pct": "N/A",
+    "sources": {
+      "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
+      "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
+      "market": "PharmEasy Catalog Search API"
+    }
+  }
+]

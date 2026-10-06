@@ -1569,3 +1569,360 @@ html { scroll-behavior: smooth; }
 .feat-dot.blue { background: #3b82f6; }
 .feat-dot.purple { background: #8b5cf6; }
 
+/* -------------------------------------------------------------------------
+   Landing Page + Dashboard REST API Integration Styles
+   ------------------------------------------------------------------------- */
+.lp-telemetry-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  max-width: 1040px;
+  margin: -10px auto 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.lp-telemetry-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.lp-telemetry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.lp-telemetry-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.lp-telemetry-val {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Interactive Sandbox Tabs in Hero */
+.lp-sandbox-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(243, 244, 246, 0.8);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.lp-sandbox-tab {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.lp-sandbox-tab.active {
+  background: #ffffff;
+  color: var(--brand);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.lp-sandbox-action {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Price Explorer Widget on Landing */
+.lp-price-box {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.lp-price-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.lp-price-search-bar input {
+  flex: 1;
+  height: 48px;
+  padding: 0 18px;
+  font-size: 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  outline: none;
+  transition: all 0.2s;
+  background: var(--surface-2);
+}
+
+.lp-price-search-bar input:focus {
+  border-color: var(--brand);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.lp-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.lp-chip {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lp-chip:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.lp-chip.active {
+  background: var(--brand);
+  color: #ffffff;
+  border-color: var(--brand);
+}
+
+.lp-price-result {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.lp-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.lp-pillar-card {
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lp-pillar-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.lp-pillar-card.highlight {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #86efac;
+}
+
+.lp-pillar-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.lp-pillar-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.lp-pillar-price {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 12px 0 6px;
+}
+
+.lp-savings-banner {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Demo Patient Profiles Section */
+.lp-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.lp-demo-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-demo-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.1);
+}
+
+.lp-demo-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lp-demo-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.lp-demo-role {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.lp-demo-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.lp-demo-desc {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+/* Auth Modal Backdrop and Window */
+.lp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.lp-modal {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 460px;
+  padding: 32px;
+  position: relative;
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.lp-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+
+.lp-modal-close:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .lp-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+  .lp-demo-grid {
+    grid-template-columns: 1fr;
+  }
+  .lp-telemetry-strip {
+    border-radius: var(--radius);
+    gap: 14px;
+  }
+}
+

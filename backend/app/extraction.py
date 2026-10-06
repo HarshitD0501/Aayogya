@@ -155,7 +155,7 @@ def _extract_raw(image_bytes: bytes, mime: str) -> tuple[dict, bool]:
     return _MOCK, True
 
 
-# Canned prescription for MOCK mode — the Shanti Devi cross-doctor demo (design §14).
+# Canned prescription for MOCK mode — the Shanti Devi multi-prescription demo (design §14).
 _MOCK: dict = {
     "prescriber_name": "Dr. Rao",
     "prescriber_specialty": "Orthopaedics",

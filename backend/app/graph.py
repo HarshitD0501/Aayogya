@@ -8,7 +8,7 @@ sqlite) so the two HTTP calls resume one pipeline.
 
 ponytail: the pipeline stops at reconcile_active. interaction_check (design
 §7.4) runs as the live /api/interactions endpoint, NOT a terminal node, because
-the cross-doctor moat must span ALL of a patient's reports, not just this one.
+the check must span ALL of a patient's reports, not just this one.
 explain_rag isn't built yet (needs the drug_info table).
 
 Nodes are thin wrappers over the existing pure logic (extraction/catalog/dosage)

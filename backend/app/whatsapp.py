@@ -11,6 +11,7 @@ Architecture:
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import json
@@ -18,16 +19,86 @@ import logging
 from datetime import date, datetime, timezone
 from typing import Any, Optional
 from uuid import uuid4
+from zoneinfo import ZoneInfo
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 import httpx
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .models import DoseAdherence, Medicine, Patient, ReminderLog
+from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report
+from . import telephony as telephony_svc
 
 logger = logging.getLogger("aayogya.whatsapp")
 
-GRAPH_API_BASE = "https://graph.facebook.com/v21.0"
+GRAPH_API_BASE = "https://graph.facebook.com/v23.0"
+# Version note: Meta deprecates Graph versions ~2 years after release; v21.0
+# (Jan 2025) leaves the supported window around early 2027, v23.0 buys runway.
+# The /messages surface is stable across these bumps.
+
+# One shared async client for ALL outbound Meta calls: a fresh TCP+TLS handshake
+# per message costs ~100-300ms each and the scheduler sends in bursts. Shared
+# client = pooled connections. Lazily created; closed on app shutdown.
+_http_client: httpx.AsyncClient | None = None
+
+
+def _client() -> httpx.AsyncClient:
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(
+            base_url=GRAPH_API_BASE,
+            timeout=httpx.Timeout(10.0, connect=5.0),
+            headers={
+                "Authorization": f"Bearer {settings.whatsapp_api_token}",
+                "Content-Type": "application/json",
+            },
+            limits=httpx.Limits(max_connections=10, max_keepalive_connections=10),
+        )
+    return _http_client
+
+
+async def close_http_client() -> None:
+    global _http_client
+    if _http_client is not None and not _http_client.is_closed:
+        await _http_client.aclose()
+        _http_client = None
+
+
+async def _send_to_meta(payload: dict[str, Any]) -> dict[str, Any]:
+    """POST to the Cloud API /messages endpoint with rate-limit handling.
+    Meta answers 429 with a Retry-After header — honor it once, then give up
+    gracefully (the scheduler will re-offer this dose on the next tick because
+    whatsapp_message_id was never written)."""
+    url = f"/{settings.whatsapp_phone_number_id}/messages"
+    for attempt in range(2):
+        try:
+            res = await _client().post(url, json=payload)
+            if res.status_code == 429 and attempt == 0:
+                retry_after = 1.0
+                try:
+                    retry_after = float(res.headers.get("Retry-After", "1"))
+                except ValueError:
+                    pass
+                logger.warning("[WHATSAPP] rate-limited (429); retrying in %.1fs", retry_after)
+                await asyncio.sleep(retry_after)
+                continue
+            res.raise_for_status()
+            data = res.json()
+            wamid = data.get("messages", [{}])[0].get("id", "")
+            return {"status": "sent", "message_id": wamid, "raw": data}
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "[WHATSAPP] Meta API error %s: %s",
+                exc.response.status_code,
+                exc.response.text[:300],
+            )
+            return {"status": "failed", "error": f"HTTP {exc.response.status_code}"}
+        except httpx.HTTPError as exc:
+            logger.error("[WHATSAPP] network error: %s", exc)
+            return {"status": "failed", "error": str(exc)}
+    return {"status": "failed", "error": "rate_limited"}
+
 
 _SLOT_TIMES = {
     "morning": "08:00 AM",
@@ -42,6 +113,75 @@ _SLOT_HINDI = {
     "night": "रात",
     "sos": "ज़रूरत पड़ने पर",
 }
+
+
+
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def _ist_today() -> str:
+    """Today's date in IST (Asia/Kolkata), as ISO string. Patients are Indian;
+    the dose day must roll over at Indian midnight, not the server's local one
+    (a UTC server would be 5.5h off)."""
+    return datetime.now(IST).date().isoformat()
+
+
+
+
+def _ist_date() -> date:
+    return datetime.now(IST).date()
+
+
+def parse_time_to_minutes(time_str: str | None, default_slot: str = "morning") -> int:
+    """Parse time strings like '08:00 AM', '13:30', '8:00 pm', '08:00' to minutes from midnight (0..1439)."""
+    default_map = {"morning": 480, "afternoon": 780, "night": 1200, "sos": 720}
+    if not time_str or not isinstance(time_str, str):
+        return default_map.get(default_slot, 480)
+
+    clean = time_str.strip().upper()
+    try:
+        if "AM" in clean or "PM" in clean:
+            is_pm = "PM" in clean
+            clean_digits = clean.replace("AM", "").replace("PM", "").strip()
+            parts = clean_digits.split(":")
+            hour = int(parts[0])
+            minute = int(parts[1]) if len(parts) > 1 else 0
+            if hour == 12:
+                hour = 12 if is_pm else 0
+            elif is_pm:
+                hour += 12
+            return (hour % 24) * 60 + (minute % 60)
+        else:
+            parts = clean.split(":")
+            hour = int(parts[0])
+            minute = int(parts[1]) if len(parts) > 1 else 0
+            return (hour % 24) * 60 + (minute % 60)
+    except Exception:
+        return default_map.get(default_slot, 480)
+
+
+def format_minutes_to_time(minutes: int) -> str:
+    """Format minutes from midnight into 12-hour AM/PM string, e.g. 480 -> '08:00 AM'."""
+    minutes = minutes % 1440
+    hour = minutes // 60
+    minute = minutes % 60
+    suffix = "AM" if hour < 12 else "PM"
+    h12 = hour % 12
+    if h12 == 0:
+        h12 = 12
+    return f"{h12:02d}:{minute:02d} {suffix}"
+
+
+def get_patient_slot_time(patient: Patient | None, slot: str) -> str:
+    """Retrieve patient's configured reminder time for a slot, falling back to defaults."""
+    if patient:
+        if slot == "morning" and patient.reminder_time_morning:
+            return patient.reminder_time_morning
+        if slot == "afternoon" and patient.reminder_time_afternoon:
+            return patient.reminder_time_afternoon
+        if slot == "night" and patient.reminder_time_night:
+            return patient.reminder_time_night
+    return _SLOT_TIMES.get(slot, "08:00 AM")
 
 
 def _clean_phone(phone: str | None) -> str:
@@ -78,7 +218,7 @@ def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
     """Ensure today's dose adherence records exist for all active medicines.
     Idempotent: will not duplicate if records already exist for today.
     """
-    today_str = date.today().isoformat()
+    today_str = _ist_today()
     active_meds = (
         db.query(Medicine)
         .filter(
@@ -101,43 +241,52 @@ def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
 
     # Cancel pending doses for stopped/paused medicines
     active_med_ids = {m.id for m in active_meds}
+    dirty = False
     for d in existing:
         if d.medicine_id not in active_med_ids and d.status == "pending":
             d.status = "stopped"
             d.notes = "Medicine stopped or reminders paused by patient"
+            dirty = True
+
+    patient = db.get(Patient, patient_id)
 
     created = []
     for m in active_meds:
         slots = m.timing if (m.timing and not m.prn) else (["sos"] if m.prn else ["morning"])
         for slot in slots:
             if (m.id, slot) not in existing_map:
+                slot_time = get_patient_slot_time(patient, slot)
                 rec = DoseAdherence(
                     patient_id=patient_id,
                     medicine_id=m.id,
                     dose_date=today_str,
                     slot=slot,
                     status="pending",
-                    scheduled_time=_SLOT_TIMES.get(slot, "08:00 AM"),
+                    scheduled_time=slot_time,
                     channel="whatsapp",
                     notes="Awaiting patient confirmation",
                 )
                 db.add(rec)
                 created.append(rec)
+            else:
+                # Keep scheduled_time in sync with patient preference for pending unsent doses
+                ex = existing_map[(m.id, slot)]
+                if ex.status == "pending" and not ex.whatsapp_message_id:
+                    expected_time = get_patient_slot_time(patient, slot)
+                    if ex.scheduled_time != expected_time:
+                        ex.scheduled_time = expected_time
+                        dirty = True
 
-    db.commit()
-    for r in created:
-        db.refresh(r)
+    # The scheduler calls this every 30s per patient: commit only when rows were
+    # created/changed — a no-op tick must not take a write lock or re-query.
+    if dirty or created:
+        db.commit()
+        for r in created:
+            db.refresh(r)
 
-    return (
-        db.query(DoseAdherence)
-        .filter(
-            DoseAdherence.patient_id == patient_id,
-            DoseAdherence.dose_date == today_str,
-            DoseAdherence.status != "stopped",
-        )
-        .order_by(DoseAdherence.id.asc())
-        .all()
-    )
+    doses = [d for d in existing + created if d.status != "stopped"]
+    doses.sort(key=lambda d: d.id)
+    return doses
 
 
 async def send_text_message(to_phone: str, text: str) -> dict[str, Any]:
@@ -147,11 +296,6 @@ async def send_text_message(to_phone: str, text: str) -> dict[str, Any]:
         logger.info("[MOCK WHATSAPP] Outbound text to %s: %s", clean_to, text)
         return {"status": "simulated", "to": clean_to, "message_id": f"mock_txt_{uuid4().hex[:10]}"}
 
-    url = f"{GRAPH_API_BASE}/{settings.whatsapp_phone_number_id}/messages"
-    headers = {
-        "Authorization": f"Bearer {settings.whatsapp_api_token}",
-        "Content-Type": "application/json",
-    }
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -159,43 +303,78 @@ async def send_text_message(to_phone: str, text: str) -> dict[str, Any]:
         "type": "text",
         "text": {"preview_url": False, "body": text},
     }
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            res = await client.post(url, headers=headers, json=payload)
-            res.raise_for_status()
-            data = res.json()
-            wamid = data.get("messages", [{}])[0].get("id", "")
-            return {"status": "sent", "to": clean_to, "message_id": wamid, "raw": data}
-    except Exception as exc:
-        logger.error("Failed to send WhatsApp text to %s: %s", clean_to, exc)
-        return {"status": "failed", "error": str(exc)}
+    res = await _send_to_meta(payload)
+    res["to"] = clean_to
+    res.setdefault("message_id", "")
+    return res
 
 
-async def send_interactive_dose_reminder(
+async def send_interactive_slot_reminder(
     db: Session,
-    adherence: DoseAdherence,
     patient: Patient,
-    medicine: Medicine,
+    slot: str,
+    adherences: list[DoseAdherence],
 ) -> dict[str, Any]:
-    """Send a 2-button interactive WhatsApp reminder for a specific scheduled dose.
-    Buttons: '✅ Yes, Taken' and '❌ Missed / Forgot'.
+    """Send a SINGLE consolidated 2-button interactive WhatsApp reminder containing ALL
+    medicines scheduled for this patient at this exact slot time.
+    Prevents spamming the patient with multiple separate messages.
     """
+    if not adherences:
+        return {"status": "skipped", "reason": "no_adherences"}
+
     clean_to = _clean_phone(patient.phone)
-    slot_label = _SLOT_HINDI.get(adherence.slot, adherence.slot)
-    timing_str = adherence.scheduled_time or _SLOT_TIMES.get(adherence.slot, "")
-    dosage_note = medicine.dosage_notation or "डॉक्टर के निर्देशानुसार"
+    slot_label = _SLOT_HINDI.get(slot, slot)
+    timing_str = adherences[0].scheduled_time or get_patient_slot_time(patient, slot)
 
-    # Friendly Hindi message body
-    body_text = (
-        f"नमस्ते {patient.name}! 🔔\n\n"
-        f"आपकी *{slot_label} ({timing_str})* की दवा का समय हो गया है:\n\n"
-        f"💊 *{medicine.brand}* ({medicine.strength or ''})\n"
-        f"• खुराक: {dosage_note}\n\n"
-        f"क्या आपने यह दवा ले ली है?"
-    )
+    # Format single message body with all medicines of that slot
+    if len(adherences) == 1:
+        adh = adherences[0]
+        med = adh.medicine
+        brand = med.brand if med else "दवा"
+        strength = f" ({med.strength})" if (med and med.strength) else ""
+        dosage = med.dosage_notation if (med and med.dosage_notation) else "डॉक्टर के निर्देशानुसार"
+        body_text = (
+            f"नमस्ते {patient.name}! 🔔\n\n"
+            f"आपकी *{slot_label} ({timing_str})* की दवा का समय हो गया है:\n\n"
+            f"💊 *{brand}*{strength}\n"
+            f"• खुराक: {dosage}\n\n"
+            f"क्या आपने यह दवा ले ली है?"
+        )
+        btn_taken_title = "✅ Yes, Taken"
+        btn_missed_title = "❌ Missed / Forgot"
+    else:
+        med_lines = []
+        seen_brands = set()
+        for adh in adherences:
+            med = adh.medicine
+            if not med:
+                continue
+            key = (med.brand.strip().lower(), (med.strength or "").strip().lower())
+            if key in seen_brands:
+                continue
+            seen_brands.add(key)
+            str_info = f" ({med.strength})" if med.strength else ""
+            dosage = f" — खुराक: {med.dosage_notation}" if med.dosage_notation else ""
+            med_lines.append(f"{len(med_lines) + 1}. 💊 *{med.brand}*{str_info}{dosage}")
+        meds_formatted = "\n".join(med_lines)
 
-    btn_taken_id = f"dose_taken_{adherence.id}"
-    btn_missed_id = f"dose_missed_{adherence.id}"
+        body_text = (
+            f"नमस्ते {patient.name}! 🔔\n\n"
+            f"आपकी *{slot_label} ({timing_str})* की सभी दवाओं का समय हो गया है (कुल: {len(med_lines)} दवाएं):\n\n"
+            f"{meds_formatted}\n\n"
+            f"क्या आपने ये सभी दवाएं ले ली हैं?"
+        )
+        btn_taken_title = "✅ Yes, All Taken"
+        btn_missed_title = "❌ Missed / Forgot"
+
+    # Button IDs containing adherence IDs (dose_ for single, batch_ for multiple)
+    ids_str = ",".join(str(a.id) for a in adherences)
+    if len(adherences) == 1:
+        btn_taken_id = f"dose_taken_{adherences[0].id}"
+        btn_missed_id = f"dose_missed_{adherences[0].id}"
+    else:
+        btn_taken_id = f"batch_taken_{ids_str}"
+        btn_missed_id = f"batch_missed_{ids_str}"
 
     interactive_payload = {
         "messaging_product": "whatsapp",
@@ -204,7 +383,7 @@ async def send_interactive_dose_reminder(
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "header": {"type": "text", "text": "🔔 Aayogya Dawa Reminder"},
+            "header": {"type": "text", "text": "🔔 Aayogya Dawa Checklist"},
             "body": {"text": body_text},
             "footer": {"text": "सहायक (Aayogya Health Companion)"},
             "action": {
@@ -213,14 +392,14 @@ async def send_interactive_dose_reminder(
                         "type": "reply",
                         "reply": {
                             "id": btn_taken_id,
-                            "title": "✅ Yes, Taken",
+                            "title": btn_taken_title[:20],
                         },
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": btn_missed_id,
-                            "title": "❌ Missed / Forgot",
+                            "title": btn_missed_title[:20],
                         },
                     },
                 ]
@@ -229,41 +408,42 @@ async def send_interactive_dose_reminder(
     }
 
     wamid = f"mock_wamid_{uuid4().hex[:12]}"
-    status = "sent"
+    status = "simulated"
 
     if settings.whatsapp_api_token and settings.whatsapp_phone_number_id:
-        url = f"{GRAPH_API_BASE}/{settings.whatsapp_phone_number_id}/messages"
-        headers = {
-            "Authorization": f"Bearer {settings.whatsapp_api_token}",
-            "Content-Type": "application/json",
-        }
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.post(url, headers=headers, json=interactive_payload)
-                res.raise_for_status()
-                data = res.json()
-                wamid = data.get("messages", [{}])[0].get("id", wamid)
-        except Exception as exc:
-            logger.error("Meta WhatsApp Cloud API error: %s", exc)
-            status = "failed"
+        res = await _send_to_meta(interactive_payload)
+        status = res["status"]
+        if status == "sent":
+            wamid = res["message_id"] or wamid
     else:
+        med_names = ", ".join(a.medicine.brand for a in adherences if a.medicine)
         logger.info(
-            "[MOCK WHATSAPP] Interactive Reminder sent to %s for %s (%s). Buttons: [%s, %s]",
+            "[MOCK WHATSAPP] Single Consolidated Reminder sent to %s for slot %s (%s). Meds: [%s]. Buttons: [%s, %s]",
             clean_to,
-            medicine.brand,
-            adherence.slot,
+            slot,
+            timing_str,
+            med_names,
             btn_taken_id,
             btn_missed_id,
         )
 
-    # Record outbound in reminder_logs
-    adherence.whatsapp_message_id = wamid
+    # Mark all adherences in this batch with the single WhatsApp message ID and
+    # scheduled time. ONLY on success: a failed/rate-limited send leaves the
+    # whatsapp_message_id unset, so the next scheduler tick can retry the dose.
+    if status in ("sent", "simulated"):
+        for adh in adherences:
+            adh.whatsapp_message_id = wamid
+            if adh.scheduled_time != timing_str:
+                adh.scheduled_time = timing_str
+
+    # Record single outbound reminder log
+    primary_med_id = adherences[0].medicine_id if len(adherences) == 1 else None
     db.add(
         ReminderLog(
             patient_id=patient.id,
-            medicine_id=medicine.id,
+            medicine_id=primary_med_id,
             channel="whatsapp",
-            kind="dose",
+            kind="dose_batch" if len(adherences) > 1 else "dose",
             body=body_text,
             status=status,
         )
@@ -272,11 +452,50 @@ async def send_interactive_dose_reminder(
 
     return {
         "status": status,
-        "adherence_id": adherence.id,
+        "slot": slot,
+        "adherence_ids": [a.id for a in adherences],
         "recipient": clean_to,
         "message_id": wamid,
+        "medicines": [a.medicine.brand for a in adherences if a.medicine],
+        "medicine": ", ".join(a.medicine.brand for a in adherences if a.medicine),
         "button_ids": [btn_taken_id, btn_missed_id],
+        "body": body_text,
     }
+
+
+async def send_interactive_dose_reminder(
+    db: Session,
+    adherence: DoseAdherence,
+    patient: Patient,
+    medicine: Medicine,
+) -> dict[str, Any]:
+    """Compatibility wrapper that routes single dose to send_interactive_slot_reminder."""
+    return await send_interactive_slot_reminder(db, patient, adherence.slot, [adherence])
+
+
+
+
+def _sender_patient(db: Session, from_number: str) -> Patient | None:
+    """Resolve the webhook sender (E.164 digits) to a patient by phone suffix match."""
+    clean = _clean_phone(from_number)
+    return (
+        db.query(Patient)
+        .filter(Patient.phone.like(f"%{clean[-10:]}%"))
+        .first()
+    )
+
+
+def _sender_scoped(db: Session, adh_ids: list[int], sender: Patient | None) -> list[DoseAdherence]:
+    """Fetch dose adherences by id, scoped to the SENDER's patient id. Button ids
+    are just integers — without this, a crafted id could confirm another patient's
+    doses. Unknown sender => no rows acted on."""
+    if not adh_ids or sender is None:
+        return []
+    return (
+        db.query(DoseAdherence)
+        .filter(DoseAdherence.id.in_(adh_ids), DoseAdherence.patient_id == sender.id)
+        .all()
+    )
 
 
 async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[str, Any]:
@@ -301,58 +520,99 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                     title = btn.get("title", "")
                     logger.info("WhatsApp Button Click received: %s (%s) from %s", btn_id, title, from_number)
 
-                    if btn_id.startswith("dose_taken_"):
-                        try:
-                            adh_id = int(btn_id.replace("dose_taken_", ""))
-                        except ValueError:
-                            adh_id = 0
-                        adh = db.query(DoseAdherence).filter(DoseAdherence.id == adh_id).first()
-                        if adh:
+                    # A) Batch taken (Multiple medicines or single)
+                    if btn_id.startswith("batch_taken_") or btn_id.startswith("dose_taken_"):
+                        if btn_id.startswith("batch_taken_"):
+                            raw_ids = btn_id.replace("batch_taken_", "").split(",")
+                        else:
+                            raw_ids = [btn_id.replace("dose_taken_", "")]
+
+                        adh_ids = []
+                        for rid in raw_ids:
+                            try:
+                                adh_ids.append(int(rid.strip()))
+                            except ValueError:
+                                pass
+
+                        sender = _sender_patient(db, from_number)
+                        adherences = _sender_scoped(db, adh_ids, sender)
+                        med_names = []
+                        slot_name = "इस समय"
+                        patient_name = "जी"
+                        for adh in adherences:
                             adh.status = "taken"
                             adh.confirmed_at = datetime.now(timezone.utc)
                             adh.notes = f"Confirmed via WhatsApp Button ({title})"
-                            db.commit()
+                            if adh.medicine:
+                                med_names.append(adh.medicine.brand)
+                            if adh.slot:
+                                slot_name = _SLOT_HINDI.get(adh.slot, adh.slot)
+                            if adh.patient:
+                                patient_name = adh.patient.name
+                        db.commit()
 
-                            med = adh.medicine
-                            med_name = med.brand if med else "दवा"
-                            patient = adh.patient
-                            p_name = patient.name if patient else "जी"
-                            ack = f"शाबाश {p_name}! आपकी दवा *{med_name}* ({adh.slot}) समय पर लेने के लिए दर्ज कर ली गई है। 🌟 अपना ख्याल रखें!"
-                            await send_text_message(from_number, ack)
-                            results.append({"action": "marked_taken", "adherence_id": adh_id, "medicine": med_name})
+                        names_str = ", ".join(med_names) if med_names else "सभी दवाएं"
+                        ack = (
+                            f"शाबाश {patient_name}! 🌟\n\n"
+                            f"आपकी *{slot_name}* की दवाएं ({names_str}) समय पर लेने के लिए सफलतापूर्वक दर्ज कर ली गई हैं।\n"
+                            f"स्वस्थ रहें और अपना ख्याल रखें!"
+                        )
+                        await send_text_message(from_number, ack)
+                        results.append({
+                            "action": "marked_taken",
+                            "adherence_ids": adh_ids,
+                            "medicines": med_names,
+                        })
 
-                    elif btn_id.startswith("dose_missed_"):
-                        try:
-                            adh_id = int(btn_id.replace("dose_missed_", ""))
-                        except ValueError:
-                            adh_id = 0
-                        adh = db.query(DoseAdherence).filter(DoseAdherence.id == adh_id).first()
-                        if adh:
+                    # B) Batch missed
+                    elif btn_id.startswith("batch_missed_") or btn_id.startswith("dose_missed_"):
+                        if btn_id.startswith("batch_missed_"):
+                            raw_ids = btn_id.replace("batch_missed_", "").split(",")
+                        else:
+                            raw_ids = [btn_id.replace("dose_missed_", "")]
+
+                        adh_ids = []
+                        for rid in raw_ids:
+                            try:
+                                adh_ids.append(int(rid.strip()))
+                            except ValueError:
+                                pass
+
+                        sender = _sender_patient(db, from_number)
+                        adherences = _sender_scoped(db, adh_ids, sender)
+                        med_names = []
+                        slot_name = "इस समय"
+                        for adh in adherences:
                             adh.status = "missed"
                             adh.confirmed_at = datetime.now(timezone.utc)
                             adh.notes = f"Patient marked missed via WhatsApp Button ({title})"
-                            db.commit()
+                            if adh.medicine:
+                                med_names.append(adh.medicine.brand)
+                            if adh.slot:
+                                slot_name = _SLOT_HINDI.get(adh.slot, adh.slot)
+                        db.commit()
 
-                            med = adh.medicine
-                            med_name = med.brand if med else "दवा"
-                            advice = (
-                                f"नोट कर लिया गया है कि *{med_name}* की खुराक छूट गई है।\n"
-                                f"कृपया अपने डॉक्टर की सलाह का पालन करें और अगली खुराक सामान्य समय पर लें। "
-                                f"कभी भी छूटी हुई खुराक के लिए दोहरी (double) दवा ना लें।"
-                            )
-                            await send_text_message(from_number, advice)
-                            results.append({"action": "marked_missed", "adherence_id": adh_id, "medicine": med_name})
+                        names_str = ", ".join(med_names) if med_names else "दवाएं"
+                        advice = (
+                            f"नोट कर लिया गया है कि *{slot_name}* की दवाएं ({names_str}) छूट गई हैं।\n\n"
+                            f"कृपया घबराएं नहीं, अगली खुराक अपने नियमित समय पर लें। "
+                            f"कभी भी छूटी हुई खुराक के लिए दोहरी (double) खुराक ना लें।"
+                        )
+                        await send_text_message(from_number, advice)
+                        results.append({
+                            "action": "marked_missed",
+                            "adherence_ids": adh_ids,
+                            "medicines": med_names,
+                        })
 
                 # 2. Text Message Reply (Natural Language)
                 elif msg_type == "text":
                     body = msg.get("text", {}).get("body", "").strip().lower()
                     logger.info("WhatsApp Text Message received: '%s' from %s", body, from_number)
 
-                    # Simple intent check for affirmative / negative
-                    positive_terms = ["yes", "taken", "haa", "haan", "le li", "kha li", "done", "li", "1"]
+                    positive_terms = ["yes", "taken", "haa", "haan", "le li", "kha li", "done", "li", "1", "sab", "all"]
                     negative_terms = ["no", "nahi", "missed", "forgot", "bhool", "nahi li", "skip", "2"]
 
-                    # Find patient by phone
                     clean = _clean_phone(from_number)
                     patient = (
                         db.query(Patient)
@@ -363,9 +623,8 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                     )
 
                     if patient:
-                        today_str = date.today().isoformat()
-                        # Find the most recent pending adherence
-                        pending = (
+                        today_str = _ist_today()
+                        pending_list = (
                             db.query(DoseAdherence)
                             .filter(
                                 DoseAdherence.patient_id == patient.id,
@@ -373,32 +632,40 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                                 DoseAdherence.status == "pending",
                             )
                             .order_by(DoseAdherence.id.asc())
-                            .first()
+                            .all()
                         )
 
-                        if pending:
-                            med = pending.medicine
-                            med_name = med.brand if med else "दवा"
+                        if pending_list:
+                            # Group by first pending slot to update all medicines of that slot together
+                            first_slot = pending_list[0].slot
+                            slot_doses = [a for a in pending_list if a.slot == first_slot]
+
                             if any(p in body for p in positive_terms):
-                                pending.status = "taken"
-                                pending.confirmed_at = datetime.now(timezone.utc)
-                                pending.notes = f"Confirmed via text reply: '{body}'"
+                                med_names = []
+                                for a in slot_doses:
+                                    a.status = "taken"
+                                    a.confirmed_at = datetime.now(timezone.utc)
+                                    a.notes = f"Confirmed via text reply: '{body}'"
+                                    if a.medicine:
+                                        med_names.append(a.medicine.brand)
                                 db.commit()
+                                names_str = ", ".join(med_names) if med_names else "सभी दवाएं"
                                 await send_text_message(
                                     from_number,
-                                    f"नमस्ते {patient.name}! आपकी दवा *{med_name}* दर्ज कर ली गई है। 🌟",
+                                    f"नमस्ते {patient.name}! आपकी *{_SLOT_HINDI.get(first_slot, first_slot)}* की दवाएं ({names_str}) दर्ज कर ली गई हैं। 🌟",
                                 )
-                                results.append({"action": "marked_taken_via_text", "adherence_id": pending.id})
+                                results.append({"action": "marked_taken_via_text", "adherence_ids": [a.id for a in slot_doses]})
                             elif any(n in body for n in negative_terms):
-                                pending.status = "missed"
-                                pending.confirmed_at = datetime.now(timezone.utc)
-                                pending.notes = f"Marked missed via text reply: '{body}'"
+                                for a in slot_doses:
+                                    a.status = "missed"
+                                    a.confirmed_at = datetime.now(timezone.utc)
+                                    a.notes = f"Marked missed via text reply: '{body}'"
                                 db.commit()
                                 await send_text_message(
                                     from_number,
-                                    f"नोट कर लिया गया है। अगली खुराक अपने सही समय पर लें।",
+                                    f"नोट कर लिया गया है कि आपकी खुराक छूट गई है। कृपया अगली खुराक सामान्य समय पर लें।",
                                 )
-                                results.append({"action": "marked_missed_via_text", "adherence_id": pending.id})
+                                results.append({"action": "marked_missed_via_text", "adherence_ids": [a.id for a in slot_doses]})
                             else:
                                 await send_text_message(
                                     from_number,
@@ -431,7 +698,7 @@ def stop_medicine(
     med.stopped_reason = reason or "Patient completed course / feeling fit"
 
     # Cancel today's pending adherence records for this medicine
-    today_str = date.today().isoformat()
+    today_str = _ist_today()
     pending_adhs = (
         db.query(DoseAdherence)
         .filter(
@@ -467,7 +734,7 @@ def resume_medicine(db: Session, medicine_id: int, patient_id: str) -> Medicine:
     med.stopped_reason = None
 
     # Un-cancel today's stopped adherence records for this medicine
-    today_str = date.today().isoformat()
+    today_str = _ist_today()
     stopped_adhs = (
         db.query(DoseAdherence)
         .filter(
@@ -513,21 +780,26 @@ def toggle_medicine_reminders(
 async def run_automated_reminders_check(
     db: Session, force: bool = False
 ) -> dict[str, Any]:
-    """Automated scheduler worker. Checks all patients with active auto-reminders
-    and dispatches WhatsApp (and queues Call) reminders for due doses.
+    """Automated precision scheduler worker. Checks all patients with active auto-reminders
+    and dispatches:
+    1. Daily Medicines: Dispatched via WHATSAPP ONLY when the current IST minute matches
+       the patient's scheduled dose time (within a 5-minute precision window).
+    2. Doctor Meet / Checkup / Test Follow-ups: Dispatched via SAHAYAK VOICE CALL ONLY,
+       strictly 2 days before the scheduled appointment during daylight hours (09:00 AM - 08:00 PM IST).
     """
     from datetime import timedelta
 
-    # Determine current slot in Indian Standard Time (Asia/Kolkata: UTC+5:30)
-    ist_now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
-    hour = ist_now.hour
+    ist_tz = ZoneInfo("Asia/Kolkata")
+    ist_now = datetime.now(ist_tz)
+    current_total_mins = ist_now.hour * 60 + ist_now.minute
 
-    current_slot = None
-    if 6 <= hour < 11:
+    # Broad slot identifier for diagnostic dashboard reporting
+    current_slot = "off_hours"
+    if 360 <= current_total_mins < 660:  # 06:00 AM - 11:00 AM
         current_slot = "morning"
-    elif 11 <= hour < 16:
+    elif 660 <= current_total_mins < 1020:  # 11:00 AM - 05:00 PM
         current_slot = "afternoon"
-    elif 18 <= hour < 23:
+    elif 1020 <= current_total_mins < 1410:  # 05:00 PM - 11:30 PM
         current_slot = "night"
 
     patients = (
@@ -537,91 +809,189 @@ async def run_automated_reminders_check(
     )
 
     dispatched = []
-    calls_queued = []
+    doctor_calls = []
+
+    two_days_later = (_ist_date() + timedelta(days=2)).isoformat()
+    today_str = _ist_today()
+
+    # One batched query for ALL due follow-ups this tick (was: one query per patient).
+    if force:
+        due_reports = (
+            db.query(Report)
+            .filter(Report.follow_up_date.isnot(None), Report.follow_up_date >= today_str)
+            .all()
+        )
+    else:
+        due_reports = (
+            db.query(Report)
+            .filter(Report.follow_up_date == two_days_later)
+            .all()
+        )
+    due_reports_by_patient: dict[str, list[Report]] = {}
+    for r in due_reports:
+        due_reports_by_patient.setdefault(r.patient_id, []).append(r)
 
     for p in patients:
+        # 1. MEDICINES: Dispatched via WHATSAPP ONLY (single consolidated message per time slot)
         today_adherences = sync_today_adherence(db, p.id)
         pending_doses = [a for a in today_adherences if a.status == "pending"]
 
+        # Group pending active doses by slot so patient gets exactly ONE message at that time
+        slot_groups: dict[str, list[DoseAdherence]] = {}
         for adh in pending_doses:
             med = adh.medicine
             if not med or med.status != "active" or not med.reminders_enabled:
                 continue
 
-            # In normal mode, only dispatch for the active time window
-            if not force and current_slot and adh.slot != current_slot:
-                continue
-
-            # Prevent duplicate sending if already sent recently
+            # Prevent duplicate sending if already dispatched today
             if adh.whatsapp_message_id and not force:
                 continue
 
-            # 1. WhatsApp Automated Reminder
+            slot_groups.setdefault(adh.slot, []).append(adh)
+
+        for slot, slot_adherences in slot_groups.items():
+            if not slot_adherences:
+                continue
+
+            # Parse scheduled time for this slot in Indian Standard Time (Asia/Kolkata / Lucknow)
+            slot_time_str = slot_adherences[0].scheduled_time or get_patient_slot_time(p, slot)
+            scheduled_mins = parse_time_to_minutes(slot_time_str, default_slot=slot)
+
+            # Precision matching: active if current minute is within 5 minutes after scheduled dose time
+            time_diff = current_total_mins - scheduled_mins
+            is_time_due = (0 <= time_diff <= 5)
+
+            if not force and not is_time_due:
+                continue
+
             if p.whatsapp_reminders_enabled is not False:
-                res = await send_interactive_dose_reminder(db, adh, p, med)
+                # SEND ONLY ONE SINGLE CONSOLIDATED MESSAGE FOR ALL MEDICINES AT THIS TIME!
+                res = await send_interactive_slot_reminder(db, p, slot, slot_adherences)
                 dispatched.append({
                     "patient_id": p.id,
                     "patient_name": p.name,
-                    "medicine": med.brand,
-                    "slot": adh.slot,
+                    "slot": slot,
+                    "medicines_count": len(slot_adherences),
+                    "medicines": [a.medicine.brand for a in slot_adherences if a.medicine],
+                    "medicine": ", ".join(a.medicine.brand for a in slot_adherences if a.medicine),
+                    "scheduled_time": slot_time_str,
+                    "scheduled_mins": scheduled_mins,
+                    "current_ist_mins": current_total_mins,
+                    "time_diff_mins": time_diff,
                     "status": res.get("status"),
                 })
 
-            # 2. Automated Call Reminder Queue
-            if p.call_reminders_enabled:
-                call_body = (
-                    f"नमस्ते {p.name}, सहायक से आपकी {adh.slot} की दवा {med.brand} "
-                    f"लेने का समय हो गया है।"
+        # 2. DOCTOR MEET / CHECKUP / TEST: Dispatched via CALL ONLY (2 days prior, daytime 09:00 - 20:00)
+        reports = due_reports_by_patient.get(p.id, [])
+        # Voice call window: 09:00 AM (540 mins) to 08:00 PM (1200 mins) IST
+        is_call_window = (540 <= current_total_mins <= 1200)
+
+        for r in reports:
+            # Check if review/checkup is exactly 2 days away (or earliest upcoming if force=True)
+            is_due = (r.follow_up_date == two_days_later) or (force and r.follow_up_date and r.follow_up_date >= today_str)
+            if not is_due:
+                continue
+
+            if not force and not is_call_window:
+                continue
+
+            # Check if patient was already called for this follow-up
+            already_called = (
+                db.query(ReminderLog)
+                .filter(
+                    ReminderLog.patient_id == p.id,
+                    ReminderLog.channel == "voice",
+                    ReminderLog.kind == "followup",
+                    ReminderLog.body.contains(r.follow_up_date),
                 )
-                call_log = ReminderLog(
-                    patient_id=p.id,
-                    medicine_id=med.id,
-                    channel="voice",
-                    kind="dose",
-                    body=call_body,
-                    status="queued",
-                )
-                db.add(call_log)
-                db.commit()
-                calls_queued.append({
-                    "patient_id": p.id,
-                    "patient_name": p.name,
-                    "medicine": med.brand,
-                    "slot": adh.slot,
-                })
+                .first()
+            )
+            if already_called and not force:
+                continue
+
+            call_res = await telephony_svc.dispatch_doctor_followup_call(
+                db, p, r, force=force
+            )
+            if call_res.get("status") in ("call_placed", "sent"):
+                doctor_calls.append(call_res)
 
     logger.info(
-        "[SCHEDULER] Check complete. Slot: %s, WhatsApp sent: %d, Calls queued: %d",
-        current_slot or ("FORCE_ALL" if force else "OFF_HOURS"),
+        "[SCHEDULER] Precision check completed at %s IST (%d mins). WhatsApp meds sent: %d. Doctor voice calls: %d",
+        ist_now.strftime("%I:%M %p"),
+        current_total_mins,
         len(dispatched),
-        len(calls_queued),
+        len(doctor_calls),
     )
 
     return {
         "ist_time": ist_now.strftime("%Y-%m-%d %I:%M %p"),
+        "current_total_mins": current_total_mins,
         "current_slot": current_slot,
-        "whatsapp_dispatched": dispatched,
-        "calls_queued": calls_queued,
+        "whatsapp_medicines_dispatched": dispatched,
+        "doctor_voice_calls_dispatched": doctor_calls,
     }
 
 
-async def start_reminder_scheduler_loop():
-    """Background asyncio worker loop that runs every 60s to check dose schedules."""
-    import asyncio
-    from .db import SessionLocal
+# Enterprise-grade APScheduler singleton (AsyncIOScheduler)
+scheduler = AsyncIOScheduler(timezone=ZoneInfo("Asia/Kolkata"))
 
-    logger.info("Starting Aayogya Automated Medication Reminder Scheduler loop...")
-    while True:
-        try:
-            await asyncio.sleep(60)
-            db = SessionLocal()
-            try:
-                await run_automated_reminders_check(db, force=False)
-            finally:
-                db.close()
-        except asyncio.CancelledError:
-            logger.info("Reminder scheduler loop cancelled.")
-            break
-        except Exception as exc:
-            logger.error("Error in reminder scheduler loop: %s", exc)
+
+async def _scheduled_tick():
+    """Periodic tick called by APScheduler every 30 seconds."""
+    from .db import SessionLocal
+    db = SessionLocal()
+    try:
+        await run_automated_reminders_check(db, force=False)
+    except Exception as exc:
+        logger.error("[APSCHEDULER] Exception during precision reminder tick: %s", exc)
+    finally:
+        db.close()
+
+
+def start_apscheduler():
+    """Start the APScheduler background scheduler ticking every 30 seconds in Asia/Kolkata."""
+    global scheduler
+    if not scheduler.running:
+        scheduler.add_job(
+            _scheduled_tick,
+            IntervalTrigger(seconds=30, timezone=ZoneInfo("Asia/Kolkata")),
+            id="aayogya_precision_reminder_tick",
+            replace_existing=True,
+            coalesce=True,
+            max_instances=1,
+        )
+        scheduler.start()
+        logger.info("[APSCHEDULER] Precision medication reminder scheduler started (30s interval, Asia/Kolkata).")
+
+
+def stop_apscheduler():
+    """Stop the APScheduler background scheduler."""
+    global scheduler
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        logger.info("[APSCHEDULER] Precision medication reminder scheduler stopped.")
+
+
+async def start_reminder_scheduler_loop():
+    """Backward compatibility wrapper: starts the APScheduler."""
+    start_apscheduler()
+
+
+async def trigger_doctor_call_reminder(
+    db: Session, patient: Patient, report_id: int
+) -> dict[str, Any]:
+    """Trigger an on-demand or scheduled Sahayak voice call reminder for an upcoming doctor checkup."""
+    report = (
+        db.query(Report)
+        .filter(Report.id == report_id, Report.patient_id == patient.id)
+        .first()
+    )
+    if not report:
+        raise ValueError("Prescription / Medical Report not found")
+    if not report.follow_up_date:
+        raise ValueError("No follow-up review date found on this report")
+
+    return await telephony_svc.dispatch_doctor_followup_call(
+        db, patient, report, force=True
+    )
 

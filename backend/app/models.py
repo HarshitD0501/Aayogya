@@ -2,7 +2,7 @@
 
 Single demo patient for now (patient_id string, default "demo") — the full
 patients/users tables (design §9) come with auth. prescriber_name lives on both
-report and medicine so the cross-doctor interaction flag (the moat) can name
+report and medicine so interaction findings and call reminders can name
 which doctor prescribed what.
 """
 from __future__ import annotations
@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     JSON, Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, String,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -36,6 +37,10 @@ class Report(Base):
     prescriber_specialty = Column(String)
     prescription_date = Column(String)  # as read from the script (may be null)
     follow_up_date = Column(String)  # next visit / review date (design: "kab jana hai")
+    follow_up_status = Column(String, default="scheduled")  # scheduled | confirmed | reschedule_requested | completed
+    reschedule_preferred_date = Column(String, nullable=True)  # requested new date/time if patient can't attend
+    reschedule_notes = Column(String, nullable=True)  # notes or reason from voice call
+    last_call_at = Column(DateTime, nullable=True)  # timestamp of most recent outbound reminder call
     parsed_json = Column(JSON)  # full extraction, kept immutable alongside confirmed
     confirmed = Column(Boolean, default=False)  # human-confirm gate (design §5)
     created_at = Column(DateTime, default=_now)
@@ -75,8 +80,9 @@ class Medicine(Base):
 
 
 class Patient(Base):
-    """Patient + auth fields. Design §3 is patient-only (caregiver deferred), so
-    no separate users table yet. Per-patient isolation keys off `id`.
+    """Patient + auth fields. Per-patient isolation keys off `id`.
+    role='caregiver' rows are family members who act ONLY on linked patients
+    (CaregiverLink) — never on arbitrary patients (isolation, design §11).
     """
     __tablename__ = "patients"
 
@@ -86,6 +92,7 @@ class Patient(Base):
     phone = Column(String, unique=True, index=True)
     password_hash = Column(String)
     plan = Column(String, default="free")  # free | pro
+    role = Column(String, default="patient")  # patient | caregiver
     lang = Column(String, default="hi")
     timezone = Column(String, default="Asia/Kolkata")
     emergency_contact = Column(String)
@@ -130,6 +137,8 @@ class ReminderLog(Base):
     kind = Column(String, default="dose")  # dose | followup | refill
     body = Column(String)
     status = Column(String, default="sent")  # sent | failed | queued
+    call_status = Column(String, nullable=True)  # answered | no_answer | busy | voicemail | failed
+    call_duration_seconds = Column(Integer, nullable=True)  # duration in seconds
     sent_at = Column(DateTime, default=_now)
 
 
@@ -158,3 +167,22 @@ class DoseAdherence(Base):
 
     medicine = relationship("Medicine")
     patient = relationship("Patient")
+
+
+class CaregiverLink(Base):
+    """Patient-invited caregiver access (DPDP: explicit, auditable consent).
+    A caregiver sees ONLY the patients linked here — the caregiver-side
+    isolation boundary (design §11), same rule the patient role gets.
+    """
+    __tablename__ = "caregiver_links"
+    __table_args__ = (
+        Index("ix_caregiver_links_pair", "caregiver_id", "patient_id"),
+        UniqueConstraint("caregiver_id", "patient_id", name="uq_caregiver_patient"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    caregiver_id = Column(String, ForeignKey("patients.id"), index=True)
+    patient_id = Column(String, ForeignKey("patients.id"), index=True)
+    relation = Column(String)  # display only: "father", "daughter", "friend"
+    consented_at = Column(DateTime, default=_now)
+    created_at = Column(DateTime, default=_now)

@@ -113,9 +113,16 @@ function Slot({
     );
   return (
     <div className="slot">
-      <h4>
-        <Icon size={16} color={color} /> {label}
-      </h4>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 4 }}>
+        <h4 style={{ margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+          <Icon size={16} color={color} /> {label}
+        </h4>
+        {meds.length > 1 && (
+          <span style={{ fontSize: 11, color: "var(--brand)", background: "rgba(34, 197, 94, 0.08)", padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>
+            Single Message ({meds.length} medicines)
+          </span>
+        )}
+      </div>
       {meds.map((m, i) => (
         <div className="med" key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -153,16 +160,16 @@ function Slot({
                 style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6 }}
                 disabled={sendingId === m.adherence_id || !m.reminders_enabled}
                 onClick={() => onSendReminder(m.adherence_id)}
-                title="Send interactive 2-button WhatsApp reminder to patient's phone"
+                title="Send ONE consolidated WhatsApp checklist containing all medicines for this time slot"
               >
-                🔔 {sendingId === m.adherence_id ? "Sending…" : "WhatsApp Nudge"}
+                🔔 {sendingId === m.adherence_id ? "Sending…" : meds.length > 1 ? "WhatsApp Nudge (All Meds)" : "WhatsApp Nudge"}
               </button>
               {m.adherence_status !== "taken" && (
                 <button
                   className="btn btn-sm btn-ghost"
                   style={{ fontSize: 11, padding: "2px 8px", color: "var(--brand-strong)", fontWeight: 600 }}
                   onClick={() => onSimulateReply(m.adherence_id, "taken")}
-                  title="Simulate patient clicking 'Yes, Taken' on WhatsApp"
+                  title="Simulate patient clicking 'Yes, All Taken' on WhatsApp"
                 >
                   ✓ Tap &apos;Yes, Taken&apos;
                 </button>
@@ -201,12 +208,74 @@ function Slot({
   );
 }
 
+function timeTo24h(t) {
+  if (!t) return "08:00";
+  const str = t.trim().toUpperCase();
+  if (str.includes("AM") || str.includes("PM")) {
+    const isPm = str.includes("PM");
+    const digits = str.replace("AM", "").replace("PM", "").trim();
+    const parts = digits.split(":");
+    let h = parseInt(parts[0], 10);
+    const m = parts[1] ? parseInt(parts[1], 10) : 0;
+    if (h === 12) h = isPm ? 12 : 0;
+    else if (isPm) h += 12;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+  return str.length === 5 ? str : "08:00";
+}
+
+function timeTo12h(t) {
+  if (!t) return "08:00 AM";
+  const parts = t.split(":");
+  let h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) || 0;
+  const suffix = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${suffix}`;
+}
+
 export function Summary() {
   const [sendingId, setSendingId] = useState(null);
   const [testingScheduler, setTestingScheduler] = useState(false);
+  const [editingTimes, setEditingTimes] = useState(false);
+  const [slotTimes, setSlotTimes] = useState({ morning: "08:00", afternoon: "13:00", night: "20:00" });
+  const [savingTimes, setSavingTimes] = useState(false);
   const [adhVersion, setAdhVersion] = useState(0);
   const { loading, error, data } = useData("/summary", [adhVersion]);
   const scope = useReveal([loading, data]);
+
+  useEffect(() => {
+    if (data?.patient) {
+      setSlotTimes({
+        morning: timeTo24h(data.patient.reminder_time_morning || "08:00 AM"),
+        afternoon: timeTo24h(data.patient.reminder_time_afternoon || "01:00 PM"),
+        night: timeTo24h(data.patient.reminder_time_night || "08:00 PM"),
+      });
+    }
+  }, [data?.patient]);
+
+  const handleSaveTimes = async () => {
+    setSavingTimes(true);
+    try {
+      await api("/reminders/preferences", {
+        method: "POST",
+        json: {
+          reminder_time_morning: timeTo12h(slotTimes.morning),
+          reminder_time_afternoon: timeTo12h(slotTimes.afternoon),
+          reminder_time_night: timeTo12h(slotTimes.night),
+        },
+      });
+      setEditingTimes(false);
+      setAdhVersion((v) => v + 1);
+      alert(
+        `✅ Schedule Times Saved!\n\n• Morning: ${timeTo12h(slotTimes.morning)}\n• Afternoon: ${timeTo12h(slotTimes.afternoon)}\n• Night: ${timeTo12h(slotTimes.night)}\n\nThe APScheduler will dispatch your WhatsApp messages at these exact times.`
+      );
+    } catch (e) {
+      alert(e.message || "Failed to save schedule times");
+    } finally {
+      setSavingTimes(false);
+    }
+  };
 
   const handleSendReminder = async (adherence_id) => {
     setSendingId(adherence_id);
@@ -274,14 +343,34 @@ export function Summary() {
     }
   };
 
+  const handleTriggerDoctorCall = async (reportId) => {
+    try {
+      const res = await api(`/reports/${reportId}/trigger-call-reminder`, { method: "POST" });
+      if (res.status === "dispatch_failed") {
+        alert(`❌ Call dispatch failed: ${res.error || "unknown error"}`);
+      } else if (res.mode === "simulated") {
+        alert(
+          `🧪 Simulated call logged (no Twilio/LiveKit SIP keys configured).\n\n• Patient: ${res.patient_name}\n• Doctor: ${res.doctor}\n• Checkup: ${res.follow_up_date}`
+        );
+      } else {
+        alert(
+          `📞 Sahayak is calling ${res.patient_name} now!\n\n• Doctor: ${res.doctor}\n• Checkup: ${res.follow_up_date}\n• Room: ${res.room_name}`
+        );
+      }
+      setAdhVersion((v) => v + 1);
+    } catch (e) {
+      alert(e.message || "Failed to trigger call reminder");
+    }
+  };
+
   const handleTriggerScheduler = async () => {
     setTestingScheduler(true);
     try {
       const res = await api("/reminders/trigger-check", { method: "POST" });
-      const sentCount = res.details?.whatsapp_dispatched?.length || 0;
-      const callCount = res.details?.calls_queued?.length || 0;
+      const sentCount = res.details?.whatsapp_medicines_dispatched?.length || 0;
+      const callCount = res.details?.doctor_voice_calls_dispatched?.length || 0;
       alert(
-        `⚡ Automated Scheduler Check Complete!\n\n• Time (IST): ${res.details?.ist_time || "Now"}\n• WhatsApp Reminders Dispatched: ${sentCount}\n• Voice Call Reminders Queued: ${callCount}`
+        `⚡ Automated Scheduler Check Complete!\n\n• Time (IST): ${res.details?.ist_time || "Now"}\n• WhatsApp Medicine Reminders: ${sentCount}\n• 2-Day Doctor Voice Calls: ${callCount}`
       );
       setAdhVersion((v) => v + 1);
     } catch (e) {
@@ -369,10 +458,10 @@ export function Summary() {
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>
-                  WhatsApp Auto-Reminders
+                  Daily Medicines (WhatsApp Only)
                 </div>
                 <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                  Interactive Yes/No dose alerts via Meta Cloud API
+                  Interactive Yes/No dose alerts delivered exclusively via WhatsApp
                 </div>
               </div>
             </div>
@@ -414,10 +503,10 @@ export function Summary() {
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>
-                  Voice Call Reminders
+                  Doctor Meets & Tests (Voice Call Only)
                 </div>
                 <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                  Automated spoken calls from Sahayak Assistant
+                  Sahayak automated call 2 days before appointment (No WhatsApp)
                 </div>
               </div>
             </div>
@@ -433,23 +522,34 @@ export function Summary() {
 
         <div
           style={{
-            marginTop: 12,
+            marginTop: 14,
+            padding: "12px 14px",
+            borderRadius: 10,
+            background: "rgba(0,0,0,0.02)",
+            border: "1px solid var(--line-light)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 8,
-            fontSize: 12,
-            color: "var(--muted)",
+            gap: 10,
+            fontSize: 13,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Clock size={14} />
-            <span>
-              Scheduled dose times: Morning ({p.reminder_time_morning}), Afternoon ({p.reminder_time_afternoon}), Night ({p.reminder_time_night})
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <Clock size={16} color="var(--brand)" />
+            <span style={{ fontWeight: 600, color: "var(--ink)" }}>Precision Schedule (IST):</span>
+            <span style={{ color: "var(--muted)" }}>
+              🌅 Morning (<strong>{p.reminder_time_morning || "08:00 AM"}</strong>) · ☀️ Afternoon (<strong>{p.reminder_time_afternoon || "01:00 PM"}</strong>) · 🌙 Night (<strong>{p.reminder_time_night || "08:00 PM"}</strong>)
             </span>
           </div>
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              className="btn btn-sm btn-outline"
+              style={{ fontSize: 12, padding: "4px 10px", borderRadius: 8, fontWeight: 600 }}
+              onClick={() => setEditingTimes((v) => !v)}
+            >
+              {editingTimes ? "Close Settings" : "⚙️ Change Slot Times"}
+            </button>
             <button
               className="btn btn-sm btn-ghost"
               style={{
@@ -459,10 +559,119 @@ export function Summary() {
               }}
               onClick={() => handleTogglePref("auto_reminders_enabled", p.auto_reminders_enabled)}
             >
-              {p.auto_reminders_enabled ? "Pause All Reminders" : "Resume All Reminders"}
+              {p.auto_reminders_enabled ? "Pause Master Reminders" : "Resume Master Reminders"}
             </button>
           </div>
         </div>
+
+        {editingTimes && (
+          <div
+            style={{
+              marginTop: 12,
+              padding: 16,
+              borderRadius: 12,
+              background: "var(--surface-2)",
+              border: "1px solid var(--brand)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>
+                  Configure Exact WhatsApp Dose Schedule
+                </div>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                  Set the exact minute in Indian Standard Time (IST) when your interactive WhatsApp medication card will be dispatched.
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className="btn btn-sm btn-primary"
+                  style={{ fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}
+                  disabled={savingTimes}
+                  onClick={handleSaveTimes}
+                >
+                  <CheckCircle2 size={14} />
+                  {savingTimes ? "Saving…" : "Save Exact Schedule"}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+              <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                  🌅 Morning Dose Time
+                </label>
+                <input
+                  type="time"
+                  value={slotTimes.morning}
+                  onChange={(e) => setSlotTimes({ ...slotTimes, morning: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--line)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+
+              <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                  ☀️ Afternoon Dose Time
+                </label>
+                <input
+                  type="time"
+                  value={slotTimes.afternoon}
+                  onChange={(e) => setSlotTimes({ ...slotTimes, afternoon: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--line)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+
+              <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                  🌙 Night Dose Time
+                </label>
+                <input
+                  type="time"
+                  value={slotTimes.night}
+                  onChange={(e) => setSlotTimes({ ...slotTimes, night: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--line)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--muted)",
+                background: "rgba(37, 99, 235, 0.05)",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px dashed rgba(37, 99, 235, 0.3)",
+              }}
+            >
+              💡 <strong>Instant Test Tip:</strong> Set one of the times above to <strong>1–2 minutes ahead</strong> of your current clock and click <em>Save Exact Schedule</em>! The APScheduler ticks every 30 seconds and will immediately deliver the interactive WhatsApp message to your registered phone.
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card
@@ -560,27 +769,79 @@ export function Summary() {
           <Disclaimer>{data.conditions_disclaimer}</Disclaimer>
         </Card>
 
-        <Card title="Next Doctor Review" sub="Earliest scheduled follow-up">
+        <Card
+          title="Next Doctor Review & Checkup"
+          sub="Reminders for checkups are delivered through Sahayak Voice Call 2 days before, never WhatsApp"
+        >
           {data.next_followup ? (
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 8,
+                gap: 12,
                 padding: "20px",
                 borderRadius: "14px",
                 background: "linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(30, 58, 138, 0.05))",
                 border: "1px solid rgba(37, 99, 235, 0.2)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Calendar size={22} color="#2563eb" />
-                <span style={{ fontSize: 26, fontWeight: 800, color: "var(--ink)" }}>
-                  {data.next_followup.date}
-                </span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Calendar size={22} color="#2563eb" />
+                  <span style={{ fontSize: 26, fontWeight: 800, color: "var(--ink)" }}>
+                    {data.next_followup.date}
+                  </span>
+                </div>
+                {data.next_followup.follow_up_status === "reschedule_requested" ? (
+                  <Pill tone="warn" dot>
+                    🔄 Reschedule Requested
+                  </Pill>
+                ) : data.next_followup.follow_up_status === "confirmed" ? (
+                  <Pill tone="accent" dot>
+                    ✓ Confirmed by Patient
+                  </Pill>
+                ) : (
+                  <Pill tone="brand" dot>
+                    📞 Voice Call (2 Days Prior)
+                  </Pill>
+                )}
               </div>
               <div style={{ fontSize: 14, color: "var(--muted)", fontWeight: 600 }}>
-                Consultation with <strong>{data.next_followup.doctor}</strong>
+                Consultation & Review with <strong>{data.next_followup.doctor}</strong>
+                {data.next_followup.follow_up_status === "reschedule_requested" && (
+                  <div style={{ color: "#d97706", fontSize: 13, marginTop: 4, fontWeight: 700 }}>
+                    Preferred Time: {data.next_followup.reschedule_preferred_date}
+                    {data.next_followup.reschedule_notes && ` · Note: ${data.next_followup.reschedule_notes}`}
+                  </div>
+                )}
+              </div>
+              <div
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  background: "rgba(37, 99, 235, 0.08)",
+                  border: "1px solid rgba(37, 99, 235, 0.15)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <PhoneCall size={16} color="#2563eb" />
+                  <span style={{ fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>
+                    {data.next_followup.call_reminder_status || "Call scheduled 2 days before"}
+                  </span>
+                </div>
+                <button
+                  className="btn btn-sm btn-outline"
+                  style={{ fontSize: 11, padding: "3px 10px", borderColor: "rgba(37, 99, 235, 0.4)", color: "#2563eb" }}
+                  onClick={() => handleTriggerDoctorCall(data.next_followup.report_id)}
+                  title="Simulate or place the 2-day prior doctor follow-up phone call"
+                >
+                  📞 Simulate 2-Day Call
+                </button>
               </div>
             </div>
           ) : (
@@ -718,7 +979,6 @@ function FindingCard({ f }) {
           <Pill tone={SEV[f.severity] || "brand"} dot>
             {f.severity.toUpperCase()} RISK
           </Pill>
-          {f.cross_doctor && <Pill tone="accent">Cross-Doctor Conflict</Pill>}
         </div>
         <AlertTriangle size={18} color={f.severity === "major" ? "#dc2626" : "#d97706"} />
       </div>
@@ -754,7 +1014,7 @@ function FindingCard({ f }) {
 export function Interactions() {
   const { loading, error, data } = useData("/interactions");
   const scope = useReveal([loading, data]);
-  if (loading) return <Loader label="Scanning cross-doctor interactions…" />;
+  if (loading) return <Loader label="Scanning medicine interactions…" />;
   if (error) return <Note tone="err">{error}</Note>;
   return (
     <div ref={scope} className="grid">
@@ -882,8 +1142,16 @@ export function Reports() {
             ))}
           </div>
           {r.follow_up_date && (
-            <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 12, display: "flex", alignItems: "center", gap: 6 }}>
-              <Calendar size={14} color="#2563eb" /> Review on <strong>{r.follow_up_date}</strong>
+            <div style={{ fontSize: 13, marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--muted)" }}>
+                <Calendar size={14} color="#2563eb" /> Review on <strong>{r.follow_up_date}</strong>
+              </div>
+              {r.follow_up_status === "reschedule_requested" && (
+                <Pill tone="warn">🔄 Rescheduled: {r.reschedule_preferred_date}</Pill>
+              )}
+              {r.follow_up_status === "confirmed" && (
+                <Pill tone="accent">✓ Confirmed</Pill>
+              )}
             </div>
           )}
         </Card>

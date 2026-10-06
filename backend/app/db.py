@@ -21,7 +21,8 @@ if settings.is_postgres:
 else:
     # check_same_thread only matters for SQLite + FastAPI's threadpool.
     engine = create_engine(
-        settings.database_url, connect_args={"check_same_thread": False}
+        settings.database_url,
+        connect_args={"check_same_thread": False, "timeout": 30},
     )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -59,6 +60,11 @@ def init_db():
     if not settings.is_postgres:
         with engine.connect() as conn:
             from sqlalchemy import text
+            try:
+                conn.execute(text("PRAGMA journal_mode=WAL"))
+                conn.commit()
+            except Exception:
+                pass
             col_specs = [
                 ("patients", "auto_reminders_enabled", "BOOLEAN DEFAULT 1"),
                 ("patients", "whatsapp_reminders_enabled", "BOOLEAN DEFAULT 1"),

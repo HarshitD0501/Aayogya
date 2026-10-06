@@ -1,8 +1,7 @@
-"""Cross-doctor interaction check (design §7.4 — the moat).
+"""Drug-interaction check (design §7.4).
 
-Runs on the SALTS of ACTIVE meds across ALL of a patient's reports (not just the
-latest), so a new prescription from one doctor is checked against every other
-doctor's meds. Output cites a source and is framed as "checked against N known
+Runs on the SALTS of ACTIVE meds across ALL of a patient's reports (not just
+the latest). Output cites a source and is framed as "checked against N known
 interactions," never "guaranteed safe."
 """
 from __future__ import annotations
@@ -50,7 +49,6 @@ def check(db: Session, patient_id: str) -> dict:
             "severity": hit.severity,
             "note": hit.note,
             "source": hit.source,
-            "cross_doctor": (m1.prescriber_name or "") != (m2.prescriber_name or ""),
             "medicines": [
                 {"brand": m1.brand, "salt": m1.salt, "prescriber": m1.prescriber_name},
                 {"brand": m2.brand, "salt": m2.salt, "prescriber": m2.prescriber_name},
