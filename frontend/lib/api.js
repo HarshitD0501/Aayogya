@@ -19,11 +19,26 @@ export function clearToken() {
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+const PATIENT_KEY = "aayogya_patient_id";
+
+// Which linked patient the (caregiver) token acts on. Patients ignore this —
+// the backend forces them to self regardless of the header.
+export function getActivePatientId() {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(PATIENT_KEY) || null;
+}
+export function setActivePatientId(id) {
+  if (typeof window === "undefined") return;
+  if (id) window.localStorage.setItem(PATIENT_KEY, id);
+  else window.localStorage.removeItem(PATIENT_KEY);
+}
 
 export async function api(path, opts = {}) {
   const headers = { ...(opts.headers || {}) };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
+  const pid = getActivePatientId();
+  if (token && pid) headers["X-Patient-Id"] = pid;
 
   const init = { ...opts, headers };
   if (opts.json !== undefined) {
@@ -103,6 +118,15 @@ export async function getPublicPrices({ brand, salt, strength }) {
 
 export const DEMO_USERS = [
   {
+    id: "meera",
+    name: "Meera Kulkarni",
+    email: "meera@demo.in",
+    password: "pass1234",
+    tag: "Family Caregiver",
+    desc: "Caregiver dashboard — manage Papa, Dadi, brother & Maa together",
+    color: "#7c3aed",
+  },
+  {
     id: "ramesh",
     name: "Ramesh Kulkarni",
     email: "ramesh@demo.in",
@@ -178,6 +202,34 @@ export async function askAssistant(message, history = []) {
     throw new Error(detail);
   }
   return res.json(); // { reply, history }
+}
+
+// --- Caregiver portal helpers ---
+
+export function getFamilyOverview() {
+  return api("/caregiver/patients");
+}
+
+export function updatePatientContact(patientId, phone) {
+  return api(`/caregiver/patients/${patientId}/contact`, {
+    method: "POST",
+    json: { phone },
+  });
+}
+
+export function dispatchAiCall(reportId, force = false) {
+  return api("/telephony/dispatch", {
+    method: "POST",
+    json: { report_id: reportId, force },
+  });
+}
+
+// Build the official WhatsApp click-to-chat URL for a caregiver's own WhatsApp
+// (free, no Meta API). Number: full international format WITHOUT '+'; text URL-encoded.
+export function whatsappLink(phone, text) {
+  const digits = (phone || "").replace(/\D/g, "");
+  const withCc = digits.length === 10 ? `91${digits}` : digits;
+  return `https://wa.me/${withCc}?text=${encodeURIComponent(text)}`;
 }
 
 export async function getVoiceToken() {

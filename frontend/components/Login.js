@@ -9,6 +9,7 @@ import ShinyText from "@/components/reactbits/ShinyText";
 import { ArrowRight, ArrowLeft, Lock, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 const DEMOS = [
+  { name: "Meera Kulkarni (Caregiver)", email: "meera@demo.in", plan: "Caregiver", desc: "Family dashboard — manage 4 members, call & WhatsApp them" },
   { name: "Ramesh Kulkarni", email: "ramesh@demo.in", plan: "Free", desc: "Sample prescription with diabetes & BP meds" },
   { name: "Shanti Devi", email: "shanti@demo.in", plan: "Pro", desc: "Multi-doctor safety demo with detected drug interactions" },
   { name: "Aarav Sharma", email: "aarav@demo.in", plan: "Free", desc: "Active medication schedule demo" },
@@ -139,8 +140,18 @@ export default function Login({ onLogin, onBack }) {
                         fontWeight: 700,
                         padding: "1px 6px",
                         borderRadius: 4,
-                        background: d.plan === "Pro" ? "rgba(30, 58, 138, 0.1)" : "rgba(37, 99, 235, 0.1)",
-                        color: d.plan === "Pro" ? "#1e3a8a" : "#2563eb",
+                        background:
+                          d.plan === "Caregiver"
+                            ? "rgba(124, 58, 237, 0.12)"
+                            : d.plan === "Pro"
+                            ? "rgba(30, 58, 138, 0.1)"
+                            : "rgba(37, 99, 235, 0.1)",
+                        color:
+                          d.plan === "Caregiver"
+                            ? "#7c3aed"
+                            : d.plan === "Pro"
+                            ? "#1e3a8a"
+                            : "#2563eb",
                       }}
                     >
                       {d.plan}

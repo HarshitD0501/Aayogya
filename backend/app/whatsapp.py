@@ -309,6 +309,20 @@ async def send_text_message(to_phone: str, text: str) -> dict[str, Any]:
     return res
 
 
+
+
+def _med_detail_score(med: Medicine) -> int:
+    """Rank duplicate-salt rows so the richest (strength + dosage) is shown."""
+    score = 0
+    if med.strength:
+        score += 1
+    if med.dosage_notation:
+        score += 2
+    if med.brand and med.salt and med.brand.strip().lower() != med.salt.strip().lower():
+        score += 0  # brand vs salt name carries no extra info for ranking
+    return score
+
+
 async def send_interactive_slot_reminder(
     db: Session,
     patient: Patient,
@@ -343,16 +357,20 @@ async def send_interactive_slot_reminder(
         btn_taken_title = "✅ Yes, Taken"
         btn_missed_title = "❌ Missed / Forgot"
     else:
+        # Dedupe by SALT: the same drug re-uploaded across reports (e.g. "Amlong 5"
+        # and "Amlong") is ONE medicine to the patient — one line, not two. Prefer
+        # the row with the most detail (strength + dosage notation).
         med_lines = []
-        seen_brands = set()
+        seen_salts: dict[str, Medicine] = {}
         for adh in adherences:
             med = adh.medicine
             if not med:
                 continue
-            key = (med.brand.strip().lower(), (med.strength or "").strip().lower())
-            if key in seen_brands:
-                continue
-            seen_brands.add(key)
+            salt_key = (med.salt or med.brand).strip().lower()
+            best = seen_salts.get(salt_key)
+            if best is None or _med_detail_score(med) > _med_detail_score(best):
+                seen_salts[salt_key] = med
+        for med in seen_salts.values():
             str_info = f" ({med.strength})" if med.strength else ""
             dosage = f" — खुराक: {med.dosage_notation}" if med.dosage_notation else ""
             med_lines.append(f"{len(med_lines) + 1}. 💊 *{med.brand}*{str_info}{dosage}")

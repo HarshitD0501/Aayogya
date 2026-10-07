@@ -194,6 +194,7 @@
     <button class="act" onclick="submitLogin()">Log in</button>
     <div class="err" id="loginErr"></div>
     <div class="quick">
+      <button onclick="quick('meera@demo.in')">Meera (caregiver)</button>
       <button onclick="quick('ramesh@demo.in')">Ramesh (free)</button>
       <button onclick="quick('shanti@demo.in')">Shanti (pro · 3 doctors)</button>
       <button onclick="quick('aarav@demo.in')">Aarav (free)</button>
@@ -201,6 +202,11 @@
     <div id="creds">
       <p class="muted" style="margin:14px 0 6px">Demo logins — tap to sign in. Password <b>pass1234</b> for all.</p>
       <table><tbody>
+        <tr style="cursor:pointer" onclick="quick('meera@demo.in')">
+          <td><b>Meera Kulkarni</b> <span class="pill ok">caregiver</span><br>
+            <span class="muted">family dashboard · 4 linked members (call / WhatsApp / AI call)</span></td>
+          <td class="muted">meera@demo.in<br>+919454535136</td>
+        </tr>
         <tr style="cursor:pointer" onclick="quick('ramesh@demo.in')">
           <td><b>Ramesh Kulkarni</b> <span class="pill expired">free</span><br>
             <span class="muted">prescription_test.jpg · hypertension + type-2 diabetes</span></td>

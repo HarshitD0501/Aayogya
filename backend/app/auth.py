@@ -86,15 +86,17 @@ def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
     return None
 
 
-def _linked_patient_ids(db: Session, caregiver_id: str) -> set[str]:
+def _linked_patient_ids(db: Session, caregiver_id: str) -> list[str]:
+    """Linked patient ids in link order (matches /api/caregiver/patients cards)."""
     from .models import CaregiverLink  # local import: avoid circular module load
 
     rows = (
         db.query(CaregiverLink.patient_id)
         .filter(CaregiverLink.caregiver_id == caregiver_id)
+        .order_by(CaregiverLink.id.asc())
         .all()
     )
-    return {r[0] for r in rows}
+    return [r[0] for r in rows]
 
 
 def resolve_actor(
@@ -122,7 +124,7 @@ def resolve_actor(
     if not linked:
         raise HTTPException(403, "No patients linked to this caregiver yet")
 
-    target_id = x_patient_id or next(iter(sorted(linked)))
+    target_id = x_patient_id or linked[0]  # default: first linked patient
     if target_id not in linked:
         raise HTTPException(403, "Not a linked patient of this caregiver")
     patient = db.get(Patient, target_id)

@@ -36,7 +36,7 @@ def upgrade() -> None:
         batch_op.create_index(batch_op.f('ix_caregiver_links_patient_id'), ['patient_id'], unique=False)
 
     with op.batch_alter_table('patients', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('role', sa.String(), nullable=True))
+        batch_op.add_column(sa.Column('role', sa.String(), nullable=True, server_default='patient'))
 
     # ### end Alembic commands ###
 

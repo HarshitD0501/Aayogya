@@ -1926,3 +1926,286 @@ html { scroll-behavior: smooth; }
   }
 }
 
+
+/* ============ Caregiver Portal ============ */
+
+.cg-family-head {
+  margin-bottom: 22px;
+}
+.cg-sub {
+  margin-top: 6px;
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+
+.cg-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+.cg-card {
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  font: inherit;
+  color: inherit;
+}
+.cg-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.14);
+}
+.cg-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cg-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  flex-shrink: 0;
+}
+.cg-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cg-relation {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.cg-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cg-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  background: var(--surface-2);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.cg-adher {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cg-adher-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.cg-adher-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3aa88b, #2563eb);
+  transition: width 0.6s ease;
+}
+.cg-adher span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.cg-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+.cg-alert.warn {
+  background: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+}
+.cg-alert.danger {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
+/* Action panel */
+.cg-actions {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cg-actions-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+.cg-countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+.cg-countdown.danger {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.cg-countdown.warn {
+  background: rgba(217, 119, 6, 0.08);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+.cg-countdown.ok {
+  background: rgba(16, 185, 129, 0.08);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.cg-countdown.muted {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.cg-action-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cg-btn {
+  flex: 1 1 150px;
+  justify-content: center;
+}
+.cg-btn-wa {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+}
+.cg-btn-wa:hover {
+  background: #15803d;
+}
+.cg-btn-ai {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff;
+  border: none;
+}
+.cg-btn-ai:hover {
+  filter: brightness(1.08);
+}
+.cg-contact {
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cg-contact label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-secondary);
+}
+.cg-contact-row {
+  display: flex;
+  gap: 8px;
+}
+.cg-contact-row input {
+  flex: 1;
+}
+.cg-msg {
+  font-size: 12.5px;
+  color: var(--ink-secondary);
+  line-height: 1.45;
+}
+
+/* Patient detail */
+.cg-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.cg-detail-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+.cg-detail-sub {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.cg-section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.cg-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cg-tab:hover {
+  border-color: rgba(124, 58, 237, 0.4);
+  color: var(--ink);
+}
+.cg-tab.active {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  border-color: transparent;
+}
+.spin {
+  animation: cg-spin 0.9s linear infinite;
+}
+@keyframes cg-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .cg-contact-row {
+    flex-direction: column;
+  }
+  .cg-btn {
+    flex: 1 1 100%;
+  }
+}

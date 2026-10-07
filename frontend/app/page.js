@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, getToken, clearToken, loginAsDemo } from "@/lib/api";
+import { api, getToken, clearToken, loginAsDemo, setActivePatientId } from "@/lib/api";
 import Landing from "@/components/Landing";
 import Login from "@/components/Login";
 import Dashboard from "@/components/Dashboard";
+import Caregiver from "@/components/Caregiver";
 
 export default function Home() {
   const [patient, setPatient] = useState(null);
@@ -43,6 +44,7 @@ export default function Home() {
 
   const handleLogout = () => {
     clearToken();
+    setActivePatientId(null);
     setPatient(null);
     setView("landing");
   };
@@ -70,8 +72,17 @@ export default function Home() {
     );
   }
 
-  // If in dashboard view and authenticated, show Dashboard
+  // If in dashboard view and authenticated, show the right shell by role
   if (view === "dashboard" && patient) {
+    if (patient.role === "caregiver") {
+      return (
+        <Caregiver
+          caregiver={patient}
+          onLogout={handleLogout}
+          onGoHome={() => setView("landing")}
+        />
+      );
+    }
     return (
       <Dashboard
         patient={patient}

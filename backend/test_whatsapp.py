@@ -450,6 +450,40 @@ def test_webhook_cross_patient_isolation():
 
 
 
+def test_duplicate_salt_dedupe_in_message():
+    """Re-uploading the same prescription creates duplicate Medicine rows with
+    variant names ('Amlong 5' vs 'Amlong'): the WhatsApp body must list ONE line
+    per SALT (same drug), not one per row."""
+    db, patient, meds = _setup_test_db()
+    # a re-upload duplicate: same salt, variant brand, less detail
+    dup = Medicine(
+        id=103,
+        patient_id=patient.id,
+        brand="Amlong",
+        salt="Telmisartan",
+        strength="40",
+        dosage_notation="1-0-0",
+        timing=["morning"],
+        status="active",
+        per_day=1.0,
+    )
+    db.add(dup)
+    db.commit()
+
+    adherences = wa_svc.sync_today_adherence(db, patient.id)
+    morning = [a for a in adherences if a.slot == "morning"]
+    # Telma 40 + Amlong (same salt Telmisartan) + Metsmall 500 => 2 lines
+    res = asyncio.run(wa_svc.send_interactive_slot_reminder(db, patient, "morning", morning))
+    body = res["body"]
+    assert "Telma 40" in body, "richer duplicate should be shown"
+    telmisartan_lines = [l for l in body.splitlines() if "Telma" in l or "Amlong" in l]
+    assert len(telmisartan_lines) == 1, f"expected 1 telmisartan line, got {telmisartan_lines}"
+    metformin_lines = [l for l in body.splitlines() if "Metsmall" in l]
+    assert len(metformin_lines) == 1
+    print("  [PASS] Same-salt re-upload duplicates collapse to one message line.")
+
+
+
 if __name__ == "__main__":
     orig_token = settings.whatsapp_api_token
     try:
@@ -469,6 +503,7 @@ if __name__ == "__main__":
         test_precision_scheduler_matching()
         test_consolidated_batch_slot_reminder()
         test_webhook_cross_patient_isolation()
+        test_duplicate_salt_dedupe_in_message()
         print("\n=======================================================")
         print("ALL WHATSAPP & ADHERENCE TESTS PASSED WITH 0 ERRORS!")
         print("=======================================================\n")

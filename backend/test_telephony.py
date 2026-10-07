@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.config import settings
 from app.db import Base, get_db
 from app.main import app
 from app.models import Patient, ReminderLog, Report
@@ -12,6 +13,12 @@ from app.telephony import dispatch_doctor_followup_call, handle_reschedule_reque
 
 
 from sqlalchemy.pool import StaticPool
+
+# Hermetic: force simulation mode even if the dev .env has real LiveKit/Twilio
+# keys — tests must never fire a real agent dispatch.
+settings.livekit_url = ""
+settings.livekit_sip_trunk_id = ""
+settings.twilio_sip_domain = ""
 
 def setup_test_db():
     engine = create_engine(
