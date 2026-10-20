@@ -30,6 +30,7 @@ export default function Home() {
     })();
 
     const onLogout = () => {
+      clearToken();
       setPatient(null);
       setView("landing");
     };

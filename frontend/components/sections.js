@@ -492,8 +492,8 @@ export function Summary() {
                   width: 38,
                   height: 38,
                   borderRadius: 10,
-                  background: "rgba(37, 99, 235, 0.12)",
-                  color: "#2563eb",
+                  background: "rgba(232, 168, 56, 0.14)",
+                  color: "#d4942b",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -787,7 +787,7 @@ export function Summary() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Calendar size={22} color="#2563eb" />
+                  <Calendar size={22} color="#e8a838" />
                   <span style={{ fontSize: 26, fontWeight: 800, color: "var(--ink)" }}>
                     {data.next_followup.date}
                   </span>
@@ -829,14 +829,14 @@ export function Summary() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <PhoneCall size={16} color="#2563eb" />
+                  <PhoneCall size={16} color="#e8a838" />
                   <span style={{ fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>
                     {data.next_followup.call_reminder_status || "Call scheduled 2 days before"}
                   </span>
                 </div>
                 <button
                   className="btn btn-sm btn-outline"
-                  style={{ fontSize: 11, padding: "3px 10px", borderColor: "rgba(37, 99, 235, 0.4)", color: "#2563eb" }}
+                  style={{ fontSize: 11, padding: "3px 10px", borderColor: "rgba(232, 168, 56, 0.4)", color: "#1a2234" }}
                   onClick={() => handleTriggerDoctorCall(data.next_followup.report_id)}
                   title="Simulate or place the 2-day prior doctor follow-up phone call"
                 >

@@ -8,18 +8,14 @@ import ShinyText from "@/components/reactbits/ShinyText";
 import GlowPill from "@/components/reactbits/GlowPill";
 import { Sparkles, Activity, AlertTriangle, Info, ExternalLink } from "lucide-react";
 
-export function BrandMark() {
+export function BrandMark({ className = "" }) {
+  // Real Aayogya lockup (golden leaf + pulse mark + wordmark). The PNG carries a
+  // warm ivory background, so it sits cleanly on cream and reads as a rounded
+  // chip on dark surfaces.
   return (
-    <div className="brand-mark">
-      <span className="brand-logo">
-        <Sparkles size={20} strokeWidth={2.5} />
-      </span>
-      <ShinyText
-        text="Aayogya"
-        className="brand-title"
-        gradient="linear-gradient(135deg, #111827 0%, #2563eb 60%, #1e3a8a 100%)"
-      />
-    </div>
+    <span className={`brand-mark ${className}`.trim()}>
+      <img src="/logo.png" alt="Aayogya" className="brand-logo-img" />
+    </span>
   );
 }
 
@@ -30,7 +26,7 @@ export function Card({
   className = "",
   reveal = true,
   spotlightColor = "rgba(99, 102, 241, 0.10)",
-  borderColor = "rgba(37, 99, 235, 0.35)",
+  borderColor = "rgba(176, 127, 20, 0.35)",
   children,
   ...props
 }) {
@@ -61,14 +57,16 @@ export function Stat({ icon, label, value, animate = true }) {
   return (
     <SpotlightCard
       className="stat"
-      spotlightColor="rgba(59, 130, 246, 0.12)"
-      borderColor="rgba(99, 102, 241, 0.3)"
+      spotlightColor="rgba(232, 168, 56, 0.12)"
+      borderColor="rgba(26, 34, 52, 0.14)"
     >
-      {icon && <span className="ic">{icon}</span>}
+      <div className="stat-top">
+        {icon && <span className="ic">{icon}</span>}
+        <span className="lbl">{label}</span>
+      </div>
       <span className="val" ref={animate ? ref : undefined}>
         {animate ? "0" : value}
       </span>
-      <span className="lbl">{label}</span>
     </SpotlightCard>
   );
 }

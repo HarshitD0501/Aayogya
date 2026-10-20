@@ -153,7 +153,7 @@ export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient
               border: "1px solid var(--line)",
             }}
           >
-            <Home size={14} color="#2563eb" />
+            <Home size={14} color="#e8a838" />
             <span>← Landing Page</span>
           </button>
         )}
@@ -186,23 +186,23 @@ export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #2563eb, #1e3a8a)",
-                color: "#ffffff",
+                background: "linear-gradient(135deg, #e8a838, #b07f14)",
+                color: "#1a2234",
                 display: "grid",
                 placeItems: "center",
                 fontWeight: 700,
                 fontSize: 13,
-                boxShadow: "0 4px 10px rgba(99, 102, 241, 0.3)",
+                boxShadow: "0 4px 10px rgba(232, 168, 56, 0.35)",
                 flexShrink: 0,
               }}
             >
               {initials}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="nm" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div className="nm" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "#f8fafc", fontWeight: 700, fontSize: 13.5 }}>
                 {patient.name}
               </div>
-              <div style={{ fontSize: 12, color: "var(--muted)" }}>
+              <div style={{ fontSize: 11.5, color: "#94a3b8" }}>
                 {patient.email || patient.phone}
               </div>
             </div>
@@ -260,30 +260,12 @@ export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient
         <div className="topbar">
           <div className="topbar-header">
             <div>
-              <ShinyText
-                text={current.title}
-                speed={5}
-                gradient="linear-gradient(135deg, #111827 0%, #2563eb 60%, #1e3a8a 100%)"
-                className="topbar-title-shiny"
-              />
-              <p>{current.sub}</p>
+              <h2 className="topbar-title">{current.title}</h2>
+              <p className="topbar-sub">{current.sub}</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "var(--muted)",
-                  background: "var(--surface)",
-                  padding: "5px 12px",
-                  borderRadius: 999,
-                  border: "1px solid var(--line)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <HeartPulse size={14} color="#2563eb" />
+              <span className="live-sync-badge">
+                <HeartPulse size={14} color="#e8a838" className="animate-pulse" />
                 Live Sync
               </span>
             </div>

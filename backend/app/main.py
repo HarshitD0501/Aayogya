@@ -18,8 +18,6 @@ from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, Response, UploadFile
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from langgraph.types import Command
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload
@@ -46,8 +44,6 @@ from .schemas import (  # noqa: E402
     TelephonyDispatchIn,
 )
 from .seed import seed  # noqa: E402
-
-STATIC = Path(__file__).parent / "static"
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +93,17 @@ async def lifespan(app: FastAPI):
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Aayogya - extraction backend", lifespan=lifespan)
+
+
+def _get_pipeline():
+    """Returns the compiled LangGraph extraction pipeline, initializing on-demand if needed."""
+    pipeline = getattr(app.state, "pipeline", None)
+    if pipeline is None:
+        cp, pool = _make_checkpointer()
+        pipeline = build_pipeline(cp)
+        app.state.pipeline = pipeline
+        app.state.pool = pool
+    return pipeline
 
 app.add_middleware(
     CORSMiddleware,
@@ -182,8 +189,18 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
 
 
 @app.get("/api/auth/me", response_model=PatientOut)
-def me(patient: Patient = Depends(current_patient)):
-    return PatientOut.model_validate(patient)
+def me(
+    authorization: str = Header(None),
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
+):
+    """Who am I — the LOGGED-IN ACCOUNT, not the patient being acted on.
+    current_patient would resolve a caregiver to their linked patient, so a
+    caregiver reloading the page would lose their caregiver identity (or 403
+    on a stale X-Patient-Id) and the caregiver dashboard would never load.
+    resolve_actor[0] is the account; data routes keep using the patient."""
+    actor, _patient = resolve_actor(authorization, x_patient_id, db)
+    return PatientOut.model_validate(actor)
 
 
 @app.post("/api/reports/upload", response_model=ReportOut)
@@ -202,9 +219,10 @@ async def upload_report(
     # so the async event loop stays responsive during the ~15s VLM extraction.
     thread_id = uuid4().hex
     config = {"configurable": {"thread_id": thread_id}}
+    pipe = _get_pipeline()
     try:
         await run_in_threadpool(
-            app.state.pipeline.invoke,
+            pipe.invoke,
             {"image_b64": base64.b64encode(image).decode(),
              "mime": file.content_type, "patient_id": patient.id},
             config,
@@ -214,7 +232,7 @@ async def upload_report(
         raise HTTPException(502, f"Extraction service error: {type(e).__name__}: {str(e)[:200]}")
 
     try:
-        snap = app.state.pipeline.get_state(config).values
+        snap = pipe.get_state(config).values
 
         report = Report(
             patient_id=patient.id, thread_id=thread_id, filename=file.filename,
@@ -252,9 +270,10 @@ def confirm_report(
     if not report.confirmed and report.thread_id:
         # Resume the paused graph run: human_confirm -> reconcile_active.
         config = {"configurable": {"thread_id": report.thread_id}}
+        pipe = _get_pipeline()
         try:
-            app.state.pipeline.invoke(Command(resume={"confirmed": True}), config)
-            final = app.state.pipeline.get_state(config).values.get("meds", [])
+            pipe.invoke(Command(resume={"confirmed": True}), config)
+            final = pipe.get_state(config).values.get("meds", [])
             # rows were persisted in graph-med order; ids ascend in that order.
             for med, fm in zip(sorted(report.medicines, key=lambda x: x.id), final):
                 med.status = fm.get("status", med.status)
@@ -777,10 +796,13 @@ def get_telephony_status_endpoint(
 
 
 @app.get("/")
-def dashboard():
-    return FileResponse(STATIC / "index.html")
+def root():
+    return {
+        "status": "online",
+        "service": "Aayogya Backend API",
+        "version": "1.0.0",
+        "docs": "/docs",
+    }
 
-
-app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

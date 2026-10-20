@@ -15,6 +15,7 @@ export function clearToken() {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(TOKEN_KEY);
     window.localStorage.removeItem("aarogya_token");
+    window.localStorage.removeItem(PATIENT_KEY); // stale patient header = wrong dashboard
   }
 }
 
@@ -75,9 +76,12 @@ export async function api(path, opts = {}) {
     let detail = `Request failed (${res.status})`;
     try {
       const body = await res.json();
-      detail = body.detail || detail;
+      detail = body.detail || body.message || detail;
     } catch {
-      /* non-JSON error body */
+      /* non-JSON error body (e.g. Next.js proxy error when backend is offline) */
+      if (res.status === 500 || res.status === 502 || res.status === 504) {
+        detail = "Backend server is unreachable on port 8000. Please ensure the backend is started with: uvicorn app.main:app --reload --port 8000";
+      }
     }
     throw new Error(detail);
   }

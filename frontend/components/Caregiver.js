@@ -99,7 +99,7 @@ function FamilyGrid({ caregiver, cards, loading, err, onOpenPatient }) {
           <ShinyText
             text={`Namaste, ${caregiver.name?.split(" ")[0]}`}
             speed={5}
-            gradient="linear-gradient(135deg, #111827 0%, #7c3aed 60%, #2563eb 100%)"
+            gradient="linear-gradient(135deg, #111827 0%, #9a6b26 60%, #b07f14 100%)"
           />
           <p className="cg-sub">
             You manage {cards.length} family members. Tap a card to open their
@@ -229,7 +229,7 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
   return (
     <div className="cg-actions">
       <div className="cg-actions-title">
-        <Phone size={15} color="#7c3aed" />
+        <Phone size={15} color="#9a6b26" />
         <span>Reach {patientCard.name?.split(" ")[0]}</span>
       </div>
 
@@ -428,7 +428,7 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     );
   };
 
-  const cardFor = cards?.find((c) => c.id === openId) || null;
+  const cardFor = () => cards?.find((c) => c.id === openId) || null;
 
   return (
     <div className="shell">
@@ -436,33 +436,14 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
         <BrandMark />
 
         {onGoHome && (
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={onGoHome}
-            title="Return to Public Landing Page"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              width: "100%",
-              justifyContent: "flex-start",
-              marginTop: 10,
-              marginBottom: 4,
-              color: "var(--ink-secondary)",
-              fontSize: 12,
-              fontWeight: 600,
-              padding: "6px 10px",
-              borderRadius: 8,
-              background: "var(--surface-2)",
-              border: "1px solid var(--line)",
-            }}
-          >
-            <Home size={14} color="#2563eb" />
-            <span>← Landing Page</span>
+          <button className="home-link" onClick={onGoHome} title="Back to landing page">
+            <Home size={14} />
+            <span>Home</span>
           </button>
         )}
 
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+        <div className="nav-group">
+          <div className="nav-group-label">Family</div>
           <button
             className={`nav-item ${openId === null ? "active" : ""}`}
             onClick={handleBack}
@@ -489,42 +470,16 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
         <div className="nav-spacer" />
 
         <div className="who-card">
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-                color: "#ffffff",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 700,
-                fontSize: 13,
-                boxShadow: "0 4px 10px rgba(124, 58, 237, 0.3)",
-                flexShrink: 0,
-              }}
-            >
-              {initialsOf(caregiver.name)}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="nm" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {caregiver.name}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                {caregiver.email || caregiver.phone}
-              </div>
+          <div className="who-row">
+            <div className="who-avatar">{initialsOf(caregiver.name)}</div>
+            <div className="who-meta">
+              <div className="nm">{caregiver.name}</div>
+              <div className="em">{caregiver.email || caregiver.phone}</div>
             </div>
           </div>
-
-          <div className="row" style={{ marginTop: 12 }}>
-            <Pill tone="accent">Caregiver</Pill>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={onLogout}
-              title="Sign out of Aayogya"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px" }}
-            >
+          <div className="who-actions">
+            <span className="plan-badge free">Caregiver</span>
+            <button className="btn btn-ghost btn-sm" onClick={onLogout} title="Sign out">
               <LogOut size={14} />
               <span>Sign out</span>
             </button>
@@ -533,6 +488,26 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
       </aside>
 
       <main className="main">
+        <header className="topbar">
+          <div className="topbar-title">
+            <div className="topbar-eyebrow" style={{ color: "#9a6b26" }}>
+              <Users size={13} />
+              <span>{openId ? "Patient Detail" : "Family Overview"}</span>
+            </div>
+            <h1>{openId ? cardFor()?.name || "Family member" : "Your Family"}</h1>
+            <p>
+              {openId
+                ? `Viewing ${cardFor()?.relation || "family member"}’s medicines, schedule and reminders.`
+                : "Everyone you care for, side by side — medicines, adherence and next visits."}
+            </p>
+          </div>
+          <div className="topbar-side">
+            <span className="live-chip">
+              <Heart size={14} className="live-pulse" />
+              Linked
+            </span>
+          </div>
+        </header>
         {openId && cardFor() ? (
           <PatientDetail
             patientCard={cardFor()}

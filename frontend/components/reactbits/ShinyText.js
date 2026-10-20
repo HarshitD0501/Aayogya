@@ -5,7 +5,7 @@ export default function ShinyText({
   disabled = false,
   speed = 4,
   className = "",
-  gradient = "linear-gradient(135deg, #111827 0%, #2563eb 50%, #1e3a8a 100%)",
+  gradient = "linear-gradient(135deg, #111827 0%, #b07f14 50%, #8a5f0a 100%)",
 }) {
   const animationDuration = `${speed}s`;
 

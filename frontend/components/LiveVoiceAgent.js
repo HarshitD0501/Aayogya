@@ -92,7 +92,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
           grad.addColorStop(0, "#10b981");
           grad.addColorStop(1, "#059669");
         } else if (normalized > 0.15) {
-          grad.addColorStop(0, "#3b82f6");
+          grad.addColorStop(0, "#e4a635");
           grad.addColorStop(1, "#1d4ed8");
         } else {
           grad.addColorStop(0, "#94a3b8");
@@ -410,7 +410,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
                     Microphone is muted — click unmute to speak
                   </span>
                 ) : (
-                  <span style={{ color: "#2563eb", fontWeight: 600 }}>
+                  <span style={{ color: "#b07f14", fontWeight: 600 }}>
                     Listening • Ask: &quot;Meri dawaiyan kab leni hain?&quot; or &quot;Any drug interactions?&quot;
                   </span>
                 )}

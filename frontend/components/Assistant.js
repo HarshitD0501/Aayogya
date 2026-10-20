@@ -282,12 +282,12 @@ export default function Assistant({ patient }) {
                 padding: "10px 14px",
                 background: "var(--brand-soft)",
                 borderRadius: 12,
-                border: "1px solid rgba(37, 99, 235, 0.15)",
+                border: "1px solid rgba(176, 127, 20, 0.15)",
                 marginBottom: 12,
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Sparkles size={16} color="#2563eb" />
+                <Sparkles size={16} color="#b07f14" />
                 <span style={{ fontSize: 13, color: "var(--brand-strong)", fontWeight: 500 }}>
                   Want real-time two-way voice conversation?
                 </span>
