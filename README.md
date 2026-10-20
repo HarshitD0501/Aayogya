@@ -1,22 +1,23 @@
 # Aayogya (आयोग्या)
 
-> Click your prescription -> AI deciphers doctor handwriting, explains it in your language, flags drug interactions, compares real-time medicine prices across Jan Aushadhi & PharmEasy, and sends WhatsApp / voice reminders — while deferring every clinical decision to your real doctor.
+> **Click your prescription** ➔ AI deciphers doctor handwriting, explains it in your language, flags drug interactions, compares real-time medicine prices across Jan Aushadhi & PharmEasy, coordinates remote family caregivers, and sends automated WhatsApp / outbound voice follow-ups — while deferring every clinical decision to your registered medical practitioner.
 
-**Aayogya** is an India-first medication-adherence and prescription-intelligence platform. It is deliberately **non-clinical**: under India's Telemedicine Practice Guidelines 2020 (§5.4), an AI platform may not diagnose or prescribe. Aayogya only *explains, navigates, compares prices, and reminds* — keeping every clinical decision in the hands of a registered medical practitioner.
+**Aayogya** is an India-first medication-adherence and prescription-intelligence platform. It is deliberately **non-clinical**: under India's Telemedicine Practice Guidelines 2020 (§5.4), an AI platform may not diagnose or prescribe. Aayogya only *explains, navigates, compares prices, coordinates caregivers, and reminds* — keeping every clinical decision in the hands of a registered medical practitioner.
 
-Full architecture and compliance specifications live in [`DESIGN.md`](../DESIGN.md).
+Full architecture specifications live in [`DESIGN.md`](../DESIGN.md), caregiver architecture in [`caregiver.md`](../caregiver.md), and outbound telephony details in [`voice.md`](../voice.md).
 
 ---
 
 ## Key Capabilities
 
-- **4-Agent Handwriting Extraction Pipeline** — Multi-agent system that enhances smartphone photos, deciphers messy doctor cursive, fuzzy-matches against 100+ Indian drug brands, parses Indian dosage notations (`1-0-1`, `1/0/1`, `BBF`, `SOS`), and halts at a Human-in-the-Loop gate.
+- **4-Agent Handwriting Extraction Pipeline** — Multi-agent vision & language system that enhances smartphone photos, deciphers messy doctor cursive, fuzzy-matches against 100+ Indian drug brands, parses Indian dosage notations (`1-0-1`, `1/0/1`, `BBF`, `SOS`), and halts at a Human-in-the-Loop gate.
 - **Tri-Pillar Medicine Pricing Engine** — Real-time price discovery comparing **PharmEasy** commercial rates, **NPPA (DPCO)** statutory ceiling prices, and **PMBJP Jan Aushadhi** generic store prices (up to 90% savings) with 24-hour caching.
-- **Extraction Confidence Grounding** — Composite 0–1 confidence score based on external catalog validation, dosage parsability, and strength detection. Cursive approximations automatically trigger review flags.
-- **Drug Interaction Check** — Safety feature: detects salt-level interactions across *all* active medicines that no individual physician can see.
-- **Plain-Language Multilingual Explanations** — Clarifies why each medicine was prescribed in native Indian languages (Hindi, English, etc.).
-- **Nearby Chemists & Jan Aushadhi Kendras** — Live OpenStreetMap / Overpass geolocation map of nearby retail and generic pharmacies.
-- **Voice Companion (Saathi)** — Ultra-low latency voice companion powered by LiveKit and Gemini for daily adherence check-ins.
+- **Caregiver Portal & Family Health Management** — Remote family member persona (e.g., adult child managing elderly parents in another city) with a unified multi-patient switcher, DPDP-aligned consent, live adherence monitoring, and one-click actions: direct call, WhatsApp reminder, or AI-agent dispatch.
+- **Autonomous AI Telephony Follow-Up Calls** — Ultra-low latency voice agent that calls patients **2 days prior** to scheduled doctor reviews via Twilio SIP + LiveKit, confirms attendance, negotiates reschedules in natural Hindi/English, and updates the clinic dashboard in real time.
+- **Meta WhatsApp Cloud API (v21.0) Adherence** — Interactive 2-button daily reminders (`[✅ Yes, Taken]` / `[❌ Missed / Forgot]`) with zero paid middleware, natural Hindi text parsing, and fatigue protection.
+- **Drug-to-Drug Interaction Checking** — Cross-checks active medications across multiple doctors/prescriptions to flag dangerous salt combinations before doses are taken.
+- **Nearby Chemists & Jan Aushadhi Kendras** — Live OpenStreetMap / Overpass geolocation map of nearby retail pharmacies and government Jan Aushadhi Kendras.
+- **Local Role-Based Authentication** — Stateless HMAC bearer token system with instant persona switching between patients (`Ramesh`, `Shanti`) and caregivers (`Meera`).
 
 ---
 
@@ -24,32 +25,48 @@ Full architecture and compliance specifications live in [`DESIGN.md`](../DESIGN.
 
 ```mermaid
 graph TD
-    Client["Next.js 14 PWA (Frontend)<br/>Upload | Dashboard | Price Badges | Voice"]
+    Client["Next.js 14 PWA (:3000)<br/>Upload | Patient Dashboard | Caregiver Portal | Voice"]
     
     subgraph SystemA ["System A: Backend Brain (FastAPI :8000)"]
+        Auth["Auth & Actor Resolver (auth.py)<br/>Patient vs Caregiver (X-Patient-Id)"]
         Preproc["Agent 1: Vision Preprocessor<br/>(EXIF / Contrast / Ink Sharpening)"]
         Decipher["Agent 2: Handwriting Decipherer<br/>(Ollama / Groq / Gemini VLM Chain)"]
         DrugKG["Agent 3: Drug Knowledge Graph<br/>(Suffix Engine / Difflib Fuzzy Match)"]
         ValOrch["Agent 4: Clinical Orchestrator<br/>(Dosage Parsing / Grounded Confidence)"]
         HITL{"Human-in-the-Loop<br/>(LangGraph Interrupt)"}
         Prices["Tri-Pillar Pricing Engine<br/>(PharmEasy + NPPA + Jan Aushadhi)"]
-        DB[(SQLite / Postgres<br/>Reports & Active Meds)]
+        Caregiver["Caregiver Service (caregiver.py)<br/>Family Links & Adherence Feeds"]
+        TelephonySvc["Telephony Dispatcher (telephony.py)<br/>Outbound Doctor Follow-up Scheduler"]
+        WASvc["WhatsApp Cloud API (whatsapp.py)<br/>Interactive Reminders & Webhook"]
+        DB[(SQLite / Postgres<br/>Patients, Links, Reports, Meds, Adherence)]
     end
 
-    subgraph SystemB ["System B: Voice & Chat Agent (:8080)"]
-        LiveKit["LiveKit WebRTC Worker"]
-        GeminiVoice["Google Gemini Realtime / STT+TTS"]
-        Saathi["Saathi Companion Prompt"]
+    subgraph SystemB ["System B: Voice & Telephony Agent (:8080)"]
+        LiveKit["LiveKit WebRTC & SIP Gateway"]
+        VoiceWorker["voice.py Agent Worker<br/>(Deepgram Nova-3 + Gemini + Murf TTS)"]
+        FollowupBrain["followup_prompt.py<br/>(Review Confirmation & Reschedule Tool)"]
+        Saathi["Saathi In-Browser Companion Prompt"]
     end
 
-    Client -->|POST /api/reports/upload| Preproc
+    subgraph External ["External Networks"]
+        TwilioTrunk["Twilio Elastic SIP Trunk (PSTN)"]
+        MetaCloud["Meta WhatsApp Cloud API v21.0"]
+        PharmEasy["PharmEasy Public Search API"]
+    end
+
+    Client -->|Proxied /api/* requests| Auth
+    Auth --> Caregiver & Preproc & DB
     Preproc --> Decipher --> DrugKG --> ValOrch --> HITL
-    HITL -->|POST /api/reports/:id/confirm| DB
-    DB --> Prices
-    Prices -->|Live Price Badges| Client
-    Client <-->|WebRTC Voice / Chat| LiveKit
-    LiveKit <--> Saathi <--> GeminiVoice
-    Saathi -.->|HTTP Read Tools| SystemA
+    HITL -->|Confirm /api/reports/:id/confirm| DB
+    DB --> Prices --> PharmEasy
+    Caregiver --> DB
+    TelephonySvc -->|CreateAgentDispatch| LiveKit
+    WASvc <-->|Webhooks & Outbound| MetaCloud
+    LiveKit <--> TwilioTrunk
+    TwilioTrunk <-->|Cellular PSTN Call| PatientPhone["Patient Mobile Phone (+91)"]
+    MetaCloud <-->|WhatsApp Message| PatientWA["Patient WhatsApp (+91)"]
+    LiveKit <--> VoiceWorker <--> FollowupBrain
+    VoiceWorker -->|POST /api/telephony/reschedule| SystemA
 ```
 
 ---
@@ -112,7 +129,7 @@ flowchart TD
 ### Breakdown of the 4 Agents:
 
 1. **Agent 1: Vision Preprocessor & Image Enhancement ([`app/preprocessor.py`](backend/app/preprocessor.py))**
-   - **EXIF Auto-Orientation:** Fixes sideways or upside-down mobile phone photos automatically.
+   - **EXIF Auto-Orientation:** Fixes sideways or upside-down mobile photos automatically.
    - **Dynamic Contrast Stretching & Ink Sharpening:** Enhances faint ballpoint/gel pen strokes (`ImageEnhance.Sharpness(1.5)` and `ImageOps.autocontrast(cutoff=2)`), clearing gray paper shadows.
    - **Dimension Optimization:** Binds images to 2048px max dimension to prevent vision model memory overflow.
    - **Safety:** Handles RGBA/CMYK modes and gracefully recovers from corrupt image payloads without failing the request.
@@ -189,48 +206,80 @@ flowchart TD
 | **2. Statutory Ceiling** | **NPPA (DPCO 2013)** | Official government ceiling price under the National List of Essential Medicines (NLEM). Legally caps the maximum price any pharmacy can charge. | Regulates high-cost branded drugs |
 | **3. Generic Alternative** | **PMBJP Jan Aushadhi** | Pradhan Mantri Bhartiya Janaushadhi Pariyojana public generic catalog (e.g., Paracetamol 650mg at ~₹5.50 for 10 tablets). | **50% to 90% savings** |
 
-### Patient Dashboard Display:
-In the frontend dashboard ([`frontend/components/ui.js`](frontend/components/ui.js)), each medicine card displays a unified pricing badge:
-- **Commercial Price:** e.g., `PharmEasy: ₹30.50`
-- **Government Cap:** e.g., `NPPA Cap: ₹2.10/tab`
-- **Jan Aushadhi Generic:** e.g., `Jan Aushadhi: ₹5.50 (Save 82%)`
-
 ---
 
-## Repository Structure
+## 3. Caregiver Portal & Family Health Management
 
-```
-Aayogya/
-├── backend/               System A — FastAPI + LangGraph Backend Brain
-│   ├── app/
-│   │   ├── preprocessor.py   Agent 1: Vision Preprocessor & Image Enhancement
-│   │   ├── extraction.py     Agent 2: Clinical Handwriting & VLM Decipherer
-│   │   ├── catalog.py        Agent 3: Indian Drug Knowledge Graph & Suffix Engine
-│   │   ├── dosage.py         Agent 4: Indian Dosage Notation Parser
-│   │   ├── confidence.py     Composite Grounded Confidence Scorer
-│   │   ├── graph.py          LangGraph HITL StateGraph Workflow
-│   │   ├── prices.py         Tri-Pillar Pricing Engine (PharmEasy / NPPA / PMBJP)
-│   │   ├── data/
-│   │   │   └── indian_medicines.json  100+ Indian brands, salts & forms
-│   │   ├── main.py           FastAPI Application & Endpoints
-│   │   ├── models.py         SQLAlchemy Database Models
-│   │   └── schemas.py        Pydantic v2 Request/Response Schemas
-│   ├── test_multiagent_extraction.py  Comprehensive 4-Agent & LangGraph Test Suite
-│   ├── test_dosage.py                 Dosage Parser Unit Tests
-│   └── test_confidence.py             Confidence Scoring Unit Tests
-├── frontend/              Patient Dashboard (Next.js 14 App Router, GSAP, Leaflet)
-│   ├── app/page.js        Prescription Upload & Active Medication Manager
-│   └── components/ui.js   Dynamic Price Badges & Review Cards
-└── agent/                 System B — Voice Companion (LiveKit + Google Gemini)
-    ├── voice.py           Realtime WebRTC Voice Worker
-    └── chat.py            Text Chat Brain
+In Indian households, health management is rarely individual — adult children often coordinate care for elderly parents living across the country. Aayogya implements a dedicated **Caregiver Portal** ([`caregiver.md`](../caregiver.md), [`backend/app/caregiver.py`](backend/app/caregiver.py), [`frontend/components/Caregiver.js`](frontend/components/Caregiver.js)):
+
+```mermaid
+flowchart TD
+    CaregiverLogin["Caregiver Login (Meera Kulkarni)"] --> CaregiverPortal["Caregiver Dashboard (:3000)"]
+    CaregiverPortal --> FamilySwitcher["Family Member Switcher:<br/>• Ramesh Kulkarni (Father: HTN + T2DM)<br/>• Shanti Kulkarni (Grandmother: Multi-Doctor)<br/>• Aarav Kulkarni (Brother)<br/>• Sunita Kulkarni (Mother: Thyroid)"]
+    
+    FamilySwitcher --> ActiveView["Active Patient Health Snapshot"]
+    ActiveView --> Meds["Medication Adherence Feed"]
+    ActiveView --> Flags["Cross-Doctor Interaction Alerts"]
+    ActiveView --> Countdown["Doctor Visit Countdown (e.g., 2 Days Left)"]
+    
+    ActiveView --> QuickActions["One-Click Remote Caregiver Actions"]
+    QuickActions --> ActionCall["Direct Phone Call (tel:)"]
+    QuickActions --> ActionWA["Send WhatsApp Adherence Nudge"]
+    QuickActions --> ActionAI["Dispatch Outbound AI Voice Review Call"]
 ```
 
----
+### Caregiver System Highlights:
+- **DPDP-Aligned Consent:** Patients explicitly grant access to caregivers via [`CaregiverLink`](backend/app/models.py). The caregiver only sees family members who have granted active consent.
+- **Unified Actor Resolution Seam:** The backend (`resolve_actor` in [`auth.py`](backend/app/auth.py)) inspects the `X-Patient-Id` header. Caregivers seamlessly view and act on behalf of the selected relative without creating parallel redundant endpoints.
+- **Family Switcher:** Instant tabs in the frontend dashboard allow switching between elderly parents with live medication statuses, review cards, and today's doses.
+- **Action Drawer:** Allows the caregiver to trigger a phone call, send an immediate WhatsApp reminder, or schedule an autonomous AI voice check-in.
 
 ---
 
-## 3. Meta WhatsApp Cloud API & Interactive Adherence
+## 4. Autonomous Telephony & Doctor Follow-Up (System B)
+
+Aayogya features an **outbound conversational telephony agent** ([`voice.md`](../voice.md), [`backend/app/telephony.py`](backend/app/telephony.py), [`agent/voice.py`](agent/voice.py), [`agent/followup_prompt.py`](agent/followup_prompt.py)) designed to reduce clinic no-show rates across India:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Sch as Background Telephony Scheduler
+    participant BE as FastAPI Backend (/api/telephony/dispatch)
+    participant LK as LiveKit SIP Dispatch
+    participant Twilio as Twilio Elastic SIP Trunk
+    participant Pat as Patient Mobile Phone (+91)
+    participant Agent as voice.py Worker (System B)
+    participant DB as SQLite / PostgreSQL (Reports)
+
+    Sch->>BE: Check reports with follow_up_date == Today + 2 Days
+    BE->>LK: CreateAgentDispatch(room, metadata={patient, doctor, date})
+    LK->>Agent: Worker accepts job, enters room
+    Agent->>Twilio: SIP Dial patient PSTN phone
+    Twilio->>Pat: Phone rings... Patient answers
+    Agent->>Pat: "नमस्ते रमेश जी! मैं आयोग्या से साफ़िया बोल रही हूँ..."
+    alt Patient Confirms Attendance
+        Pat->>Agent: "हाँ, मैं परसों 11 बजे डॉक्टर शर्मा के पास जा रहा हूँ।"
+        Agent->>BE: POST /api/telephony/reschedule (status='confirmed')
+        BE->>DB: UPDATE reports SET follow_up_status='confirmed'
+    else Patient Needs Reschedule
+        Pat->>Agent: "नहीं, परसों नहीं हो पाएगा। अगले सोमवार सुबह रख दो।"
+        Agent->>BE: POST /api/telephony/reschedule (status='rescheduled', preferred_date='next monday morning')
+        BE->>DB: UPDATE reports SET follow_up_status='rescheduled', reschedule_notes='...'
+    end
+    Agent->>Pat: "धन्यवाद रमेश जी, आपकी जानकारी अपडेट कर दी गई है।"
+```
+
+### Sub-400ms Zero Perceived Latency Blueprint:
+1. **LiveKit SIP Gateway + Twilio Elastic SIP Trunk** delivers raw G.711 / Opus cellular audio directly to standard Indian mobile phones (no smartphone or app required).
+2. **Noise Suppression:** `BVCTelephony()` cleans cellular line hum and street noise.
+3. **Deepgram Nova-3:** Handles rapid Hindi/English code-switching with `endpointing=250ms`.
+4. **Google Gemini 2.5 Flash:** Follow-up prompt maintains conversational flow and calls the `reschedule_appointment` tool.
+5. **Murf Falcon-2 TTS (`hi-IN`):** Sub-100ms Hindi voice streaming directly into the SIP channel.
+6. **Zero-Key Simulation Mode:** When SIP credentials are absent, the system simulates dispatches and records test logs with zero runtime crashes.
+
+---
+
+## 5. Meta WhatsApp Cloud API & Interactive Adherence
 
 Aayogya integrates direct 2-way medication adherence messaging via the **official Meta WhatsApp Business Cloud API (v21.0)** with **zero paid middleware or third-party fees**:
 
@@ -258,7 +307,7 @@ sequenceDiagram
         API->>DB: UPDATE dose_adherences SET status='missed'
         API->>WA: Send safety guidance: "छूटी खुराक के लिए दोहरी दवा ना लें।"
         DB->>UI: Real-time update: Red "✕ Missed" badge
-    else Patient replies with text ("haan le li" / "nahi li")
+    else Patient replies with natural language text ("haan le li" / "nahi li")
         Pat->>WA: Message "haan le li"
         WA->>API: POST /api/whatsapp/webhook (type: text)
         API->>DB: Intent resolved -> status='taken'
@@ -266,29 +315,86 @@ sequenceDiagram
     end
 ```
 
-### Endpoints
-- `GET /api/whatsapp/webhook`: Meta Webhook challenge handshake (`hub.challenge`).
-- `POST /api/whatsapp/webhook`: Inbound button-clicks & natural language text replies.
-- `POST /api/whatsapp/send-reminder`: Trigger outbound interactive WhatsApp reminder for a dose.
-- `POST /api/whatsapp/simulate-reply`: Local testing simulation of patient tapping 'Yes' or 'Missed'.
-- `GET /api/adherence/today`: Fetch today's schedule and adherence statuses.
-- `GET /api/reminders/preferences`: Retrieve patient's auto-reminder & voice call settings.
-- `POST /api/reminders/preferences`: Toggle WhatsApp auto-reminders, voice call reminders, and dose slot timings.
-- `POST /api/medicines/{id}/stop`: Mark medicine as stopped/completed ("Patient is fit / healthy"), canceling all future reminders.
-- `POST /api/medicines/{id}/resume`: Reactivate a previously completed/stopped medicine.
-- `POST /api/medicines/{id}/toggle-reminders`: Pause or resume reminders for an individual medicine.
-- `POST /api/reminders/trigger-check`: Trigger an immediate automated check across all patients and due doses.
+### Notification Fatigue & Patient Privacy Control:
+- **Master WhatsApp & Voice Toggles:** Patients can pause automated WhatsApp notifications or phone calls with a single toggle in settings.
+- **"I'm Feeling Fit / Stop Medicine" Action:** Once a patient finishes an antibiotic course or acute medication, stopping the medicine immediately archives remaining doses and stops all notifications.
+- **IST Scheduled Windows:** Reminders only dispatch during daytime hours (09:00–20:00 IST).
 
-### 4. Patient Privacy & Notification Fatigue Control
-- **Master WhatsApp & Call Toggles:** Patients can pause automated WhatsApp nudges or Sahayak phone calls with a single click so they are never spammed.
-- **"I'm Feeling Fit / Stop Medicine" Action:** When a patient recovers or completes their prescribed course, clicking *"Stop Medicine"* immediately halts all reminders, archives today's pending doses, and records the completion in their medical history.
-- **Background Async Scheduler:** An automated background worker daemon (`start_reminder_scheduler_loop()`) monitors dose slot windows in Indian Standard Time (IST) and dispatches reminders only when auto-reminders are active.
+---
 
-> **Zero-Key Development Mode:** If `WHATSAPP_API_TOKEN` is not yet set in `.env`, the backend automatically runs in safe simulation mode, logging outbound payloads and permitting instant UI testing with zero errors.
+## Repository Structure
+
+```
+Aayogya/
+├── backend/                       System A — FastAPI Backend Brain
+│   ├── alembic/                   Database schema migrations
+│   ├── app/
+│   │   ├── preprocessor.py        Agent 1: Vision Preprocessor & Image Enhancement
+│   │   ├── extraction.py          Agent 2: Clinical Handwriting & VLM Decipherer
+│   │   ├── catalog.py             Agent 3: Indian Drug Knowledge Graph & Suffix Engine
+│   │   ├── dosage.py              Agent 4: Indian Dosage Notation Parser
+│   │   ├── confidence.py          Composite Grounded Confidence Scorer
+│   │   ├── graph.py               LangGraph HITL StateGraph Workflow
+│   │   ├── prices.py              Tri-Pillar Pricing Engine (PharmEasy / NPPA / PMBJP)
+│   │   ├── whatsapp.py            Meta WhatsApp Business Cloud API Integration
+│   │   ├── telephony.py           Outbound Doctor Follow-up SIP Dispatcher
+│   │   ├── caregiver.py           Caregiver Links, Family Resolver & Actions
+│   │   ├── auth.py                HMAC Bearer Auth & Actor Resolution (X-Patient-Id)
+│   │   ├── summary.py             Patient Summary & Doctor Visit Countdown
+│   │   ├── interactions.py        Drug-to-Drug Interaction Checking
+│   │   ├── data/
+│   │   │   ├── indian_medicines.json       100+ Indian brands, salts & forms
+│   │   │   ├── medicine_pricing_dataset.json Expanded pricing dataset
+│   │   │   └── medicine_pricing_dataset.csv  CSV dataset of medicine pricing
+│   │   ├── main.py                FastAPI Application, Router & Endpoints
+│   │   ├── models.py              SQLAlchemy Database Models
+│   │   ├── schemas.py             Pydantic v2 Request/Response Schemas
+│   │   └── seed.py                Database Seeder (Ramesh, Shanti, Meera, Aarav, Sunita)
+│   ├── test_multiagent_extraction.py  Comprehensive 4-Agent Pipeline Test Suite
+│   ├── test_whatsapp.py               WhatsApp Cloud API & Webhook Test Suite
+│   ├── test_telephony.py              Outbound Telephony & Rescheduling Test Suite
+│   ├── test_caregiver.py              18/18 Caregiver Role & Isolation Test Suite
+│   ├── test_dosage.py                 Dosage Notation Parser Unit Tests
+│   └── test_confidence.py             Confidence Scoring Unit Tests
+├── frontend/                      Next.js 14 PWA (App Router, GSAP, Leaflet)
+│   ├── app/
+│   │   ├── page.js                App Root (Patient Dashboard & Caregiver Portal)
+│   │   ├── layout.js              Root Layout with Aura Background
+│   │   └── globals.css            Design System, Dark Theme & Tailwind Styles
+│   ├── components/
+│   │   ├── Dashboard.js           Patient Dashboard Shell
+│   │   ├── Caregiver.js           Caregiver Family Portal & Quick Actions
+│   │   ├── Login.js               Quick-Login Persona Switcher & Custom Login
+│   │   ├── LiveVoiceAgent.js      Realtime LiveKit WebRTC Voice Interface
+│   │   ├── Assistant.js           AI Companion Text & Voice Chat Interface
+│   │   ├── Pharmacies.js          Leaflet Map of Nearby Chemists & Jan Aushadhi Kendras
+│   │   ├── Landing.js             Interactive Hero & Feature Showcase
+│   │   ├── sections.js            Overview, Meds, Timeline, Interactions & Pricing
+│   │   └── ui.js                  Price Badges, Review Cards, Metric Cards
+│   ├── lib/
+│   │   ├── api.js                 Authenticated Fetch Client & X-Patient-Id Header
+│   │   └── gsap.js                Smooth Scroll & Interactive Animations
+│   └── next.config.mjs            Next.js Proxy Rewrites (/api/* -> :8000, /agent/* -> :8081)
+└── agent/                         System B — Voice & Follow-up Companion
+    ├── voice.py                   Realtime WebRTC Voice Worker & Telephony Dial
+    ├── followup_prompt.py         Outbound Doctor Follow-up Telephony Persona
+    ├── prompt.py                  Saathi Companion Persona
+    ├── chat.py                    FastAPI Chat Server with Tool Calling
+    ├── backend_client.py          Authenticated Backend Client for Agent Tools
+    ├── test_agent.py              Companion Prompt & Routing Unit Tests
+    └── test_followup.py           Telephony Agent Rescheduling Tests
+```
 
 ---
 
 ## Quick Start
+
+### Port Allocation:
+- **Backend (FastAPI):** Port **8000** (`http://localhost:8000`)
+- **Frontend (Next.js):** Port **3000** (`http://localhost:3000`)
+- **Voice/Chat Agent (LiveKit/FastAPI):** Port **8080** / **8081**
+
+> **Note on Port 8000:** The frontend automatically proxies all `/api/*` network requests to `http://127.0.0.1:8000` via Next.js rewrites (`next.config.mjs`). Always launch the backend on port **8000**.
 
 ### 1. Backend (FastAPI + LangGraph) — Port 8000
 
@@ -302,11 +408,11 @@ python -m venv .venv
 # Install dependencies
 pip install -r requirements.txt
 
-# Run migrations & launch server
+# Run migrations & launch server on port 8000
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-> **Zero-Key Out of the Box:** The backend works immediately with zero API keys. Extraction defaults to the deterministic mock or local Ollama, and SQLite is used automatically.
+> **Zero-Key Out of the Box:** The backend works immediately with zero API keys. Extraction defaults to deterministic mock or local Ollama, and SQLite is initialized and seeded automatically.
 
 ### 2. Frontend (Next.js 14 PWA) — Port 3000
 
@@ -317,38 +423,63 @@ npm install
 npm run dev
 ```
 
-Visit **http://localhost:3000** in your browser. Upload any prescription photo (`.jpg`/`.png`) to watch the 4-agent pipeline and pricing engine in action.
+Visit **`http://localhost:3000`** in your browser.
+
+#### Demo Quick-Login Personas:
+- **Caregiver Persona (Meera Kulkarni):** Log in as `meera@demo.in` / `pass1234` to access the Caregiver Portal and manage father Ramesh and grandmother Shanti.
+- **Patient Persona (Ramesh Kulkarni):** Log in as `ramesh@demo.in` / `pass1234` to test individual prescription upload, adherence tracking, and pricing comparison.
+- **High-Risk Interaction Persona (Shanti Kulkarni):** Log in as `shanti@demo.in` / `pass1234` to view cross-doctor drug interaction warnings.
+
+### 3. Voice Companion & Telephony Worker (System B) — Port 8080
+
+```bash
+cd agent
+
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+# Start LiveKit Voice Worker
+python voice.py dev
+
+# Or start the Text Chatbot API
+uvicorn chat:app --reload --port 8080
+```
 
 ---
 
 ## Testing & Verification
 
-A comprehensive test suite verifies each agent and edge case:
+A comprehensive test suite verifies each subsystem and safety boundary:
 
 ```bash
 cd backend
 .venv\Scripts\activate
 
-# Run comprehensive 4-agent pipeline test suite (EXIF, JSON sanitizing, fuzzy matching, LangGraph HITL)
+# 1. Run 4-Agent Pipeline test suite (EXIF, JSON sanitizing, fuzzy matching, LangGraph HITL)
 python test_multiagent_extraction.py
 
-# Run WhatsApp Meta Cloud API adherence and webhook test suite
+# 2. Run Caregiver data isolation and patient linking test suite (18/18 passing)
+python test_caregiver.py
+
+# 3. Run Outbound Telephony & appointment reschedule test suite
+python test_telephony.py
+
+# 4. Run WhatsApp Meta Cloud API adherence and webhook test suite
 python test_whatsapp.py
 
-# Run unit tests
+# 5. Run Indian dosage parser & confidence scoring unit tests
 python test_dosage.py
 python test_confidence.py
-```
 
-### Verified Test Cases:
-- **Agent 1:** EXIF auto-rotation, RGBA transparency conversion, 2048px Lanczos downscaling, corrupt image handling.
-- **Agent 2:** Markdown code block sanitization (````json ... ````), trailing comma removal, conversational wrapper extraction.
-- **Agent 3:** Brand normalization (`"Dolo-650"` $\to$ `"dolo"`), combo suffix reasoning (`-D`, `-H`, `-AM`, `-GP`, `-SP`), cursive handwriting fuzzy matching (`"Agmntin"` $\to$ *Augmentin*).
-- **Agent 4:** Indian notations (`1-0-1`, `1/0/1`, `BBF`, `SOS`, `empty stomach`), expired vs active statuses, negative duration edge cases.
-- **LangGraph HITL:** State pauses at `human_confirm` interrupt and resumes smoothly upon confirmation.
+# 6. Run Telephony Voice Agent follow-up tests
+cd ../agent
+python test_followup.py
+python test_agent.py
+```
 
 ---
 
 ## Disclaimer
 
-Aayogya is **not a substitute for professional medical advice, diagnosis, or treatment**. Under India's Telemedicine Practice Guidelines 2020, Aayogya never prescribes medication or alters dosages. Always consult a registered medical practitioner with any health-related questions. In a medical emergency, call **108** immediately.
+Aayogya is **not a substitute for professional medical advice, diagnosis, or treatment**. Under India's Telemedicine Practice Guidelines 2020, Aayogya never prescribes medication, modifies clinical regimens, or alters dosages. Always consult a registered medical practitioner with any health-related questions. In a medical emergency in India, call **108** immediately.
