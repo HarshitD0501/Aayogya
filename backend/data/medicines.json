@@ -1,0 +1,194 @@
+{
+  "version": "2026-10-21-b1-curated-3-a2b",
+  "checked_on": "2026-10-21",
+  "records": [
+    {
+      "medicine_id": "pmbjp-299",
+      "product_code": "299",
+      "molecule_components": [
+        {
+          "name": "Telmisartan",
+          "amount": 20,
+          "unit": "mg"
+        }
+      ],
+      "molecule_label": "Telmisartan",
+      "strength_label": "20 mg",
+      "form": "tablet",
+      "release_type": null,
+      "pack": {
+        "quantity": 10,
+        "unit": "tablet"
+      },
+      "pmbjp_price": {
+        "amount_paise": 1134,
+        "currency": "INR",
+        "unit": "pack",
+        "source": {
+          "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+          "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+          "row_ref": "Sr No 236; Drug Code 299; Telmisartan Tablets IP 20mg; 10's; MRP INR 11.34",
+          "checked_on": "2026-10-21",
+          "source_as_of": "2026-10-21"
+        }
+      },
+      "nppa_ceiling_price": null,
+      "brand_products": [],
+      "source": {
+        "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+        "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+        "row_ref": "Sr No 236; Drug Code 299; Telmisartan Tablets IP 20mg; 10's; MRP INR 11.34",
+        "checked_on": "2026-10-21",
+        "source_as_of": "2026-10-21"
+      },
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "record_status": "incomplete"
+    },
+    {
+      "medicine_id": "pmbjp-300",
+      "product_code": "300",
+      "molecule_components": [
+        {
+          "name": "Telmisartan",
+          "amount": 40,
+          "unit": "mg"
+        }
+      ],
+      "molecule_label": "Telmisartan",
+      "strength_label": "40 mg",
+      "form": "tablet",
+      "release_type": null,
+      "pack": {
+        "quantity": 10,
+        "unit": "tablet"
+      },
+      "pmbjp_price": {
+        "amount_paise": 1238,
+        "currency": "INR",
+        "unit": "pack",
+        "source": {
+          "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+          "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+          "row_ref": "Sr No 237; Drug Code 300; Telmisartan Tablets IP 40mg; 10's; MRP INR 12.38",
+          "checked_on": "2026-10-21",
+          "source_as_of": "2026-10-21"
+        }
+      },
+      "nppa_ceiling_price": {
+        "amount_paise": 692,
+        "currency": "INR",
+        "unit": "tablet",
+        "source": {
+          "source_url": "https://nppa.gov.in/uploads/tender/0fd8be342c35d5a46a13b281cadc5e4f.pdf",
+          "document_ref": "NPPA Gazette ceiling record, notification 1489(E), dated 2025-03-27; current Pharma Sahi Daam result checked 2026-10-21",
+          "row_ref": "Row 705; Telmisartan; Tablet 40mg; 1 Tablet; ceiling INR 6.92",
+          "checked_on": "2026-10-21",
+          "source_as_of": "2025-03-27"
+        }
+      },
+      "brand_products": [
+        {
+          "brand_id": "a2b-40mg-tablet-10",
+          "name": "A2B 40 MG TABLET 10",
+          "molecule_components": [
+            {
+              "name": "Telmisartan",
+              "amount": 40,
+              "unit": "mg"
+            }
+          ],
+          "form": "tablet",
+          "release_type": null,
+          "pack": {
+            "quantity": 10,
+            "unit": "tablet"
+          },
+          "market_price": {
+            "amount_paise": 7462,
+            "currency": "INR",
+            "unit": "pack",
+            "source": {
+              "source_url": "https://nppaipdms.gov.in/NPPA/PharmaSahiDaam/searchMedicine",
+              "document_ref": "Pharma Sahi Daam Market Price (Available Brands) detail; displayed MRP as on Aug-2026; user screenshot supplied 2026-10-21",
+              "row_ref": "Formulation/Brand TELMISARTAN TABLET 40 MG / A2B; Fidelity Lifescience; MRP INR 74.62/10 TABLET",
+              "checked_on": "2026-10-21",
+              "source_as_of": "2026-10-21"
+            }
+          },
+          "source": {
+            "source_url": "https://nppaipdms.gov.in/NPPA/PharmaSahiDaam/searchMedicine",
+            "document_ref": "Pharma Sahi Daam Market Price (Available Brands) detail; displayed MRP as on Aug-2026; user screenshot supplied 2026-10-21",
+            "row_ref": "Formulation/Brand TELMISARTAN TABLET 40 MG / A2B; Fidelity Lifescience; MRP INR 74.62/10 TABLET",
+            "checked_on": "2026-10-21",
+            "source_as_of": "2026-10-21"
+          }
+        }
+      ],
+      "source": {
+        "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+        "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+        "row_ref": "Sr No 237; Drug Code 300; Telmisartan Tablets IP 40mg; 10's; MRP INR 12.38",
+        "checked_on": "2026-10-21",
+        "source_as_of": "2026-10-21"
+      },
+      "reviewed_by": "HarshitD05",
+      "reviewed_on": "2026-10-21",
+      "record_status": "verified",
+      "usage_summary": {
+        "hi": "टेल्मिसार्टन उच्च रक्तचाप (ब्लड प्रेशर) की दवा है। इसे डॉक्टर की सलाह के अनुसार ही लें।",
+        "en": "Telmisartan is used to treat high blood pressure (hypertension). Take only as directed by your doctor.",
+        "source": {
+          "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+          "document_ref": "PMBI Essential Medicines Clinical Reference & CDSCO Indication Database",
+          "row_ref": "Drug Code 300; Telmisartan 40mg reviewed indication summary",
+          "checked_on": "2026-10-21",
+          "source_as_of": "2026-10-21"
+        }
+      }
+    },
+    {
+      "medicine_id": "pmbjp-291",
+      "product_code": "291",
+      "molecule_components": [
+        {
+          "name": "Metoprolol",
+          "amount": 50,
+          "unit": "mg"
+        }
+      ],
+      "molecule_label": "Metoprolol",
+      "strength_label": "50 mg",
+      "form": "tablet",
+      "release_type": "extended",
+      "pack": {
+        "quantity": 10,
+        "unit": "tablet"
+      },
+      "pmbjp_price": {
+        "amount_paise": 1021,
+        "currency": "INR",
+        "unit": "pack",
+        "source": {
+          "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+          "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+          "row_ref": "Sr No 230; Drug Code 291; Metoprolol Extended release Tablets IP 50mg; 10's; MRP INR 10.21",
+          "checked_on": "2026-10-21",
+          "source_as_of": "2026-10-21"
+        }
+      },
+      "nppa_ceiling_price": null,
+      "brand_products": [],
+      "source": {
+        "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+        "document_ref": "PMBI Product List CSV, exported 2026-10-21 11:28 IST, SHA-256 4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f",
+        "row_ref": "Sr No 230; Drug Code 291; Metoprolol Extended release Tablets IP 50mg; 10's; MRP INR 10.21",
+        "checked_on": "2026-10-21",
+        "source_as_of": "2026-10-21"
+      },
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "record_status": "incomplete"
+    }
+  ]
+}

@@ -1,45 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-sans), "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), "Playfair Display", Georgia, serif;
 
-  /* Major White Base */
-  --bg: #f3f0e9;
-  --bg-white: #f7f4ee;
-  --surface: #fdfcf9;
-  --surface-2: #f3f0e9;
+  /* Deciding Health Tokens */
+  --brand-navy: #1a2234;
+  --brand-orange: #e8a838;
+  --brand-cream: #f5f2eb;
+  --brand-peach: #f4c4a8;
+  --brand-gray: #6b6b6b;
+  --brand-white: #ffffff;
+
+  --bg: #f5f2eb;
+  --bg-white: #f5f2eb;
+  --surface: #ffffff;
+  --surface-2: #f5f2eb;
   --surface-hover: #ede9e0;
-  --surface-glass: rgba(253, 252, 249, 0.88);
+  --surface-glass: rgba(255, 255, 255, 0.92);
 
-  --ink: #161b27;
-  --ink-secondary: #3d4250;
-  --muted: #75716a;
-  --muted-light: #a8a29a;
-  --line: #e3ded2;
-  --line-light: rgba(227, 222, 210, 0.7);
+  --ink: #1a2234;
+  --ink-secondary: #2c364d;
+  --muted: #6b6b6b;
+  --muted-light: #9ea3ae;
+  --line: rgba(26, 34, 52, 0.12);
+  --line-light: rgba(26, 34, 52, 0.08);
 
-  /* Clean dark-ink + blue accent (dental-clinic template language).
-     Names kept for backwards-compat; purple values remapped to navy/blue
-     so the whole dashboard re-themes off these tokens. */
-  --blue-primary: #b07f14;
-  --blue-vibrant: #e4a635;
-  --indigo-primary: #b07f14;
-  --purple-primary: #8a5f0a;
-  --purple-vibrant: #e4a635;
-  --violet-soft: #f0cd7e;
+  --blue-primary: #1a2234;
+  --blue-vibrant: #e8a838;
+  --indigo-primary: #1a2234;
+  --purple-primary: #1a2234;
+  --purple-vibrant: #e8a838;
+  --violet-soft: #f4c4a8;
 
-  --brand-grad: linear-gradient(135deg, #242a38 0%, #161b27 100%);
-  --brand-grad-hover: linear-gradient(135deg, #161b27 0%, #10141d 100%);
-  --brand-grad-subtle: linear-gradient(135deg, rgba(228, 166, 53, 0.14) 0%, rgba(228, 166, 53, 0.05) 100%);
-  --brand-grad-glow: 0 10px 24px -8px rgba(22, 27, 39, 0.4);
+  --brand-grad: linear-gradient(135deg, #1a2234 0%, #121824 100%);
+  --brand-grad-hover: linear-gradient(135deg, #121824 0%, #0c1018 100%);
+  --brand-grad-subtle: linear-gradient(135deg, rgba(232, 168, 56, 0.14) 0%, rgba(232, 168, 56, 0.05) 100%);
+  --brand-grad-glow: 0 10px 24px -8px rgba(26, 34, 52, 0.4);
 
-  --brand: #b07f14;
-  --brand-strong: #8a5f0a;
-  --brand-soft: #f6e9c8;
+  --brand: #e8a838;
+  --brand-strong: #1a2234;
+  --brand-soft: #f4c4a8;
 
-  --accent-blue: #e4a635;
-  --accent-purple: #b07f14;
-  --accent-soft: #f6e9c8;
+  --accent-blue: #e8a838;
+  --accent-purple: #1a2234;
+  --accent-soft: #f4c4a8;
 
   /* Status Colors */
   --success: #5a7d2a;
@@ -459,6 +468,7 @@ button { font-family: inherit; }
   position: sticky;
   top: 0;
   height: 100dvh;
+  overflow-y: auto;
   z-index: 10;
 }
 
@@ -2446,8 +2456,8 @@ html { scroll-behavior: smooth; }
    section carries its own accent; grouped nav with labels.
    ============================================================ */
 .sidebar {
-  background: linear-gradient(180deg, #0f172a 0%, #111c33 100%);
-  border-right: none;
+  background: var(--brand-cream);
+  border-right: 2px solid var(--brand-navy);
   gap: 2px;
   padding: 22px 14px;
 }
@@ -2477,7 +2487,7 @@ html { scroll-behavior: smooth; }
 }
 .home-link:hover {
   background: rgba(168, 162, 153, 0.16);
-  color: #f1f5f9;
+  color: var(--brand-navy);
 }
 .nav-group { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
 .nav-group-label {
@@ -2568,7 +2578,7 @@ html { scroll-behavior: smooth; }
 .who-meta .nm {
   font-weight: 700;
   font-size: 13.5px;
-  color: #f1f5f9;
+  color: var(--brand-navy);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3254,3 +3264,142 @@ html { scroll-behavior: smooth; }
 .ed-nav .brand-logo-img { height: 32px; }
 .ed-footer-brand .brand-logo-img { height: 34px; }
 .sidebar .brand-logo-img { height: 28px; max-width: 100%; }
+
+
+/* ==============================================================
+   DECIDING HEALTH V2 - MASTER DESIGN SYSTEM RULES & UTILITIES
+   ============================================================== */
+
+body {
+  background-color: #f5f2eb !important;
+  color: #1a2234 !important;
+}
+
+/* Hand-drawn organic border radius simulation */
+.sketchy-box {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+}
+.sketchy-btn {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+.sketchy-oval {
+  border-radius: 50% / 100% 100% 80% 80% !important;
+}
+
+/* Marker Highlight Effect */
+.marker-highlight {
+  background-image: linear-gradient(120deg, #f4c4a8 0%, #f4c4a8 100%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 40% !important;
+  background-position: 0 85% !important;
+  transition: background-size 0.25s ease-in !important;
+}
+
+/* Wavy Underline Generator */
+.wavy-underline {
+  text-decoration: underline !important;
+  text-decoration-style: wavy !important;
+  text-decoration-color: #e8a838 !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 4px !important;
+}
+
+/* Audio / Data Bars Animation */
+.bar {
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.bar:nth-child(odd) { animation-duration: 0.8s; }
+.bar:nth-child(2) { animation-duration: 1.1s; }
+.bar:nth-child(4) { animation-duration: 0.9s; }
+@keyframes bounce {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* Reveal Animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease-out;
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ==============================================================
+   UNIVERSALITY LAW: PWA & WORKSPACE DOSSIER SYSTEM
+   ============================================================== */
+
+.card, .pwa-card, .dossier-card {
+  background: #ffffff !important;
+  border: 2px solid #1a2234 !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: 4px 4px 0px 0px #1a2234 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.card:hover, .pwa-card:hover, .dossier-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 2px 2px 0px 0px #1a2234 !important;
+}
+
+.btn, .ed-btn, button.btn {
+  border: 2px solid #1a2234 !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 11px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.btn-primary, .btn-brand, .btn-gold, .ed-btn-gold {
+  background: #e8a838 !important;
+  color: #1a2234 !important;
+  border: 2px solid #1a2234 !important;
+  box-shadow: 4px 4px 0px 0px #1a2234 !important;
+}
+
+.btn-primary:hover, .btn-brand:hover, .btn-gold:hover, .ed-btn-gold:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px 0px #1a2234 !important;
+}
+
+.btn-outline, .btn-ghost {
+  background: transparent !important;
+  color: #1a2234 !important;
+  border: 2px solid #1a2234 !important;
+}
+
+.btn-outline:hover, .btn-ghost:hover {
+  background: #ffffff !important;
+}
+
+.sidebar {
+  background: #f5f2eb !important;
+  border-right: 2px solid #1a2234 !important;
+}
+
+.topbar {
+  background: rgba(245, 242, 235, 0.95) !important;
+  border-bottom: 2px solid #1a2234 !important;
+}
+
+.nav-item.active {
+  background: #e8a838 !important;
+  color: #1a2234 !important;
+  border: 2px solid #1a2234 !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: 2px 2px 0px 0px #1a2234 !important;
+}
+
+.who-card {
+  background: #ffffff !important;
+  color: #1a2234 !important;
+  border: 2px solid #1a2234 !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: 4px 4px 0px 0px #1a2234 !important;
+}

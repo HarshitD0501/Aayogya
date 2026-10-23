@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// Aayogya Assistant: Combines real-time 2-way WebRTC Live Voice Agent
+// Ayogya Assistant: Combines real-time 2-way WebRTC Live Voice Agent
 // (LiveKit + Deepgram Nova-3 + Gemini 2.5 + Murf Falcon) with text chat fallback.
 const STARTERS = [
   "मेरी दवाइयाँ कौन सी हैं?",

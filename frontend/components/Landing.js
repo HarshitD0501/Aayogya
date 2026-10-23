@@ -1,44 +1,47 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
+
 import { useEffect, useState } from "react";
 import { useScrollReveal, useScrollCountUp } from "@/lib/gsap";
-import { BrandMark } from "@/components/ui";
-import { getPublicPrices, DEMO_USERS, login } from "@/lib/api";
+import { DEMO_USERS, getPublicPrices, login } from "@/lib/api";
 import {
   ScanLine, ShieldAlert, MessageCircleHeart, Tag, MapPin, Bell,
   ArrowRight, Stethoscope, Lock, CheckCircle2, Search,
   Users, AlertTriangle, CircleDollarSign, CalendarClock,
   Pill, ChevronRight, ShieldCheck, Database, HeartPulse, PhoneCall, Play,
-  Radio, Pause,
+  Radio, Pause, Mail, Compass, Sparkles, Check, LayoutDashboard,
 } from "lucide-react";
 
-// ---- Hero benefit ticker (auto-advancing one-liners) ----
+// ---- Hero benefit ticker ----
 const HERO_SLIDES = [
-  "One record across every doctor.",
+  "One unified record across every doctor.",
   "Dangerous drug combinations, caught early.",
   "WhatsApp reminders your parents actually read.",
   "Family can watch over elders from anywhere.",
 ];
 
-// ---- Interactive "problem" visualiser (bars animate on facet change) ----
+// ---- The Problem: interactive data facets ----
 const PROBLEMS = [
   {
     key: "adherence", label: "Missed doses", Icon: Pill,
-    stat: "≈ 50%", statLabel: "of patients with chronic illness don't take medicines as prescribed (WHO)",
+    stat: "≈ 50%", statLabel: "of patients with chronic illness miss doses (WHO)",
     bars: [
-      { name: "Taken as prescribed", value: 50, tone: "ok" },
-      { name: "Missed or irregular", value: 50, tone: "bad" },
+      { name: "Taken as prescribed", value: 50, color: "bg-brand-navy" },
+      { name: "Missed or irregular", value: 50, color: "bg-brand-orange" },
     ],
     note: "Half of every long-term prescription is effectively wasted — not because the medicine fails, but because doses are missed.",
   },
   {
     key: "multidoctor", label: "Many doctors, no shared view", Icon: Users,
-    stat: "3+", statLabel: "specialists a chronic patient sees — none seeing each other's notes",
+    stat: "3+", statLabel: "specialists a chronic patient sees with zero shared notes",
     bars: [
-      { name: "Cardiologist's script", value: 100, tone: "neutral" },
-      { name: "Physician's script", value: 100, tone: "neutral" },
-      { name: "Orthopaedic's script", value: 100, tone: "neutral" },
-      { name: "One shared record", value: 10, tone: "bad" },
+      { name: "Cardiologist's script", value: 100, color: "bg-brand-navy" },
+      { name: "Physician's script", value: 100, color: "bg-brand-navy" },
+      { name: "Orthopaedic's script", value: 100, color: "bg-brand-navy" },
+      { name: "One shared record", value: 10, color: "bg-brand-orange" },
     ],
     note: "Prescriptions pile up on paper. No single doctor sees the whole list — so combinations like Ibuprofen + Aspirin slip through.",
   },
@@ -46,9 +49,9 @@ const PROBLEMS = [
     key: "price", label: "Overpaying for medicines", Icon: CircleDollarSign,
     stat: "up to 80%", statLabel: "cheaper on Jan Aushadhi generics vs branded retail",
     bars: [
-      { name: "Branded retail", value: 100, tone: "bad" },
-      { name: "NPPA price ceiling", value: 62, tone: "neutral" },
-      { name: "Jan Aushadhi generic", value: 22, tone: "ok" },
+      { name: "Branded retail", value: 100, color: "bg-brand-navy" },
+      { name: "NPPA price ceiling", value: 62, color: "bg-brand-navy/60" },
+      { name: "Jan Aushadhi generic", value: 20, color: "bg-brand-orange" },
     ],
     note: "The same salt and strength can cost a fraction at a Jan Aushadhi Kendra — most families simply never see the comparison.",
   },
@@ -56,80 +59,126 @@ const PROBLEMS = [
     key: "followup", label: "Missed follow-ups", Icon: CalendarClock,
     stat: "1 in 4", statLabel: "follow-up visits slip, breaking the treatment thread",
     bars: [
-      { name: "Attended on time", value: 74, tone: "ok" },
-      { name: "Missed or late", value: 26, tone: "bad" },
+      { name: "Attended on time", value: 74, color: "bg-brand-navy" },
+      { name: "Missed or late", value: 26, color: "bg-brand-orange" },
     ],
     note: "When the next review date lives on a paper slip, it gets forgotten — and the condition drifts untracked between visits.",
   },
 ];
 
-// ---- Interactive feature explorer ----
-const FEATURES = [
-  { key: "ocr", Icon: ScanLine, title: "Prescription OCR", body: "Snap any script — printed or handwritten. We read the brand, salt, strength and dosage, then let you confirm before anything is saved." },
-  { key: "safety", Icon: ShieldAlert, title: "Interaction safety check", body: "Checks interactions across the salts of every active medicine you hold — across all your doctors. Never called “guaranteed safe”.", tag: "Safety moat" },
-  { key: "explain", Icon: MessageCircleHeart, title: "Plain-language explanations", body: "What each medicine is for, in your language, grounded in real drug data — always deferring the final word to your doctor." },
-  { key: "price", Icon: Tag, title: "Fair price comparison", body: "Match by salt and strength across branded retail, NPPA ceilings, and Jan Aushadhi generic alternatives." },
-  { key: "map", Icon: MapPin, title: "Nearby chemists", body: "Find local pharmacies on a live map, confirm stock by phone, and get turn-by-turn directions in a tap." },
-  { key: "whatsapp", Icon: Bell, title: "WhatsApp reminders", body: "Gentle dose and follow-up reminders on the app people already open every day. Confirm a dose with a single tap." },
+// ---- Feature Dossiers Grid ----
+const FEATURE_DOSSIERS = [
+  {
+    ep: "DOSSIER 01",
+    tag: "Prescription OCR",
+    title: "Instant Script Digitization",
+    desc: "Snap any script — printed or handwritten. Reads brand, salt, strength, and schedule. Requires explicit confirmation before saving.",
+    img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop",
+    key: "ocr",
+  },
+  {
+    ep: "DOSSIER 02",
+    tag: "Safety Moat",
+    title: "Multi-Doctor Interaction Graph",
+    desc: "Cross-checks salts across all active prescriptions against 300,000+ cited interactions. Deferring final clinical judgment to doctors.",
+    img: "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg",
+    key: "safety",
+  },
+  {
+    ep: "DOSSIER 03",
+    tag: "Price Transparency",
+    title: "Jan Aushadhi Generic Discovery",
+    desc: "Match identical salts against Jan Aushadhi generic alternatives and NPPA ceilings. Save up to 80% with verified nearby stock.",
+    img: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?q=80&w=1200&auto=format&fit=crop",
+    key: "price",
+  },
+  {
+    ep: "DOSSIER 04",
+    tag: "Adherence Engine",
+    title: "WhatsApp & Voice Companion",
+    desc: "Gentle reminders on the app parents already use every day. Single-tap response logging (Haan, Nahi, 10 min) with voice fallbacks.",
+    img: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=1200&auto=format&fit=crop",
+    key: "whatsapp",
+  },
+  {
+    ep: "DOSSIER 05",
+    tag: "Geo Navigation",
+    title: "Verified Kendra Locator",
+    desc: "Find verified Jan Aushadhi Kendras and local pharmacies within your radius with stock status and direct call buttons.",
+    img: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=1200&auto=format&fit=crop",
+    key: "map",
+  },
+  {
+    ep: "DOSSIER 06",
+    tag: "Caregiver View",
+    title: "Remote Family Telemetry",
+    desc: "Watch over elder parents' dose adherence from any city with proactive alerts if scheduled doses are repeatedly missed.",
+    img: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1200&auto=format&fit=crop",
+    key: "caregiver",
+  },
 ];
 
-const TRUST = [
-  { Icon: Stethoscope, title: "Defers to your doctor", body: "Aayogya never diagnoses, prescribes, or changes a dose. Every clinical-adjacent answer ends by asking you to confirm with your doctor." },
-  { Icon: Lock, title: "Per-patient isolation", body: "Every query and every record is bounded to your authenticated session. No cross-patient leakage, by design." },
-  { Icon: CheckCircle2, title: "Human-in-the-loop", body: "Nothing is scheduled, flagged, or saved until you review and confirm exactly what we read from your prescription." },
-  { Icon: Database, title: "Sourced interaction data", body: "Interactions are checked against curated, cited rows — shown as “checked against N known interactions”, never an absolute guarantee." },
-];
-
-const CRED = [
-  "FastAPI + LangGraph", "Gemini Vision OCR", "HL7 FHIR R4 (ABDM)", "DPDP-aligned", "Data localized in India",
-];
-
-// ---- Scroll-counting stats band (count up on scroll into view) ----
+// ---- Scroll-counting stats band ----
 const STATS = [
-  { to: 250, suffix: "K+", label: "Indian medicines mapped", sub: "Brand → salt catalogue powering every parse." },
-  { to: 300, suffix: "K+", label: "Drug interactions catalogued", sub: "Curated, cited safety data we check against." },
+  { to: 250, suffix: "K+", label: "Indian medicines mapped", sub: "Brand to salt catalogue powering every parse." },
+  { to: 300, suffix: "K+", label: "Drug interactions catalogued", sub: "Curated, cited safety data we cross-check." },
   { to: 9, suffix: "+", label: "Languages, voice & text", sub: "Hindi, Hinglish and more — spoken, not typed." },
 ];
 
-// ---- Pricing tiers (DESIGN §2 feature split) ----
+// ---- Pricing tiers ----
 const TIERS = [
   {
-    name: "Free", price: "₹0", period: "forever",
+    name: "Free Forever",
+    price: "₹0",
+    period: "forever",
     tagline: "Everything you need to understand your medicines and stay safe.",
     features: [
       "Prescription upload + OCR parsing",
-      "Plain-language explanations",
-      "Drug-interaction safety flag",
-      "Health records timeline",
-      "Emergency “Call 108” card",
+      "Plain-language medicine explanations",
+      "Multi-doctor interaction safety flag",
+      "Jan Aushadhi price comparison",
+      "Emergency Call 108 card",
     ],
-    cta: "Start free",
+    cta: "Start Free",
+    highlight: false,
+    demoId: "aarav",
   },
   {
-    name: "Pro", price: "₹99", period: "/ month", highlight: true,
-    tagline: "The full adherence engine — reminders, prices, follow-ups and voice.",
+    name: "Ayogya Pro",
+    price: "₹99",
+    period: "/ month",
+    tagline: "The complete adherence engine — reminders, prices, and voice check-ins.",
     features: [
-      "Everything in Free",
-      "Medicine price comparison + nearby chemists",
-      "WhatsApp dose reminders",
-      "Follow-up appointment reminders",
-      "Voice check-in calls (usage-limited)",
-      "Adherence tracking + trends",
+      "Everything in Free Forever",
+      "Automated WhatsApp dose reminders",
+      "Doctor follow-up appointment tracking",
+      "Sahayak AI voice check-in calls",
+      "Remote caregiver alert portal",
+      "Historical adherence telemetry",
     ],
-    cta: "Go Pro",
+    cta: "Launch Pro Experience",
+    highlight: true,
+    demoId: "ramesh",
   },
 ];
 
 export default function Landing({
-  patient, onSelectDemo, onOpenDashboard, onLoginSuccess, onLogout,
+  patient,
+  onSelectDemo,
+  onOpenDashboard,
+  onLoginSuccess,
 }) {
+  const router = useRouter();
   const scope = useScrollReveal([]);
-
   const [slide, setSlide] = useState(0);
   const [problem, setProblem] = useState("adherence");
-  const [feature, setFeature] = useState("safety");
+  const [activeFeatureKey, setActiveFeatureKey] = useState("ocr");
 
-  // Inline login (the "Login" section)
+  // Email brief newsletter state
+  const [subEmail, setSubEmail] = useState("");
+  const [subSuccess, setSubSuccess] = useState(false);
+
+  // Inline login
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
@@ -137,25 +186,40 @@ export default function Landing({
 
   useEffect(() => {
     let alive = true;
-    const t = setInterval(
-      () => alive && setSlide((s) => (s + 1) % HERO_SLIDES.length), 3200
-    );
-    return () => { alive = false; clearInterval(t); };
+    const t = setInterval(() => {
+      if (alive) setSlide((s) => (s + 1) % HERO_SLIDES.length);
+    }, 3400);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
   }, []);
 
   const doLogin = async (e) => {
     e.preventDefault();
-    setBusy(true); setErr("");
+    setBusy(true);
+    setErr("");
     try {
       const p = await login(email.trim(), pw);
       onLoginSuccess && onLoginSuccess(p);
     } catch (e2) {
       setErr(e2.message || "Sign in failed");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!subEmail.trim()) return;
+    setSubSuccess(true);
+    setTimeout(() => {
+      setSubEmail("");
+      setSubSuccess(false);
+    }, 4000);
   };
 
   const pb = PROBLEMS.find((p) => p.key === problem) || PROBLEMS[0];
-  const ft = FEATURES.find((f) => f.key === feature) || FEATURES[0];
 
   const scrollTo = (id) => (e) => {
     e.preventDefault();
@@ -163,466 +227,791 @@ export default function Landing({
   };
 
   return (
-    <div className="ed" ref={scope}>
-      {/* ===== NAV ===== */}
-      <nav className="ed-nav">
-        <BrandMark />
-        <div className="ed-nav-links">
-          <a href="#problem" onClick={scrollTo("problem")}>The Problem</a>
-          <a href="#features" onClick={scrollTo("features")}>Features</a>
-          <a href="#trust" onClick={scrollTo("trust")}>Trust</a>
-          <a href="#pricing" onClick={scrollTo("pricing")}>Pricing</a>
-        </div>
-        <div className="ed-nav-actions">
-          {patient ? (
-            <>
-              <span className="ed-who"><span className="ed-who-dot">{patient.name?.[0] || "P"}</span>{patient.name?.split(" ")[0]}</span>
-              <button className="ed-btn ed-btn-ink" onClick={onOpenDashboard}>Dashboard <ArrowRight size={15} /></button>
-            </>
-          ) : (
-            <>
-              <a href="#login" className="ed-btn ed-btn-ghost" onClick={scrollTo("login")}>Sign In</a>
-              <button className="ed-btn ed-btn-gold" onClick={() => onSelectDemo("ramesh")}>Try Live Demo <ArrowRight size={15} /></button>
-            </>
-          )}
-        </div>
-      </nav>
+    <div className="min-h-screen bg-brand-cream text-brand-navy font-sans antialiased selection:bg-brand-peach selection:text-brand-navy" ref={scope}>
+      
+      {/* ==============================================================
+          1. UNIFIED AYOGYA NAVBAR
+          ============================================================== */}
+      <Navbar isLanding={true} />
 
-      {/* ===== HERO ===== */}
-      <header className="ed-hero">
-        <div className="ed-hero-copy">
-          <span className="ed-eyebrow" data-reveal><span className="ed-eyebrow-dot" /> Non-clinical · Doctor-first</span>
-          <h1 className="ed-display" data-reveal>
-            Your medicines,<br />finally <mark className="ed-mark">made clear.</mark>
-          </h1>
-          <div className="ed-ticker" data-reveal>
-            {HERO_SLIDES.map((s, i) => (
-              <span key={i} className={`ed-ticker-item ${i === slide ? "on" : ""}`}>{s}</span>
-            ))}
-          </div>
-          <p className="ed-lead" data-reveal>
-            Aayogya reads prescriptions from every doctor, explains them in plain language,
-            flags dangerous drug interactions, and tracks fair generic prices — while keeping
-            every clinical decision strictly with your registered doctor.
-          </p>
-          <div className="ed-hero-cta" data-reveal>
-            <button className="ed-btn ed-btn-gold ed-btn-lg" onClick={() => onSelectDemo("ramesh")}>
-              Launch Live Demo <ArrowRight size={18} />
-            </button>
-            <a href="#problem" className="ed-btn ed-btn-outline ed-btn-lg" onClick={scrollTo("problem")}>
-              See the problem
-            </a>
-          </div>
-          <div className="ed-hero-trust" data-reveal>
-            <span><ShieldCheck size={15} /> Interaction safety</span>
-            <span><Tag size={15} /> Fair prices</span>
-            <span><MessageCircleHeart size={15} /> WhatsApp tracking</span>
-          </div>
-        </div>
+      {/* ==============================================================
+          2. SPLIT HERO SECTION
+          ============================================================== */}
+      <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+          
+          {/* Left: Content */}
+          <div className="lg:col-span-6 flex flex-col justify-center items-start space-y-8 reveal active">
+            
+            {/* Hand-drawn label */}
+            <div className="relative inline-block mb-2">
+              <div className="absolute inset-0 border-2 border-brand-orange sketchy-oval transform -rotate-2" />
+              <span className="relative block px-5 py-2 text-[10px] font-bold tracking-[0.15em] text-brand-navy uppercase">
+                Non-Clinical · Doctor-First
+              </span>
+            </div>
 
-        {/* Sahayak voice-agent player — same shape/angle as the reference card */}
-        <div className="ed-hero-right" data-reveal data-anim="zoom">
-          <SahayakPlayer />
+            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl font-medium text-brand-navy leading-[1.05] tracking-tight">
+              Better decisions. <br />
+              <span className="marker-highlight inline-block px-1 transform -rotate-1">Better health.</span> <br />
+              Fair prices.
+            </h1>
+
+            {/* Benefit Ticker */}
+            <div className="text-sm font-mono text-brand-navy bg-brand-peach/20 border border-brand-navy/20 px-3 py-1.5 sketchy-box">
+              <span className="text-brand-orange font-bold mr-2">●</span>
+              {HERO_SLIDES[slide]}
+            </div>
+
+            <p className="text-lg text-brand-gray font-sans font-light leading-relaxed max-w-lg">
+              Ayogya reads prescriptions from every specialist, explains them in simple language,
+              flags dangerous drug interactions, and uncovers <span className="border-b-2 border-brand-peach border-dashed">Jan Aushadhi generic savings</span> — while deferring every clinical decision to your registered doctor.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <Link
+                href="/app"
+                prefetch={true}
+                className="sketchy-btn bg-brand-navy hover:bg-[#25314a] text-brand-cream border-2 border-brand-navy px-8 py-4 font-bold text-xs uppercase tracking-widest shadow-sketch hover:shadow-sketch-hover hover:translate-x-[2px] hover:translate-y-[2px] flex items-center gap-3 transition-all"
+              >
+                <LayoutDashboard className="w-4 h-4 text-brand-orange" />
+                Open Dashboard
+              </Link>
+              <a
+                href="#problem"
+                onClick={scrollTo("problem")}
+                className="sketchy-btn bg-transparent text-brand-navy border-2 border-brand-navy px-8 py-4 font-bold text-xs uppercase tracking-widest hover:bg-brand-white transition-colors"
+              >
+                See The Problem
+              </a>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs font-bold uppercase tracking-wider text-brand-navy/70">
+              <span className="flex items-center gap-1.5"><ShieldCheck size={16} className="text-brand-orange" /> Safety Moat</span>
+              <span className="flex items-center gap-1.5"><Tag size={16} className="text-brand-orange" /> Jan Aushadhi</span>
+              <span className="flex items-center gap-1.5"><MessageCircleHeart size={16} className="text-brand-orange" /> WhatsApp Bot</span>
+            </div>
+          </div>
+
+          {/* Right: Player Card */}
+          <div className="lg:col-span-6 relative flex items-center justify-center lg:justify-end reveal delay-100 active w-full">
+            {/* Decorative Arrow SVG */}
+            <svg
+              className="absolute -top-12 -left-12 w-24 h-24 text-brand-navy/20 transform rotate-12 z-0 hidden sm:block"
+              viewBox="0 0 100 100"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M10,50 Q30,20 60,10" markerEnd="url(#arrowhead)" />
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
+                </marker>
+              </defs>
+            </svg>
+
+            <SahayakPlayerCard onLaunchDemo={() => onSelectDemo("ramesh")} />
+          </div>
         </div>
       </header>
-      {/* ===== THE PROBLEM (interactive graph) ===== */}
-      <section className="ed-section ed-problem" id="problem">
-        <div className="ed-head" data-reveal data-anim="left">
-          <span className="ed-pill">The Problem</span>
-          <h2 className="ed-h2">
-            Managing medicines on paper is <mark className="ed-mark">quietly failing</mark> millions of families.
-          </h2>
-          <p className="ed-sub">
-            Pick a problem below to see what it really costs — then see how Aayogya closes the gap.
-          </p>
-        </div>
 
-        <div className="ed-problem-grid" data-reveal data-anim="right">
-          {/* facet selector */}
-          <div className="ed-facets">
-            {PROBLEMS.map((p) => (
-              <button
-                key={p.key}
-                className={`ed-facet ${problem === p.key ? "on" : ""}`}
-                onClick={() => setProblem(p.key)}
-              >
-                <span className="ed-facet-ic"><p.Icon size={18} /></span>
-                <span className="ed-facet-lbl">{p.label}</span>
-                <ChevronRight size={16} className="ed-facet-arrow" />
-              </button>
-            ))}
-          </div>
-
-          {/* animated chart */}
-          <div className="ed-chart" key={pb.key}>
-            <div className="ed-chart-stat">
-              <span className="ed-chart-big">{pb.stat}</span>
-              <span className="ed-chart-lbl">{pb.statLabel}</span>
+      {/* ==============================================================
+          3. THE PROBLEM SECTION (NOTEBOOK STYLE)
+          ============================================================== */}
+      <section className="py-24 border-y-2 border-brand-navy/10 relative" id="problem">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-16 text-center reveal active">
+            <div className="inline-block border-2 border-brand-navy px-4 py-1 mb-6 sketchy-box transform -rotate-1">
+              <span className="font-bold text-xs tracking-widest text-brand-navy uppercase">The Problem</span>
             </div>
-            <div className="ed-bars">
-              {pb.bars.map((b, i) => (
-                <div className="ed-bar-row" key={b.name}>
-                  <span className="ed-bar-name">{b.name}</span>
-                  <span className="ed-bar-track">
-                    <span
-                      className={`ed-bar-fill t-${b.tone}`}
-                      style={{ width: `${b.value}%`, animationDelay: `${i * 90}ms` }}
-                    />
-                  </span>
-                  <span className="ed-bar-val">{b.value}%</span>
-                </div>
-              ))}
-            </div>
-            <p className="ed-chart-note">{pb.note}</p>
-          </div>
-        </div>
-        <p className="ed-foot-note" data-reveal>
-          Adherence figure: WHO, <em>Adherence to Long-Term Therapies</em>. Price and visit figures are illustrative of patterns Aayogya is built to fix.
-        </p>
-      </section>
-      {/* ===== FEATURES (interactive explorer) ===== */}
-      <section className="ed-section" id="features">
-        <div className="ed-head" data-reveal data-anim="zoom">
-          <span className="ed-pill">What you get</span>
-          <h2 className="ed-h2">
-            Everything your prescriptions need, <mark className="ed-mark">under one roof.</mark>
-          </h2>
-          <p className="ed-sub">Tap a capability to see it in action.</p>
-        </div>
-
-        <div className="ed-feat-explorer" data-reveal>
-          <div className="ed-feat-list">
-            {FEATURES.map((f) => (
-              <button
-                key={f.key}
-                className={`ed-feat-item ${feature === f.key ? "on" : ""}`}
-                onClick={() => setFeature(f.key)}
-              >
-                <span className="ed-feat-ic"><f.Icon size={18} /></span>
-                <span className="ed-feat-txt">
-                  <strong>{f.title}</strong>
-                  {f.tag && <span className="ed-feat-tag">{f.tag}</span>}
-                </span>
-                <ChevronRight size={16} className="ed-feat-arrow" />
-              </button>
-            ))}
-          </div>
-
-          <div className="ed-feat-detail" key={ft.key}>
-            <span className="ed-feat-detail-ic"><ft.Icon size={26} /></span>
-            <h3>{ft.title}</h3>
-            <p>{ft.body}</p>
-            <FeatureVisual k={ft.key} />
-          </div>
-        </div>
-      </section>
-      {/* ===== STATS BAND (scroll count-up) ===== */}
-      <section className="ed-band-section">
-        <div className="ed-band">
-          <div className="ed-band-inner" data-reveal>
-            <div className="ed-band-hero">
-              <span className="ed-band-rank">#1</span>
-              <strong>Patient Choice</strong>
-              <p>We're dedicated to your family's comfort and health — making Aayogya a trusted choice across India.</p>
-            </div>
-            <div className="ed-band-stats">
-              {STATS.map((s) => <CountStat key={s.label} {...s} />)}
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* ===== TRUST & CREDIBILITY ===== */}
-      <section className="ed-section ed-trust" id="trust">
-        <div className="ed-trust-grid">
-          <div className="ed-trust-copy" data-reveal data-anim="left">
-            <span className="ed-pill">Built to be trusted</span>
-            <h2 className="ed-h2">
-              A navigator, <mark className="ed-mark">not a doctor.</mark>
+            <h2 className="font-serif text-4xl md:text-5xl text-brand-navy max-w-3xl mx-auto leading-tight">
+              Managing medicines on paper is <span className="marker-highlight px-2">quietly failing</span> millions of families.
             </h2>
-            <p className="ed-sub">
-              Under India's Telemedicine Practice Guidelines, an AI platform may not diagnose or
-              prescribe. Aayogya is built around that line — it explains and organises, and defers
-              every clinical call to a registered medical practitioner.
+            <p className="mt-6 text-brand-gray font-light max-w-2xl mx-auto text-lg">
+              Prescriptions pile up on paper across specialists, doses slip through the cracks, and affordable generic alternatives are missed. The system isn't broken — it is completely uncoordinated.
             </p>
-            <div className="ed-cred">
-              {CRED.map((c) => <span key={c} className="ed-cred-chip">{c}</span>)}
+          </div>
+
+          {/* Stats with Scribbles */}
+          <div className="grid md:grid-cols-3 gap-12 mt-20">
+            {/* Stat 1 */}
+            <div className="relative text-center group reveal active">
+              {/* Arrow Doodle */}
+              <svg className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 text-brand-navy stroke-[1.5] opacity-80" viewBox="0 0 100 100" fill="none">
+                <path d="M50,0 Q60,30 50,70" stroke="currentColor" markerEnd="url(#arrowhead-down)" />
+              </svg>
+              <div className="border-2 border-brand-navy p-8 sketchy-box bg-brand-white group-hover:-translate-y-2 transition-transform duration-300 shadow-sketch">
+                <span className="block font-serif text-5xl font-medium text-brand-navy mb-2">≈ 50%</span>
+                <span className="font-sans text-xs font-bold tracking-widest text-brand-gray uppercase">Chronic Doses Missed (WHO)</span>
+              </div>
+            </div>
+
+            {/* Stat 2 */}
+            <div className="relative text-center group reveal active delay-100">
+              <svg className="absolute -top-8 -right-4 w-16 h-16 text-brand-orange stroke-[2] opacity-80 transform rotate-12" viewBox="0 0 100 100" fill="none">
+                <path d="M10,10 Q50,50 10,90" stroke="currentColor" />
+              </svg>
+              <div className="border-2 border-brand-navy p-8 sketchy-box bg-brand-white group-hover:-translate-y-2 transition-transform duration-300 shadow-sketch">
+                <span className="block font-serif text-5xl font-medium text-brand-navy mb-2">3+</span>
+                <span className="font-sans text-xs font-bold tracking-widest text-brand-gray uppercase">Specialists Without Shared Notes</span>
+              </div>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="relative text-center group reveal active delay-200">
+              <div className="border-2 border-brand-navy p-8 sketchy-box bg-brand-white group-hover:-translate-y-2 transition-transform duration-300 shadow-sketch">
+                <span className="block font-serif text-5xl font-medium text-brand-navy mb-2">80%</span>
+                <span className="font-sans text-xs font-bold tracking-widest text-brand-gray uppercase">Overpaid vs Jan Aushadhi</span>
+              </div>
+              {/* Underline Scribble */}
+              <svg className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-4 text-brand-orange" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <path d="M0,5 Q25,0 50,5 T100,5" stroke="currentColor" strokeWidth="2" fill="none" />
+              </svg>
             </div>
           </div>
-          <div className="ed-trust-cards">
-            {TRUST.map((t) => (
-              <div className="ed-trust-card" key={t.title} data-reveal data-anim="right">
-                <span className="ed-trust-ic"><t.Icon size={20} /></span>
-                <div>
-                  <strong>{t.title}</strong>
-                  <span>{t.body}</span>
+
+          {/* Interactive Problem Graph Deep-Dive */}
+          <div className="mt-16 bg-brand-white border-2 border-brand-navy p-8 sketchy-box shadow-sketch">
+            <div className="grid md:grid-cols-12 gap-8 items-center">
+              <div className="md:col-span-5 space-y-3">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-gray block">Interactive Evidence</span>
+                <h3 className="font-serif text-2xl font-medium text-brand-navy">Select a System Breakdown:</h3>
+                <div className="flex flex-col gap-2 pt-2">
+                  {PROBLEMS.map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => setProblem(p.key)}
+                      className={`text-left px-4 py-3 sketchy-btn border-2 transition-all flex items-center justify-between text-xs font-bold uppercase tracking-wider ${
+                        problem === p.key
+                          ? "bg-brand-orange text-brand-navy border-brand-navy shadow-sketch-hover"
+                          : "bg-brand-cream/50 border-brand-navy/20 text-brand-navy hover:border-brand-navy"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <p.Icon size={16} /> {p.label}
+                      </span>
+                      <ChevronRight size={14} />
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              <div className="md:col-span-7 bg-brand-cream/40 border border-brand-navy/10 p-6 sketchy-box">
+                <div className="flex justify-between items-baseline mb-4">
+                  <span className="font-serif text-4xl font-bold text-brand-navy">{pb.stat}</span>
+                  <span className="text-xs text-brand-gray max-w-xs text-right font-light">{pb.statLabel}</span>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  {pb.bars.map((b) => (
+                    <div key={b.name} className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold text-brand-navy">
+                        <span>{b.name}</span>
+                        <span>{b.value}%</span>
+                      </div>
+                      <div className="h-3 w-full bg-brand-navy/10 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${b.color} transition-all duration-700 rounded-full`}
+                          style={{ width: `${b.value}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-xs text-brand-gray leading-relaxed font-light italic">
+                  "{pb.note}"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Arrow definition */}
+        <defs>
+          <marker id="arrowhead-down" markerWidth="10" markerHeight="7" refX="5" refY="7" orient="auto">
+            <polygon points="0 0, 5 7, 10 0" fill="#1a2234" />
+          </marker>
+        </defs>
+      </section>
+
+      {/* ==============================================================
+          4. THE ARCHITECTURE SECTION (INVESTIGATORS STYLE)
+          ============================================================== */}
+      <section id="architecture" className="py-24 bg-brand-white relative">
+        {/* Blueprint background grid */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "linear-gradient(#1a2234 1px, transparent 1px), linear-gradient(90deg, #1a2234 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+            opacity: 0.03,
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-12 gap-12 items-start">
+            
+            <div className="lg:col-span-4 sticky top-32 reveal active">
+              <span className="font-bold text-xs tracking-widest text-brand-gray uppercase mb-4 block">The Core Framework</span>
+              <h2 className="font-serif text-4xl font-medium text-brand-navy mb-6 leading-tight">
+                Clinical Rigor Meets <br />
+                <span className="italic text-brand-orange">Patient Care</span>
+              </h2>
+              <p className="text-brand-gray font-light mb-8 font-sans leading-relaxed">
+                A strict dual-engine architecture: OCR parsing & multi-doctor drug interaction graphs on one side, empathetic WhatsApp reminders on the other.
+              </p>
+              
+              {/* Hand-drawn arrow pointing right */}
+              <svg className="w-24 h-12 text-brand-navy transform rotate-6" viewBox="0 0 100 50" fill="none">
+                <path d="M0,25 Q50,0 90,25" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#arrowhead)" />
+              </svg>
+            </div>
+
+            <div className="lg:col-span-8 grid md:grid-cols-2 gap-12">
+              {/* Dossier 1 */}
+              <div className="relative group reveal active delay-100">
+                <div className="p-8 bg-brand-cream border-2 border-brand-navy sketchy-box mb-6 relative shadow-sketch flex flex-col justify-between min-h-[340px]">
+                  <div>
+                    <span className="text-xs font-mono text-brand-gray block mb-4">ENGINE / 01</span>
+                    <h4 className="font-serif text-2xl text-brand-navy mb-3">Multi-Doctor Graph & Safety Moat</h4>
+                    <p className="text-sm text-brand-gray leading-relaxed mb-4 font-light">
+                      Extracts active salts across cardiologist, general physician, and orthopaedic slips. Cross-checks interactions against 300,000+ curated rows to prevent deadly combos.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-4 border-t border-brand-navy/10 text-xs font-bold text-brand-navy">
+                    <span className="w-2 h-2 rounded-full bg-brand-orange animate-pulse" />
+                    Always human-reviewed before saving
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-10 -left-2 bg-brand-navy text-brand-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest transform -rotate-3">
+                    Safety Moat
+                  </span>
+                  <h4 className="font-serif text-2xl text-brand-navy">Drug-Drug Cross Check</h4>
+                  <p className="font-sans text-xs font-bold tracking-widest text-brand-orange uppercase mb-2">ABDM & FHIR R4 Compliant</p>
+                  <p className="text-xs text-brand-gray leading-relaxed">
+                    "Paper records create silos. A single unified safety ledger prevents catastrophic contraindications."
+                  </p>
+                </div>
+              </div>
+
+              {/* Dossier 2 */}
+              <div className="relative group reveal active delay-200">
+                <div className="p-8 bg-brand-cream border-2 border-brand-navy sketchy-box mb-6 relative shadow-sketch flex flex-col justify-between min-h-[340px]">
+                  <div>
+                    <span className="text-xs font-mono text-brand-gray block mb-4">ENGINE / 02</span>
+                    <h4 className="font-serif text-2xl text-brand-navy mb-3">Sahayak WhatsApp & Voice Companion</h4>
+                    <p className="text-sm text-brand-gray leading-relaxed mb-4 font-light">
+                      Daily dose schedules sent through WhatsApp with single-tap acknowledgments. Automated Hindi & Hinglish voice check-in calls for elderly parents.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-4 border-t border-brand-navy/10 text-xs font-bold text-brand-navy">
+                    <span className="w-2 h-2 rounded-full bg-brand-orange animate-pulse" />
+                    Zero app install needed for parents
+                  </div>
+                </div>
+                <div className="relative">
+                  <span className="absolute -top-10 -right-2 bg-brand-orange text-brand-navy px-3 py-1 text-[10px] font-bold uppercase tracking-widest transform rotate-2">
+                    Adherence Loop
+                  </span>
+                  <h4 className="font-serif text-2xl text-brand-navy">Caregiver Telemetry</h4>
+                  <p className="font-sans text-xs font-bold tracking-widest text-brand-orange uppercase mb-2">DPDP Act Compliant</p>
+                  <p className="text-xs text-brand-gray leading-relaxed">
+                    "Elders don't want another complex medical portal. They want a friendly morning check-in on WhatsApp."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==============================================================
+          5. FEATURE DOSSIERS / CASE FILES GRID
+          ============================================================== */}
+      <section id="features" className="py-24 border-t-2 border-brand-navy/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 reveal active">
+            <div>
+              <span className="font-bold text-xs tracking-widest text-brand-gray uppercase mb-2 block">Case Files</span>
+              <h2 className="font-serif text-4xl font-medium text-brand-navy">Recent Dossiers & Features</h2>
+            </div>
+            <a href="#simulator" onClick={scrollTo("simulator")} className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-navy hover:text-brand-orange transition-colors">
+              <span className="wavy-underline">Test Price Simulator</span>
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </a>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-x-8 gap-y-16">
+            {FEATURE_DOSSIERS.map((d, idx) => (
+              <article
+                key={d.key}
+                onClick={() => router.push("/app")}
+                className="group cursor-pointer reveal active"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="relative aspect-video bg-brand-navy mb-6 border-2 border-brand-navy sketchy-box overflow-hidden shadow-sketch group-hover:shadow-sketch-hover group-hover:translate-x-[2px] group-hover:translate-y-[2px] transition-all">
+                  <img
+                    src={d.img}
+                    alt={d.title}
+                    className="w-full h-full object-cover opacity-80 mix-blend-overlay hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute top-4 right-4 bg-brand-white border-2 border-brand-navy px-2 py-1 font-bold text-[10px] tracking-widest uppercase shadow-sm">
+                    {d.ep}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <span className="text-[10px] font-bold text-brand-orange uppercase tracking-widest border border-brand-orange rounded-full px-3 py-0.5 inline-block">
+                    {d.tag}
+                  </span>
+                  <h4 className="font-serif text-xl font-medium text-brand-navy leading-tight group-hover:text-brand-orange transition-colors">
+                    {d.title}
+                  </h4>
+                  <p className="text-sm text-brand-gray font-light leading-relaxed line-clamp-2">
+                    {d.desc}
+                  </p>
+                </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
-      {/* ===== PRICING / SUBSCRIPTION ===== */}
-      <section className="ed-section ed-pricing" id="pricing">
-        <div className="ed-head" data-reveal>
-          <span className="ed-pill">Simple pricing</span>
-          <h2 className="ed-h2">
-            One plan. <mark className="ed-mark">₹99 a month.</mark>
-          </h2>
-          <p className="ed-sub">
-            No insurance paperwork, no per-feature upsells. Safety and understanding are free forever;
-            the adherence engine is Pro.
-          </p>
-        </div>
 
-        <div className="ed-tiers" data-reveal data-anim="rotate">
-          {TIERS.map((t) => (
-            <div className={`ed-tier ${t.highlight ? "hi" : ""}`} key={t.name}>
-              {t.highlight && <span className="ed-tier-flag">Most loved</span>}
-              <div className="ed-tier-name">{t.name}</div>
-              <div className="ed-tier-price">
-                <span className="ed-tier-amt">{t.price}</span>
-                <span className="ed-tier-per">{t.period}</span>
-              </div>
-              <p className="ed-tier-tag">{t.tagline}</p>
-              <ul className="ed-tier-feats">
-                {t.features.map((f) => (
-                  <li key={f}><CheckCircle2 size={16} /> {f}</li>
-                ))}
-              </ul>
-              <button
-                className={`ed-btn ${t.highlight ? "ed-btn-gold" : "ed-btn-outline"} ed-btn-block`}
-                onClick={() => (t.highlight ? onSelectDemo("shanti") : onSelectDemo("aarav"))}
-              >
-                {t.cta} <ArrowRight size={15} />
-              </button>
+      {/* ==============================================================
+          SIMULATOR / ACTION ENGINE MINI MODULE
+          ============================================================== */}
+      <section id="simulator" className="py-20 bg-brand-white border-t-2 border-brand-navy/10">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <span className="font-bold text-xs tracking-widest text-brand-gray uppercase mb-2 block">Action Engine</span>
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-brand-navy">
+              Live Jan Aushadhi Price Comparison
+            </h2>
+            <p className="text-brand-gray text-sm font-light mt-2">
+              Query real Indian medicine brands to see NPPA ceilings and certified generic prices.
+            </p>
+          </div>
+          <PriceSimulatorCard />
+        </div>
+      </section>
+
+      {/* ==============================================================
+          6. STATS BAND (FULL-BLEED DARK SECTION)
+          ============================================================== */}
+      <section className="w-full py-16 bg-brand-navy text-brand-cream border-y-2 border-brand-navy">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-8 items-center">
+          <div className="border-2 border-brand-orange p-6 sketchy-box bg-brand-navy transform -rotate-1 shadow-sketch">
+            <span className="font-serif text-4xl font-bold text-brand-orange block">#1</span>
+            <strong className="text-lg font-bold block mt-1">Patient Choice</strong>
+            <p className="text-xs text-brand-cream/70 mt-1 leading-relaxed">
+              Dedicated to elder comfort, transparent medicine pricing, and clear Hindi schedules.
+            </p>
+          </div>
+
+          {STATS.map((s) => (
+            <div key={s.label} className="space-y-1">
+              <span className="font-serif text-4xl md:text-5xl font-bold text-brand-cream block font-mono">
+                {s.to}{s.suffix}
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-orange block">
+                {s.label}
+              </span>
+              <span className="text-xs text-brand-cream/60 font-light block leading-relaxed">
+                {s.sub}
+              </span>
             </div>
           ))}
         </div>
-        <p className="ed-pay-note" data-reveal>
-          <HeartPulse size={14} /> Pay by UPI or card. In this demo, Pro unlocks instantly — no gateway, no charge.
-        </p>
       </section>
-      {/* ===== LOGIN ===== */}
-      <section className="ed-section ed-login" id="login">
-        <div className="ed-login-grid">
-          <div className="ed-login-copy" data-reveal data-anim="left">
-            <span className="ed-pill">Welcome back</span>
-            <h2 className="ed-h2">
-              Sign in, or <mark className="ed-mark">try a live patient.</mark>
+
+      {/* ==============================================================
+          7. PRICING DOSSIERS
+          ============================================================== */}
+      <section id="pricing" className="py-24 border-b-2 border-brand-navy/10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <div className="inline-block border-2 border-brand-navy px-4 py-1 mb-4 sketchy-box">
+              <span className="font-bold text-xs tracking-widest text-brand-navy uppercase">Pricing Framework</span>
+            </div>
+            <h2 className="font-serif text-4xl md:text-5xl text-brand-navy leading-tight">
+              Honest, predictable <span className="marker-highlight px-2">care access.</span>
             </h2>
-            <p className="ed-sub">
-              Pick a pre-loaded scenario to explore the real dashboard instantly — no signup — or sign
-              in with your own credentials.
+            <p className="text-brand-gray text-base font-light mt-4">
+              Understanding your medicines and catching interactions is free forever. The automated WhatsApp adherence companion is Pro.
             </p>
-            <div className="ed-demo-row">
-              {DEMO_USERS.map((u) => (
-                <button key={u.id} className="ed-demo-chip" onClick={() => onSelectDemo(u.id)}>
-                  <span className="ed-demo-av" style={{ background: u.color }}>
-                    {u.name.split(" ").map((n) => n[0]).join("")}
-                  </span>
-                  <span className="ed-demo-meta">
-                    <strong>{u.name.split(" ")[0]}</strong>
-                    <span>{u.tag}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
           </div>
 
-          <form className="ed-login-card" onSubmit={doLogin} data-reveal data-anim="right">
-            <h3>Sign in to Aayogya</h3>
-            {err && <div className="ed-login-err"><AlertTriangle size={14} /> {err}</div>}
-            <label>Email or phone</label>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ramesh@demo.in" required />
-            <label>Password</label>
-            <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="pass1234" required />
-            <button type="submit" className="ed-btn ed-btn-ink ed-btn-block" disabled={busy}>
-              {busy ? "Signing in…" : "Sign in"}
-            </button>
-            <p className="ed-login-hint">Demo accounts use password <code>pass1234</code>.</p>
-          </form>
+          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+            {TIERS.map((tier) => (
+              <div
+                key={tier.name}
+                className={`p-8 border-2 border-brand-navy sketchy-box relative transition-all duration-300 ${
+                  tier.highlight
+                    ? "bg-brand-white shadow-sketch hover:shadow-sketch-hover transform -rotate-1"
+                    : "bg-brand-cream/60 shadow-card"
+                }`}
+              >
+                {tier.highlight && (
+                  <span className="absolute -top-3.5 right-6 bg-brand-orange text-brand-navy px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-brand-navy">
+                    Most Loved
+                  </span>
+                )}
+                <div className="mb-6">
+                  <h3 className="font-serif text-2xl font-bold text-brand-navy">{tier.name}</h3>
+                  <div className="flex items-baseline gap-2 mt-2">
+                    <span className="font-serif text-5xl font-bold text-brand-navy">{tier.price}</span>
+                    <span className="text-xs font-bold uppercase text-brand-gray">{tier.period}</span>
+                  </div>
+                  <p className="text-xs text-brand-gray mt-3 font-light leading-relaxed">{tier.tagline}</p>
+                </div>
+
+                <ul className="space-y-3 mb-8 pt-4 border-t border-brand-navy/10">
+                  {tier.features.map((f) => (
+                    <li key={f} className="text-xs text-brand-navy flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/app"
+                  prefetch={true}
+                  className={`w-full py-4 text-xs font-bold uppercase tracking-widest sketchy-btn border-2 border-brand-navy flex items-center justify-center gap-2 ${
+                    tier.highlight
+                      ? "bg-brand-orange text-brand-navy shadow-sketch hover:shadow-sketch-hover hover:translate-x-[2px] hover:translate-y-[2px]"
+                      : "bg-transparent text-brand-navy hover:bg-brand-white"
+                  }`}
+                >
+                  {tier.cta} <ArrowRight size={14} />
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */}
-      <footer className="ed-footer">
-        <div className="ed-footer-top">
-          <div className="ed-footer-brand">
-            <BrandMark />
-            <p>Your medicines, made clear. A non-clinical explainer and adherence companion — never a substitute for your doctor.</p>
+      {/* ==============================================================
+          8. DARK LEAD-CAPTURE / BRIEF SECTION
+          ============================================================== */}
+      <section id="subscribe" className="py-32 bg-brand-navy relative overflow-hidden text-brand-cream">
+        {/* Texture on dark bg */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: "url('data:image/svg+xml,%3Csvg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 20 20\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'%23e8a838\\' fill-opacity=\\'1\\' fill-rule=\\'evenodd\\'%3E%3Ccircle cx=\\'3\\' cy=\\'3\\' r=\\'1\\'/%3E%3C/g%3E%3C/svg%3E')",
+          }}
+        />
+
+        <div className="max-w-2xl mx-auto px-6 text-center relative z-10 reveal active">
+          <div className="w-16 h-16 bg-brand-orange text-brand-navy mx-auto mb-8 flex items-center justify-center rounded-full border-2 border-brand-cream transform rotate-3 shadow-sketch">
+            <Mail className="w-8 h-8" />
           </div>
-          <div className="ed-footer-cols">
-            <div>
-              <span className="ed-footer-h">Product</span>
-              <a href="#features" onClick={scrollTo("features")}>Features</a>
-              <a href="#pricing" onClick={scrollTo("pricing")}>Pricing</a>
-              <a href="#problem" onClick={scrollTo("problem")}>The problem</a>
+
+          <h2 className="font-serif text-3xl md:text-4xl font-medium mb-4">Get the Generic Decision Brief</h2>
+          <p className="text-brand-cream/70 mb-10 font-light leading-relaxed text-lg">
+            Weekly research on Jan Aushadhi generic availability, drug interaction case studies, and elder adherence patterns across India.
+          </p>
+
+          {subSuccess ? (
+            <div className="p-4 bg-brand-orange text-brand-navy font-bold text-sm sketchy-box shadow-sketch">
+              Thank you! You are subscribed to the weekly Ayogya Dossier.
             </div>
-            <div>
-              <span className="ed-footer-h">Trust</span>
-              <a href="#trust" onClick={scrollTo("trust")}>Safety & compliance</a>
-              <a href="#login" onClick={scrollTo("login")}>Sign in</a>
-            </div>
-            <div className="ed-footer-sos">
-              <span className="ed-footer-h">Emergency</span>
-              <a href="tel:108" className="ed-sos"><PhoneCall size={15} /> Call 108</a>
-              <span className="ed-footer-fine">In a medical emergency, call 108 immediately.</span>
-            </div>
+          ) : (
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+              <input
+                type="email"
+                value={subEmail}
+                onChange={(e) => setSubEmail(e.target.value)}
+                placeholder="ENTER EMAIL ADDRESS"
+                required
+                className="flex-1 px-6 py-4 bg-brand-navy border-2 border-brand-cream focus:outline-none focus:border-brand-orange placeholder-brand-cream/40 text-xs font-bold tracking-wide uppercase sketchy-box text-brand-cream"
+              />
+              <button
+                type="submit"
+                className="bg-brand-orange text-brand-navy px-8 py-4 text-xs font-bold uppercase tracking-widest border-2 border-transparent hover:bg-brand-cream transition-colors sketchy-btn shadow-lg"
+              >
+                Subscribe
+              </button>
+            </form>
+          )}
+
+          <p className="text-[10px] font-sans font-bold text-brand-cream/50 mt-6 uppercase tracking-widest">
+            Joined by 12,000+ Indian Families & Caregivers
+          </p>
+        </div>
+      </section>
+
+      {/* ==============================================================
+          9. EDITORIAL FOOTER
+          ============================================================== */}
+      <footer className="bg-brand-cream border-t border-brand-navy/10 py-20 relative">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2 space-y-6">
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <img
+                src="/aayogya-logo.png"
+                alt="Ayogya"
+                className="h-10 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+              />
+            </Link>
+            <p className="text-xs font-sans text-brand-gray max-w-sm leading-relaxed">
+              A non-clinical prescription navigator and adherence companion. Not a substitute for your registered doctor. <br />Est. 2026.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-bold text-brand-gray uppercase tracking-widest">Platform</h4>
+            <ul className="space-y-3 text-sm font-sans font-medium text-brand-navy">
+              <li>
+                <a href="#features" onClick={scrollTo("features")} className="hover:text-brand-orange hover:underline decoration-wavy underline-offset-4 decoration-brand-orange transition-all">
+                  Prescription OCR
+                </a>
+              </li>
+              <li>
+                <a href="#features" onClick={scrollTo("features")} className="hover:text-brand-orange hover:underline decoration-wavy underline-offset-4 decoration-brand-orange transition-all">
+                  Drug Interaction Graph
+                </a>
+              </li>
+              <li>
+                <a href="#features" onClick={scrollTo("features")} className="hover:text-brand-orange hover:underline decoration-wavy underline-offset-4 decoration-brand-orange transition-all">
+                  Jan Aushadhi Pricing
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-bold text-brand-gray uppercase tracking-widest">Emergency & Legal</h4>
+            <ul className="space-y-3 text-sm font-sans font-medium text-brand-navy">
+              <li>
+                <a href="tel:108" className="text-brand-orange font-bold flex items-center gap-1.5 hover:underline decoration-wavy">
+                  <PhoneCall size={14} /> Emergency: Call 108
+                </a>
+              </li>
+              <li>
+                <span className="text-brand-gray text-xs block">Telemedicine Practice Guidelines Compliant</span>
+              </li>
+              <li>
+                <span className="text-brand-gray text-xs block">DPDP Act (India) Aligned</span>
+              </li>
+            </ul>
           </div>
         </div>
-        <div className="ed-footer-bar">
-          <span>© 2026 Aayogya. Not medical advice — always consult your doctor.</span>
-          <span>Data localized in India · DPDP-aligned</span>
+
+        <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-brand-navy/5 flex justify-between items-center text-[10px] font-sans font-bold text-brand-gray uppercase tracking-widest">
+          <span>© 2026 Ayogya. All rights reserved. Always consult your registered doctor.</span>
+          <span>Case File #88392</span>
         </div>
       </footer>
     </div>
   );
 }
-function CountStat({ to, fmt, suffix = "", label, sub }) {
-  const ref = useScrollCountUp(to, fmt);
-  return (
-    <div className="ed-cstat">
-      <span className="ed-cstat-val"><span ref={ref}>0</span>{suffix}</span>
-      <span className="ed-cstat-lbl">{label}</span>
-      <span className="ed-cstat-sub">{sub}</span>
-    </div>
-  );
-}
 
-const PLAYER_BARS = [
-  { h: 42, c: "c-navy" }, { h: 74, c: "c-navy" }, { h: 32, c: "c-orange" }, { h: 58, c: "c-peach" },
-  { h: 88, c: "c-navy" }, { h: 36, c: "c-muted" }, { h: 68, c: "c-orange" }, { h: 82, c: "c-navy" },
-  { h: 54, c: "c-peach" }, { h: 30, c: "c-navy" }, { h: 64, c: "c-orange" }, { h: 96, c: "c-navy" },
-  { h: 48, c: "c-peach" }, { h: 28, c: "c-muted" }, { h: 78, c: "c-navy" }, { h: 62, c: "c-orange" },
-  { h: 38, c: "c-navy" }, { h: 68, c: "c-peach" }, { h: 84, c: "c-navy" }, { h: 46, c: "c-orange" },
-  { h: 32, c: "c-muted" }, { h: 66, c: "c-navy" }, { h: 92, c: "c-peach" }, { h: 52, c: "c-orange" },
-  { h: 76, c: "c-navy" }, { h: 36, c: "c-navy" }, { h: 48, c: "c-muted" }, { h: 82, c: "c-orange" },
-  { h: 60, c: "c-peach" }, { h: 42, c: "c-navy" }, { h: 74, c: "c-navy" }, { h: 86, c: "c-orange" },
-  { h: 50, c: "c-peach" }, { h: 34, c: "c-muted" }, { h: 68, c: "c-navy" }, { h: 44, c: "c-orange" },
-];
-
-function SahayakPlayer() {
+// ---- Sub-Component: Sahayak Voice Player Card ----
+function SahayakPlayerCard({ onLaunchDemo }) {
   const [isPlaying, setIsPlaying] = useState(true);
-  const played = 0.37; // 12:45 / 34:28 fill from benchmark
+  const [response, setResponse] = useState("confirmed"); // 'confirmed' | 'snooze' | 'missed'
 
   return (
-    <div className="ed-player-wrapper">
-      {/* Decorative hand-drawn sketchy arrow pointing to card */}
-      <svg
-        className="ed-hero-arrow"
-        width="90"
-        height="70"
-        viewBox="0 0 100 80"
-        fill="none"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          d="M12 68 C 25 15, 60 12, 86 28"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-          strokeDasharray="4 3"
-        />
-        <path
-          d="M72 18 L 88 28 L 82 44"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
-      </svg>
+    <div className="w-full max-w-xl bg-brand-white border-2 border-brand-navy sketchy-box p-6 sm:p-8 shadow-[6px_6px_0px_0px_#1a2234] relative z-10 transform rotate-1 transition-all hover:rotate-0 duration-500">
+      {/* Signature Frosted Masking Tape */}
+      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-36 h-7 bg-brand-cream/90 border-l border-r border-brand-white/70 backdrop-blur-sm transform -rotate-1 opacity-80 shadow-sm flex items-center justify-center">
+        <span className="text-[9px] font-mono font-bold tracking-widest text-brand-navy/70 uppercase">EVIDENCE CASE #04</span>
+      </div>
 
-      <div className="ed-player">
-        {/* Signature frosted paper tape strip at top center */}
-        <div className="ed-player-tape" aria-hidden="true" />
-
-        <div className="ed-player-head">
-          <span className="ed-player-now">
-            <Radio size={13} className="ed-radio-pulse" />
-            NOW SPEAKING • SAHAYAK
+      {/* Top Header: Telemetry Status + Duration */}
+      <div className="flex justify-between items-center mb-5 pb-3 border-b-2 border-brand-navy/10">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-orange"></span>
           </span>
-          <span className="ed-player-time">00:34 / 01:30</span>
+          <span className="text-[11px] font-bold tracking-[0.2em] text-brand-navy uppercase flex items-center gap-1.5">
+            <Radio size={14} className="text-brand-orange" />
+            Live Adherence Telemetry
+          </span>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-brand-navy text-brand-white rounded">
+            HINDI · HINGLISH
+          </span>
+          <span className="text-xs font-mono text-brand-gray font-bold">00:34 / 01:30</span>
+        </div>
+      </div>
 
-        <h3 className="ed-player-title">Aapka dawai saathi</h3>
-        <p className="ed-player-line">
-          Har dose ka reminder, aur aapki report saral bhasha mein — har clinical faisla aapke doctor ke paas.
+      {/* Patient Dossier Strip */}
+      <div className="flex items-center justify-between bg-brand-cream/60 border border-brand-navy/15 rounded-lg p-3 mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-brand-peach/40 border border-brand-navy/30 flex items-center justify-center font-serif font-bold text-brand-navy text-sm">
+            RK
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-serif font-bold text-sm text-brand-navy leading-none">Ramesh Kumar</h4>
+              <span className="text-[10px] font-sans font-semibold bg-brand-navy/10 text-brand-navy px-1.5 py-0.5 rounded">71 yrs</span>
+            </div>
+            <p className="text-[11px] text-brand-gray mt-0.5">Hypertension + Type-2 Diabetes</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <span className="text-[10px] font-mono font-bold text-brand-orange block uppercase tracking-wider">Morning Dose</span>
+          <span className="text-[11px] font-mono text-brand-navy">08:15 AM · Scheduled</span>
+        </div>
+      </div>
+
+      {/* Active Prescription Medicine Box */}
+      <div className="p-3.5 bg-brand-white border-2 border-brand-navy/20 sketchy-box mb-5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2.5">
+            <div className="p-2 bg-brand-orange/15 rounded border border-brand-orange/40 text-brand-navy mt-0.5">
+              <Pill size={16} className="text-brand-orange" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-serif font-bold text-base text-brand-navy">Amlong 5mg</span>
+                <span className="text-[10px] font-mono bg-brand-peach/30 text-brand-navy px-1.5 py-0.5 rounded font-semibold">1 Tab · Post-Breakfast</span>
+              </div>
+              <p className="text-xs text-brand-gray mt-0.5">Salt: <span className="font-mono text-brand-navy">Amlodipine Besylate IP 5mg</span></p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="inline-block text-[10px] font-bold text-brand-navy bg-brand-orange/20 border border-brand-orange/50 px-2 py-0.5 rounded">
+              Jan Aushadhi: ₹6 (Save 82%)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Voice Transcript Speech Bubble */}
+      <div className="relative mb-5 p-4 bg-brand-cream/80 border-2 border-brand-navy sketchy-box">
+        <div className="flex items-center gap-2 mb-1.5">
+          <PhoneCall size={13} className="text-brand-orange" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-navy">
+            Sahayak Voice Bot (AI Agent)
+          </span>
+        </div>
+        <p className="font-serif text-base sm:text-lg text-brand-navy leading-snug italic">
+          "Namaste Ramesh ji! Subah ki BP wali goli <span className="font-semibold underline decoration-brand-orange decoration-2">Amlong 5</span> le li? Agar le li toh 'Haan' bole."
         </p>
 
-        <div className="ed-wave-box">
-          <div className={`ed-wave ${isPlaying ? "playing" : "paused"}`} aria-hidden="true">
-            {PLAYER_BARS.map((b, i) => (
-              <span
-                key={i}
-                className={`ed-wave-bar ${b.c}`}
-                style={{
-                  height: `${b.h}%`,
-                  animationDelay: `${(i % 8) * 110}ms`,
-                  animationDuration: `${0.85 + (i % 5) * 0.12}s`,
-                }}
-              />
-            ))}
-          </div>
+        {/* Audio Visualizer Waveform */}
+        <div className="flex items-center justify-between gap-1 h-9 mt-3 px-3 bg-brand-white/80 rounded border border-brand-navy/10 overflow-hidden">
+          {[40, 65, 80, 45, 90, 70, 30, 85, 100, 60, 40, 95, 75, 50, 85, 60, 35, 70, 90, 55, 30, 80, 65, 45, 85, 50, 30, 60].map((h, i) => (
+            <div
+              key={i}
+              className={`w-1 rounded-full transition-all duration-300 ${
+                i % 4 === 1
+                  ? "bg-brand-orange"
+                  : i % 4 === 3
+                  ? "bg-brand-peach"
+                  : "bg-brand-navy"
+              }`}
+              style={{
+                height: isPlaying ? `${Math.max(15, (h * ((i % 3) + 1)) % 100)}%` : "20%",
+                opacity: isPlaying ? 0.9 : 0.35,
+              }}
+            />
+          ))}
         </div>
+      </div>
 
-        <div className="ed-player-ctrl">
+      {/* Single-Tap Interactive Patient Response Buttons */}
+      <div className="mb-5">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-gray block mb-2">
+          Voice or Tap Confirmation:
+        </span>
+        <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
-            className="ed-player-play"
-            onClick={() => setIsPlaying((p) => !p)}
-            aria-label={isPlaying ? "Pause voice preview" : "Play voice preview"}
+            onClick={() => setResponse("confirmed")}
+            className={`px-3 py-2 text-xs font-bold rounded border-2 transition-all flex items-center justify-center gap-1.5 ${
+              response === "confirmed"
+                ? "bg-brand-navy text-brand-white border-brand-navy shadow-sketch-hover"
+                : "bg-brand-white text-brand-navy border-brand-navy/30 hover:border-brand-navy"
+            }`}
           >
-            {isPlaying ? <Pause size={18} /> : <Play size={18} className="translate-x-0.5" />}
+            <Check size={14} className={response === "confirmed" ? "text-brand-orange" : "text-brand-gray"} />
+            <span>Haan, Le Li</span>
           </button>
-          <div className="ed-player-track">
-            <span className="ed-player-fill" style={{ width: `${played * 100}%` }} />
-            <i className="ed-player-knob" style={{ left: `${played * 100}%` }} />
+          <button
+            type="button"
+            onClick={() => setResponse("snooze")}
+            className={`px-3 py-2 text-xs font-bold rounded border-2 transition-all flex items-center justify-center gap-1.5 ${
+              response === "snooze"
+                ? "bg-brand-navy text-brand-white border-brand-navy shadow-sketch-hover"
+                : "bg-brand-white text-brand-navy border-brand-navy/30 hover:border-brand-navy"
+            }`}
+          >
+            <CalendarClock size={14} className={response === "snooze" ? "text-brand-orange" : "text-brand-gray"} />
+            <span>15 Min Baad</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setResponse("missed")}
+            className={`px-3 py-2 text-xs font-bold rounded border-2 transition-all flex items-center justify-center gap-1.5 ${
+              response === "missed"
+                ? "bg-brand-navy text-brand-white border-brand-navy shadow-sketch-hover"
+                : "bg-brand-white text-brand-navy border-brand-navy/30 hover:border-brand-navy"
+            }`}
+          >
+            <AlertTriangle size={14} className={response === "missed" ? "text-brand-orange" : "text-brand-gray"} />
+            <span>Nahi Li</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Audio Controller & CTA Strip */}
+      <div className="flex items-center gap-4 pt-3 border-t-2 border-brand-navy/10">
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="w-12 h-12 rounded-full bg-brand-orange border-2 border-brand-navy flex items-center justify-center hover:scale-105 transition-transform shadow-sketch hover:shadow-sketch-hover cursor-pointer shrink-0"
+          title={isPlaying ? "Pause voice preview" : "Play voice preview"}
+        >
+          {isPlaying ? (
+            <Pause size={18} className="text-brand-navy fill-current" />
+          ) : (
+            <Play size={18} className="text-brand-navy fill-current translate-x-0.5" />
+          )}
+        </button>
+
+        <div className="flex-1">
+          <div className="flex justify-between text-[11px] font-mono text-brand-gray mb-1">
+            <span className="font-bold text-brand-navy">{isPlaying ? "Playing voice sample" : "Paused"}</span>
+            <span>00:34 / 01:30</span>
+          </div>
+          <div className="h-2 bg-brand-navy/10 rounded-full overflow-hidden">
+            <div className="h-full bg-brand-navy w-[38%] rounded-full relative">
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-brand-orange rounded-full border border-brand-navy" />
+            </div>
           </div>
         </div>
+
+        <button
+          onClick={onLaunchDemo}
+          className="sketchy-btn bg-brand-navy text-brand-white hover:bg-brand-orange hover:text-brand-navy border-2 border-brand-navy px-4 py-2.5 text-xs font-bold uppercase tracking-widest shadow-sketch transition-all shrink-0 flex items-center gap-1.5"
+        >
+          <span>Demo</span>
+          <ArrowRight size={13} />
+        </button>
+      </div>
+
+      {/* Caregiver WhatsApp sync footer notice */}
+      <div className="mt-4 pt-3 border-t border-dashed border-brand-navy/15 flex items-center justify-between text-[11px] text-brand-gray">
+        <span className="flex items-center gap-1.5">
+          <MessageCircleHeart size={14} className="text-brand-orange shrink-0" />
+          <span>Caregiver WhatsApp alert: <strong>Papa marked dose taken ✓</strong></span>
+        </span>
+        <span className="font-mono text-[10px] text-brand-navy/60 font-semibold uppercase">08:16 AM</span>
       </div>
     </div>
   );
 }
 
-function FeatureVisual({ k }) {
-  if (k === "price") return <PriceMini />;
-  if (k === "safety")
-    return (
-      <div className="ed-fv ed-fv-safety">
-        <span className="ed-fv-chip">Aspirin</span>
-        <span className="ed-fv-x">×</span>
-        <span className="ed-fv-chip">Ibuprofen</span>
-        <span className="ed-fv-flag"><AlertTriangle size={13} /> Bleeding risk — confirm with your doctor</span>
-      </div>
-    );
-  if (k === "ocr")
-    return (
-      <div className="ed-fv ed-fv-ocr">
-        <div className="ed-fv-line"><span>Glycomet 500</span><em>Metformin · 500 mg</em><b>1-0-1</b></div>
-        <div className="ed-fv-line"><span>Amlong 5</span><em>Amlodipine · 5 mg</em><b>1-0-0</b></div>
-        <span className="ed-fv-tag"><CheckCircle2 size={12} /> You confirm before anything is saved</span>
-      </div>
-    );
-  if (k === "whatsapp")
-    return (
-      <div className="ed-fv ed-fv-wa">
-        <div className="ed-fv-bubble">Namaste 🌼 Subah ki dawa le li?</div>
-        <div className="ed-fv-replies"><span>✅ Haan</span><span>❌ Nahi</span><span>⏰ 10 min</span></div>
-      </div>
-    );
-  if (k === "map")
-    return (
-      <div className="ed-fv ed-fv-map"><MapPin size={16} /> 4 chemists within 1.2 km · tap any pin for directions</div>
-    );
-  return (
-    <div className="ed-fv ed-fv-explain">
-      “Pantoprazole reduces stomach acid — take it before food.”
-      <em>— not medical advice; confirm with your doctor.</em>
-    </div>
-  );
-}
-function PriceMini() {
+// ---- Sub-Component: Action Engine Price Simulator ----
+function PriceSimulatorCard() {
   const [q, setQ] = useState("Dolo 650");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -630,33 +1019,78 @@ function PriceMini() {
 
   const run = (brand) => {
     if (!brand) return;
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
     getPublicPrices({ brand })
-      .then((r) => { setData(r); setLoading(false); })
-      .catch((e) => { setError(e.message || "Price lookup failed"); setLoading(false); });
+      .then((r) => {
+        setData(r);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message || "Price query failed");
+        setLoading(false);
+      });
   };
-  useEffect(() => { run("Dolo 650"); }, []);
 
-  const money = (v, d) => Number(v ?? d).toFixed(2);
+  useEffect(() => {
+    run("Dolo 650");
+  }, []);
+
+  const money = (v, fallback) => Number(v ?? fallback).toFixed(2);
 
   return (
-    <div className="ed-pm">
-      <form className="ed-pm-bar" onSubmit={(e) => { e.preventDefault(); run(q.trim()); }}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. Dolo 650" />
-        <button type="submit" className="ed-btn ed-btn-ink" disabled={loading}>
-          <Search size={14} />
+    <div className="p-8 bg-brand-cream border-2 border-brand-navy sketchy-box shadow-sketch">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          run(q.trim());
+        }}
+        className="flex gap-3 mb-6"
+      >
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search medicine brand e.g. Dolo 650, Glycomet 500"
+          className="flex-1 px-4 py-3 bg-brand-white border-2 border-brand-navy text-xs font-bold tracking-wide uppercase sketchy-box focus:outline-none focus:border-brand-orange"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="sketchy-btn bg-brand-orange text-brand-navy border-2 border-brand-navy px-6 py-3 text-xs font-bold uppercase tracking-widest shadow-sketch-hover"
+        >
+          {loading ? "Searching…" : <Search size={16} />}
         </button>
       </form>
-      {loading && <div className="ed-pm-note">Querying live prices…</div>}
-      {error && <div className="ed-pm-note err">{error}</div>}
+
+      {error && <div className="text-xs text-red-600 font-bold mb-4">{error}</div>}
+
       {data && !loading && (
-        <div className="ed-pm-rows">
-          <div className="ed-pm-row"><span>Branded retail</span><b>₹{money(data.market_price, 32)}</b></div>
-          <div className="ed-pm-row"><span>NPPA ceiling</span><b>{data.nppa_ceiling_price ? `₹${money(data.nppa_ceiling_price)}` : "—"}</b></div>
-          <div className="ed-pm-row best"><span>Jan Aushadhi generic</span><b>₹{money(data.jan_aushadhi_price, 10.5)}</b></div>
-          {data.max_savings_percent > 0 && (
-            <div className="ed-pm-save">Save {data.max_savings_percent}% with the generic</div>
-          )}
+        <div className="grid md:grid-cols-3 gap-4 pt-4 border-t border-brand-navy/10">
+          <div className="p-4 bg-brand-white border border-brand-navy/20 sketchy-box">
+            <span className="text-[10px] font-bold text-brand-gray uppercase tracking-widest block">Branded Retail</span>
+            <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
+              ₹{money(data.market_price, 32.5)}
+            </span>
+          </div>
+
+          <div className="p-4 bg-brand-white border border-brand-navy/20 sketchy-box">
+            <span className="text-[10px] font-bold text-brand-gray uppercase tracking-widest block">NPPA Price Ceiling</span>
+            <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
+              {data.nppa_ceiling_price ? `₹${money(data.nppa_ceiling_price, 24)}` : "—"}
+            </span>
+          </div>
+
+          <div className="p-4 bg-brand-orange/20 border-2 border-brand-orange sketchy-box relative">
+            <span className="text-[10px] font-bold text-brand-orange uppercase tracking-widest block">Jan Aushadhi Generic</span>
+            <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
+              ₹{money(data.jan_aushadhi_price, 10.5)}
+            </span>
+            {data.max_savings_percent > 0 && (
+              <span className="absolute top-2 right-2 text-[10px] font-bold bg-brand-orange text-brand-navy px-1.5 py-0.5 rounded">
+                Save {data.max_savings_percent}%
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

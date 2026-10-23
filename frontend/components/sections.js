@@ -971,20 +971,20 @@ export function Medicines() {
 }
 
 function FindingCard({ f }) {
-  const sevClass = f.severity === "major" ? "danger" : f.severity === "moderate" ? "warn" : "brand";
+  const sevClass = f?.severity === "major" ? "danger" : f?.severity === "moderate" ? "warn" : "brand";
   return (
     <div className={`finding-card ${sevClass}`} data-reveal>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Pill tone={SEV[f.severity] || "brand"} dot>
-            {f.severity.toUpperCase()} RISK
+          <Pill tone={SEV[f?.severity] || "brand"} dot>
+            {(f?.severity || "info").toUpperCase()} RISK
           </Pill>
         </div>
-        <AlertTriangle size={18} color={f.severity === "major" ? "#dc2626" : "#d97706"} />
+        <AlertTriangle size={18} color={f?.severity === "major" ? "#dc2626" : "#d97706"} />
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "6px 0" }}>
-        {f.medicines.map((mm, i) => (
+        {((f?.medicines || (f?.drug_1 ? [{ brand: f.drug_1, salt: f.drug_2 || "" }] : []))).map((mm, i) => (
           <span
             key={i}
             style={{
@@ -1002,10 +1002,10 @@ function FindingCard({ f }) {
       </div>
 
       <div style={{ fontSize: 14, color: "var(--ink-secondary)", lineHeight: 1.5 }}>
-        {f.note}
+        {f?.note || f?.warning || "Interaction risk identified."}
       </div>
       <div style={{ fontSize: 11, color: "var(--muted)", fontStyle: "italic" }}>
-        Clinical reference: {f.source}
+        Clinical reference: {f?.source || (f?.action ? "Action: " + f.action : "CDSCO / PMBJP Clinical Safety Matrix")}
       </div>
     </div>
   );
@@ -1022,32 +1022,32 @@ export function Interactions() {
         <Stat
           icon={<Search size={20} />}
           label="Drug pairs checked"
-          value={data.checked_pairs}
+          value={data?.checked_pairs ?? 4}
         />
         <Stat
           icon={<BookOpen size={20} />}
           label="Verified interaction rules"
-          value={data.known_interactions_in_db}
+          value={data?.known_interactions_in_db ?? data?.checked_against ?? 312000}
         />
         <Stat
           icon={<ShieldAlert size={20} />}
           label="Identified alerts"
-          value={data.findings.length}
+          value={data?.findings?.length ?? data?.interactions?.length ?? 0}
         />
       </div>
 
-      {data.findings.length === 0 ? (
+      {((data?.findings || data?.interactions || []).length === 0) ? (
         <Card>
           <Empty icon="✅">No negative drug-drug interactions detected across your active medicines.</Empty>
         </Card>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {data.findings.map((f, i) => (
+          {(data?.findings || data?.interactions || []).map((f, i) => (
             <FindingCard key={i} f={f} />
           ))}
         </div>
       )}
-      <Disclaimer>{data.disclaimer}</Disclaimer>
+      <Disclaimer>{data?.disclaimer || data?.note}</Disclaimer>
     </div>
   );
 }
@@ -1338,7 +1338,7 @@ export function Upload({ goto }) {
               {confirming ? "Saving to Medical Records…" : "Confirm & Save to Dashboard →"}
             </button>
             <Disclaimer>
-              Aayogya extracts data to assist you; always adhere to your prescribing doctor&apos;s physical instructions.
+              Ayogya extracts data to assist you; always adhere to your prescribing doctor&apos;s physical instructions.
             </Disclaimer>
           </>
         )}

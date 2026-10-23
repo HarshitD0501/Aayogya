@@ -42,7 +42,9 @@ import {
   Loader2,
   AlertCircle,
   Heart,
+  Compass,
 } from "lucide-react";
+import Link from "next/link";
 
 // Patient-detail nav reuses the existing sections unchanged — they already
 // scope to X-Patient-Id through lib/api.js.
@@ -202,11 +204,11 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
 
   const waText = [
     `Namaste ${patientCard.name?.split(" ")[0]}! 🔔`,
-    "Aapki dawaiyan (from Aayogya):",
+    "Aapki dawaiyan (from Ayogya):",
     ...(medsList && medsList.length
       ? medsList.map((m) => `• ${m.brand} ${m.strength || ""} (${m.dosage_notation || "as advised"})`)
       : ["• Apni dawaiyan samay par lein"]),
-    "Kripya samay par le lein. — sent via Aayogya Caregiver",
+    "Kripya samay par le lein. — sent via Ayogya Caregiver",
   ].join("\n");
 
   const placeAiCall = async () => {

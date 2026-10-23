@@ -9,12 +9,10 @@ import GlowPill from "@/components/reactbits/GlowPill";
 import { Sparkles, Activity, AlertTriangle, Info, ExternalLink } from "lucide-react";
 
 export function BrandMark({ className = "" }) {
-  // Real Aayogya lockup (golden leaf + pulse mark + wordmark). The PNG carries a
-  // warm ivory background, so it sits cleanly on cream and reads as a rounded
-  // chip on dark surfaces.
+  // Ayogya Golden Leaf lockup (golden leaf + pulse mark + wordmark).
   return (
     <span className={`brand-mark ${className}`.trim()}>
-      <img src="/logo.png" alt="Aayogya" className="brand-logo-img" />
+      <img src="/aayogya-logo.png" alt="Ayogya" className="brand-logo-img h-9 w-auto object-contain" />
     </span>
   );
 }

@@ -1,0 +1,32 @@
+{
+  "name": "Aushadh-AI — Aapki Dawai, Sahi Daam",
+  "short_name": "Aushadh-AI",
+  "description": "Medicine price transparency, verified Jan Aushadhi generic alternatives, and local Kendra finder. Informational only — confirm with doctor.",
+  "start_url": "/app",
+  "scope": "/",
+  "id": "/app",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f2eb",
+  "theme_color": "#1a2234",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

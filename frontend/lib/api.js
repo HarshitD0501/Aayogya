@@ -1,12 +1,13 @@
 "use client";
+import { FIXTURE_DATA } from "./fixtures";
 
 // Thin fetch wrapper: attaches the Bearer token, unwraps FastAPI's {detail},
 // and broadcasts a logout on 401 so the app can drop back to the login screen.
-const TOKEN_KEY = "aayogya_token";
+const TOKEN_KEY = "aushadh_token";
 
 export function getToken() {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(TOKEN_KEY) || window.localStorage.getItem("aarogya_token");
+  return window.localStorage.getItem(TOKEN_KEY) || window.localStorage.getItem("aushadh_token");
 }
 export function setToken(t) {
   window.localStorage.setItem(TOKEN_KEY, t);
@@ -14,13 +15,13 @@ export function setToken(t) {
 export function clearToken() {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(TOKEN_KEY);
-    window.localStorage.removeItem("aarogya_token");
+    window.localStorage.removeItem("aushadh_token");
     window.localStorage.removeItem(PATIENT_KEY); // stale patient header = wrong dashboard
   }
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-const PATIENT_KEY = "aayogya_patient_id";
+const PATIENT_KEY = "aushadh_patient_id";
 
 // Which linked patient the (caregiver) token acts on. Patients ignore this —
 // the backend forces them to self regardless of the header.
@@ -57,6 +58,13 @@ export async function api(path, opts = {}) {
   try {
     res = await fetch(`${API_BASE}/api${path}`, { ...init, signal: ac.signal });
   } catch (e) {
+    clearTimeout(timer);
+    // Development fixture fallback when backend is offline
+    const fixture = getDevFixture(path, pid, opts);
+    if (fixture !== undefined) {
+      console.warn(`[Dev Fixture] Backend offline, serving mock for ${path}`);
+      return fixture;
+    }
     if (e.name === "AbortError")
       throw new Error("The server took too long to respond — please try again.");
     throw new Error("Couldn't reach the server. Make sure the backend is running, then try again.");
@@ -67,8 +75,8 @@ export async function api(path, opts = {}) {
   if (res.status === 401) {
     clearToken();
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("aayogya:logout"));
-      window.dispatchEvent(new Event("aarogya:logout"));
+      window.dispatchEvent(new Event("aushadh:logout"));
+      window.dispatchEvent(new Event("aushadh:logout"));
     }
     throw new Error("Session expired — please sign in again.");
   }
@@ -80,6 +88,11 @@ export async function api(path, opts = {}) {
     } catch {
       /* non-JSON error body (e.g. Next.js proxy error when backend is offline) */
       if (res.status === 500 || res.status === 502 || res.status === 504) {
+        const fixture = getDevFixture(path, pid, opts);
+        if (fixture !== undefined) {
+          console.warn(`[Dev Fixture] Server returned ${res.status}, serving mock for ${path}`);
+          return fixture;
+        }
         detail = "Backend server is unreachable on port 8000. Please ensure the backend is started with: uvicorn app.main:app --reload --port 8000";
       }
     }
@@ -265,3 +278,48 @@ export async function getVoiceToken() {
   throw new Error("Voice service is not ready. Please verify LIVEKIT_URL / LIVEKIT_API_KEY in .env");
 }
 
+
+
+function getDevFixture(path, pid, opts) {
+  const activeKey = pid || (typeof window !== "undefined" && window.localStorage.getItem("aushadh_patient_id")) || "ramesh";
+  
+  if (path === "/auth/me") {
+    return FIXTURE_DATA.patients[activeKey] || FIXTURE_DATA.patients.ramesh;
+  }
+  if (path === "/auth/login") {
+    const ident = opts.json?.identifier || "";
+    const p = Object.values(FIXTURE_DATA.patients).find((u) => u.email === ident || u.id === ident) || FIXTURE_DATA.patients.ramesh;
+    return { token: "dev-mock-token-" + p.id, patient: p };
+  }
+  if (path.includes("/summary")) {
+    return FIXTURE_DATA.summary[activeKey] || FIXTURE_DATA.summary.ramesh;
+  }
+  if (path.includes("/medicines")) {
+    return FIXTURE_DATA.medicines[activeKey] || FIXTURE_DATA.medicines.ramesh;
+  }
+  if (path.includes("/interactions")) {
+    return FIXTURE_DATA.interactions[activeKey] || FIXTURE_DATA.interactions.ramesh;
+  }
+  if (path.includes("/pharmacies") || path.includes("/stores")) {
+    return FIXTURE_DATA.pharmacies;
+  }
+  if (path.includes("/reports")) {
+    return FIXTURE_DATA.reports;
+  }
+  if (path.includes("/prices")) {
+    return {
+      brand: "Dolo 650",
+      salt: "Paracetamol",
+      strength: "650 mg",
+      market_price: 32.5,
+      nppa_ceiling_price: 24.0,
+      jan_aushadhi_price: 10.5,
+      max_savings_percent: 68,
+      is_fixture: true,
+    };
+  }
+  if (path.includes("/caregiver/patients")) {
+    return Object.values(FIXTURE_DATA.patients).filter((p) => p.role === "patient");
+  }
+  return undefined;
+}

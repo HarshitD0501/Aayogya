@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aushadhai.example/schemas/kendras.schema.json",
+  "title": "AushadhAi curated Jan Aushadhi Kendras and cities",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "checked_on", "cities", "kendras"],
+  "properties": {
+    "version": { "type": "string", "minLength": 1 },
+    "checked_on": { "$ref": "#/$defs/date" },
+    "cities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/city" }
+    },
+    "kendras": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/kendra" }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "format": "date" },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_name", "source_url", "document_ref", "checked_on", "license"],
+      "properties": {
+        "source_name": { "type": "string", "minLength": 1 },
+        "source_url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "document_ref": { "type": "string", "minLength": 1 },
+        "checked_on": { "$ref": "#/$defs/date" },
+        "license": { "type": "string", "minLength": 1 }
+      }
+    },
+    "city": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["city_id", "name", "state", "lat", "lng"],
+      "properties": {
+        "city_id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "state": { "type": "string", "minLength": 1 },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+    "kendra": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "city_id", "kind", "lat", "lng", "address", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "city_id": { "$ref": "#/$defs/id" },
+        "kind": { "const": "kendra" },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+        "address": { "type": "string", "minLength": 1 },
+        "contact": { "type": ["string", "null"] },
+        "hours": { "type": ["string", "null"] },
+        "source": { "$ref": "#/$defs/source" }
+      }
+    }
+  }
+}

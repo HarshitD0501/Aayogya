@@ -1,42 +1,52 @@
 import "./globals.css";
-import "leaflet/dist/leaflet.css";
-import { Inter, Fraunces } from "next/font/google";
+import Script from "next/script";
 import AuraBackground from "@/components/reactbits/AuraBackground";
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-// Editorial serif display for the landing page (Deciding-Health style headlines).
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-  display: "swap",
-});
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata = {
-  title: "Aayogya — your medicines, made clear",
+  title: "Ayogya — Prescription Intelligence & Healthcare Adherence",
   description:
-    "Understand your prescriptions, daily schedule, interactions, and nearby pharmacies. Not a substitute for your doctor.",
+    "Ayogya: Unified prescription intelligence, verified Jan Aushadhi generic alternatives, multi-doctor drug conflict flags, and smart adherence companion.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/aayogya-logo.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ayogya",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#1a2234",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
-      <body>
+    <html lang="en" className="scroll-smooth">
+      <body className="font-sans antialiased selection:bg-brand-peach selection:text-brand-navy">
+        {/* Global Paper Texture Overlay */}
+        <div className="fixed inset-0 pointer-events-none z-50 bg-paper-texture mix-blend-multiply" />
         <AuraBackground />
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
+        <Script id="sw-register" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

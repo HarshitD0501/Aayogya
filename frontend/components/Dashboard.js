@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { BrandMark, Pill } from "@/components/ui";
-import ShinyText from "@/components/reactbits/ShinyText";
+import dynamic from "next/dynamic";
 import {
   Summary,
   Upload,
@@ -12,8 +11,57 @@ import {
   Prices,
   Reports,
 } from "@/components/sections";
-import Pharmacies from "@/components/Pharmacies";
-import Assistant from "@/components/Assistant";
+
+// Code-split heavy tool tabs to guarantee sub-second initial dashboard entry
+const Assistant = dynamic(() => import("@/components/Assistant"), {
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Connecting to Sahayak Voice Assistant…</p>
+    </div>
+  ),
+  ssr: false,
+});
+
+const SearchView = dynamic(() => import("@/components/views/SearchView"), {
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Loading Price Discovery…</p>
+    </div>
+  ),
+  ssr: false,
+});
+
+const ScanView = dynamic(() => import("@/components/views/ScanView"), {
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Loading Prescription Scanner…</p>
+    </div>
+  ),
+  ssr: false,
+});
+
+const StoresView = dynamic(() => import("@/components/views/StoresView"), {
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Loading Kendra Locator & Map…</p>
+    </div>
+  ),
+  ssr: false,
+});
+
+const HistoryView = dynamic(() => import("@/components/views/HistoryView"), {
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Loading Saved Records…</p>
+    </div>
+  ),
+  ssr: false,
+});
 import {
   Activity,
   UploadCloud,
@@ -23,17 +71,20 @@ import {
   MapPin,
   FileText,
   LogOut,
-  User,
+  Compass,
   HeartPulse,
   Bot,
   Home,
   Users,
+  Search,
+  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 
 const SECTIONS = [
   {
     key: "summary",
-    label: "Overview",
+    label: "Health Overview",
     Icon: Activity,
     Comp: Summary,
     title: "Health Overview",
@@ -44,16 +95,26 @@ const SECTIONS = [
     label: "Ask Sahayak",
     Icon: Bot,
     Comp: Assistant,
-    title: "Voice Assistant",
-    sub: "Talk or type to ask about your medicines, interactions, prices and next visit.",
+    title: "Sahayak Voice Assistant",
+    sub: "Real-time 2-way WebRTC live voice consultation & multilingual health assistant.",
   },
   {
-    key: "upload",
-    label: "Upload Script",
+    key: "search",
+    label: "Search & Compare",
+    Icon: Search,
+    Comp: ({ goto }) => <SearchView hideNavbar={true} onNavigateTab={goto} />,
+    title: "Jan Aushadhi Price Discovery",
+    sub: "Verify Jan Aushadhi (PMBJP) generic alternatives against branded MRP and NPPA caps.",
+    isTool: true,
+  },
+  {
+    key: "scan",
+    label: "Scan Prescription",
     Icon: UploadCloud,
-    Comp: Upload,
-    title: "Upload Prescription",
-    sub: "Snap or pick a photo — Gemini Vision extracts meds, you confirm safety.",
+    Comp: ({ goto }) => <ScanView hideNavbar={true} onNavigateTab={goto} />,
+    title: "Scan & OCR Review",
+    sub: "Upload or photograph a medicine box or prescription for OCR review and manual verification.",
+    isTool: true,
   },
   {
     key: "medicines",
@@ -68,40 +129,46 @@ const SECTIONS = [
     label: "Safety Check",
     Icon: ShieldAlert,
     Comp: Interactions,
-    title: "Drug Interaction Safety Check",
-    sub: "Automated conflict detection to prevent dangerous drug-drug interactions.",
+    title: "Drug Conflict Safety Check",
+    sub: "Automated conflict detection across 300,000+ interactions to prevent dangerous drug combinations.",
   },
   {
-    key: "prices",
-    label: "Price Comparison",
-    Icon: Tag,
-    Comp: Prices,
-    title: "Fair Price Comparison",
-    sub: "Real-time pricing across trusted Indian pharmacy partners.",
-  },
-  {
-    key: "pharmacies",
-    label: "Nearby Chemists",
+    key: "stores",
+    label: "Find Kendra",
     Icon: MapPin,
-    Comp: Pharmacies,
-    title: "Nearby Pharmacies",
-    sub: "Find local stores, confirm stock, and get instant turn-by-turn directions.",
+    Comp: ({ goto }) => <StoresView hideNavbar={true} onNavigateTab={goto} />,
+    title: "Jan Aushadhi Kendra Locator",
+    sub: "Locate genuine PMBJP Kendras with verified addresses, opening hours, and driving routes.",
+    isTool: true,
   },
   {
-    key: "reports",
-    label: "Records & History",
+    key: "history",
+    label: "Saved History",
     Icon: FileText,
-    Comp: Reports,
-    title: "Prescription History",
-    sub: "Secure archival of all uploaded prescriptions and doctor notes.",
+    Comp: ({ goto }) => <HistoryView hideNavbar={true} onNavigateTab={goto} />,
+    title: "Device-Local Report History",
+    sub: "Locally stored prescription summaries on this device with printable chemist counter slips.",
+    isTool: true,
   },
 ];
 
-export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient }) {
-  const [active, setActive] = useState("summary");
+export default function Dashboard({
+  patient,
+  onLogout,
+  onGoHome,
+  onSwitchPatient,
+  initialSection = "summary",
+}) {
+  const [active, setActive] = useState(initialSection);
   const mainRef = useRef(null);
   const current = SECTIONS.find((s) => s.key === active) || SECTIONS[0];
   const Comp = current.Comp;
+
+  useEffect(() => {
+    if (initialSection && SECTIONS.some((s) => s.key === initialSection)) {
+      setActive(initialSection);
+    }
+  }, [initialSection]);
 
   // GSAP smooth section entrance
   useEffect(() => {
@@ -110,8 +177,8 @@ export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
-        { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" }
       );
     }, el);
     return () => ctx.revert();
@@ -127,152 +194,161 @@ export default function Dashboard({ patient, onLogout, onGoHome, onSwitchPatient
     : "PT";
 
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <BrandMark />
+    <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col md:flex-row relative">
+      {/* 
+        1. STATIONARY LEFT VERTICAL NAVBAR DOCK
+        Firmly anchored on scrolls, distinct individual section with 2px ink divider
+      */}
+      <aside className="w-full md:w-72 lg:w-80 md:fixed md:top-0 md:left-0 md:bottom-0 md:h-screen bg-brand-cream border-b-2 md:border-b-0 md:border-r-2 border-brand-navy flex flex-col p-4 md:p-5 z-40 md:overflow-hidden shrink-0 select-none shadow-sm stationary-sidebar">
+        
+        {/* Brand Lockup Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b-2 border-brand-navy/15">
+          <Link href="/" className="flex items-center gap-2 group py-0.5">
+            <img
+              src="/aayogya-logo.png"
+              alt="Ayogya"
+              className="h-10 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+            />
+          </Link>
+        </div>
 
+        {/* Home Return Button */}
         {onGoHome && (
           <button
-            className="btn btn-ghost btn-sm"
             onClick={onGoHome}
-            title="Return to Public Landing Page"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              width: "100%",
-              justifyContent: "flex-start",
-              marginTop: 10,
-              marginBottom: 4,
-              color: "var(--ink-secondary)",
-              fontSize: 12,
-              fontWeight: 600,
-              padding: "6px 10px",
-              borderRadius: 8,
-              background: "var(--surface-2)",
-              border: "1px solid var(--line)",
-            }}
+            className="my-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-brand-white hover:bg-brand-peach/30 text-brand-navy border-2 border-brand-navy font-sans font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover transition-all"
+            title="Return to Home"
           >
-            <Home size={14} color="#e8a838" />
-            <span>← Landing Page</span>
+            <Home className="w-3.5 h-3.5 text-brand-orange shrink-0" />
+            <span className="truncate">← Home Showcase</span>
           </button>
         )}
 
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+        {/* Navigation Dossier Section Tabs */}
+        <nav className="my-1 space-y-1 flex-1 min-h-0 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(26,34,52,0.25) transparent' }}>
+          <div className="text-[10px] font-sans font-black uppercase tracking-wider text-brand-gray px-2 py-1">
+            PWA Workspace Modules
+          </div>
           {SECTIONS.map((s) => {
             const Icon = s.Icon;
             const isActive = s.key === active;
             return (
               <button
                 key={s.key}
-                className={`nav-item ${isActive ? "active" : ""}`.trim()}
                 onClick={() => setActive(s.key)}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-black uppercase tracking-wider transition-all text-left rounded-sm ${
+                  isActive
+                    ? "bg-brand-navy text-brand-cream border-2 border-brand-navy sketchy-btn shadow-sketch"
+                    : "text-brand-navy/80 hover:text-brand-navy hover:bg-brand-peach/30 border-2 border-transparent"
+                }`}
               >
-                <span className="ic">
-                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                </span>
-                <span>{s.label}</span>
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-brand-orange" : "text-brand-navy/60"}`} />
+                <span className="truncate">{s.label}</span>
               </button>
             );
           })}
-        </div>
+        </nav>
 
-        <div className="nav-spacer" />
-
-        <div className="who-card">
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #e8a838, #b07f14)",
-                color: "#1a2234",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 700,
-                fontSize: 13,
-                boxShadow: "0 4px 10px rgba(232, 168, 56, 0.35)",
-                flexShrink: 0,
-              }}
-            >
-              {initials}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="nm" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "#f8fafc", fontWeight: 700, fontSize: 13.5 }}>
-                {patient.name}
+        {/* 
+          2. USER INFO DOSSIER BADGE
+          Guaranteed zero-overflow container with truncated identity & flex-wrapped demo chips
+        */}
+        <div className="mt-auto shrink-0 pt-3 border-t-2 border-brand-navy/20">
+          <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-3 space-y-2.5 max-w-full overflow-hidden">
+            
+            {/* Identity Row */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs flex items-center justify-center shrink-0 shadow-sketch-hover">
+                {initials}
               </div>
-              <div style={{ fontSize: 11.5, color: "#94a3b8" }}>
-                {patient.email || patient.phone}
+              <div className="min-w-0 flex-1">
+                <div className="font-serif font-black text-sm text-brand-navy truncate leading-tight" title={patient?.name}>
+                  {patient?.name}
+                </div>
+                <div className="font-sans text-[11px] font-medium text-brand-gray truncate" title={patient?.email || patient?.phone}>
+                  {patient?.email || patient?.phone || "Verified Patient"}
+                </div>
               </div>
             </div>
+
+            {/* Plan Badge & Sign Out Button */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-brand-navy/10">
+              <span className="font-sans text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-brand-peach/40 text-brand-navy border border-brand-navy rounded-sm shrink-0">
+                {patient?.plan === "pro" ? "Pro Dossier" : "Free Access"}
+              </span>
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-1 px-2.5 py-1 bg-brand-cream hover:bg-brand-peach/30 text-brand-navy border border-brand-navy font-sans text-xs font-bold rounded-sm transition-colors shrink-0"
+                title="Sign out of Ayogya"
+              >
+                <LogOut className="w-3 h-3 text-brand-orange" />
+                <span>Sign out</span>
+              </button>
+            </div>
+
+            {/* Switch Demo Patient Section (wrapped, zero-overflow) */}
+            {onSwitchPatient && (
+              <div className="pt-2 border-t border-dashed border-brand-navy/20">
+                <div className="text-[10px] font-sans font-black uppercase tracking-wider text-brand-gray flex items-center gap-1.5 mb-1.5">
+                  <Users className="w-3 h-3 text-brand-orange" />
+                  <span>Switch Demo Patient:</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: "ramesh", label: "Ramesh" },
+                    { id: "shanti", label: "Shanti" },
+                    { id: "aarav", label: "Aarav" },
+                  ].map((p) => {
+                    const isSelected = patient?.id === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => onSwitchPatient(p.id)}
+                        className={`px-2 py-0.5 text-[10px] font-sans font-bold border border-brand-navy rounded-sm transition-all ${
+                          isSelected
+                            ? "bg-brand-orange text-brand-navy font-black shadow-sketch"
+                            : "bg-brand-cream text-brand-navy hover:bg-brand-peach/30"
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-
-          <div className="row" style={{ marginTop: 12 }}>
-            <Pill tone={patient.plan === "pro" ? "brand" : "accent"}>
-              {patient.plan === "pro" ? "Pro Member" : "Free Account"}
-            </Pill>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={onLogout}
-              title="Sign out of Aayogya"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px" }}
-            >
-              <LogOut size={14} />
-              <span>Sign out</span>
-            </button>
-          </div>
-
-          {onSwitchPatient && (
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed var(--line)" }}>
-              <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600, marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
-                <Users size={12} />
-                <span>Switch Demo Patient:</span>
-              </div>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[
-                  { id: "ramesh", label: "Ramesh" },
-                  { id: "shanti", label: "Shanti" },
-                  { id: "aarav", label: "Aarav" },
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className={`lp-chip ${patient?.id === p.id ? "active" : ""}`}
-                    onClick={() => onSwitchPatient(p.id)}
-                    style={{
-                      padding: "3px 8px",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      borderRadius: 6,
-                    }}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </aside>
 
-      <main className="main" ref={mainRef}>
-        <div className="topbar">
-          <div className="topbar-header">
-            <div>
-              <h2 className="topbar-title">{current.title}</h2>
-              <p className="topbar-sub">{current.sub}</p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="live-sync-badge">
-                <HeartPulse size={14} color="#e8a838" className="animate-pulse" />
-                Live Sync
-              </span>
-            </div>
+      {/* 
+        3. MAIN WORKSPACE WITH UNIVERSAL DITTO TYPOGRAPHY
+      */}
+      <main className="flex-1 min-w-0 flex flex-col min-h-screen bg-brand-cream/60 md:ml-72 lg:ml-80" ref={mainRef}>
+        
+        {/* Sticky Top Dossier Header */}
+        <header className="sticky top-0 z-20 bg-brand-cream/95 backdrop-blur-md border-b-2 border-brand-navy px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-serif font-black text-xl sm:text-2xl text-brand-navy tracking-tight truncate">
+              {current.title}
+            </h1>
+            <p className="font-sans text-xs text-brand-gray font-medium truncate mt-0.5">
+              {current.sub}
+            </p>
           </div>
-        </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-brand-orange/20 border-2 border-brand-navy text-brand-navy font-mono text-xs font-bold sketchy-box shadow-sketch-hover">
+              <HeartPulse className="w-3.5 h-3.5 text-brand-orange animate-pulse" />
+              <span>Live Sync</span>
+            </span>
+          </div>
+        </header>
 
-        <Comp patient={patient} goto={setActive} />
+        {/* Section Dynamic View Container */}
+        <div className="p-3 sm:p-6 flex-1">
+          <Comp patient={patient} goto={setActive} />
+        </div>
       </main>
     </div>
   );
