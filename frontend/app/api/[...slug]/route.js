@@ -117,7 +117,7 @@ function getFixtureResponse(path, searchParams) {
       verified_medicines: 250000,
       nppa_caps_tracked: 840,
       jan_aushadhi_generics: 1800,
-      interaction_rules: 312000,
+      interaction_rules: 3,
       status: "online",
       _development_fixture: true,
     };

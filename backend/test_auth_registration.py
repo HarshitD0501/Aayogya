@@ -18,7 +18,8 @@ from fastapi.testclient import TestClient  # noqa: E402
 from app.auth import _verify_token, verify_password  # noqa: E402
 from app.db import SessionLocal, engine  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import CaregiverLink, Patient  # noqa: E402
+from app.models import CaregiverLink, Interaction, Patient  # noqa: E402
+from app.seed import seed_interactions  # noqa: E402
 
 
 class RegistrationApiTests(unittest.TestCase):
@@ -244,6 +245,36 @@ class RegistrationApiTests(unittest.TestCase):
             failed.json()["detail"],
             "The text assistant is temporarily unavailable. Please try again shortly or use Live Voice.",
         )
+
+    def test_public_interaction_stat_uses_database_count(self):
+        db = SessionLocal()
+        rule = Interaction(
+            salt_a="test-salt-a",
+            salt_b="test-salt-b",
+            severity="minor",
+            note="Test rule",
+            source="Test fixture",
+        )
+        try:
+            db.add(rule)
+            db.commit()
+            expected_count = db.query(Interaction).count()
+            response = self.client.get("/api/public/stats")
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.json()["interaction_rules"], expected_count)
+        finally:
+            db.delete(rule)
+            db.commit()
+            db.close()
+
+    def test_cited_interaction_rules_seed_without_demo_accounts_and_are_idempotent(self):
+        db = SessionLocal()
+        try:
+            self.assertEqual(db.query(Interaction).count(), 3)
+            seed_interactions(db)
+            self.assertEqual(db.query(Interaction).count(), 3)
+        finally:
+            db.close()
 
 
 if __name__ == "__main__":

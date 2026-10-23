@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 
 import { useEffect, useState } from "react";
 import { useScrollReveal, useScrollCountUp } from "@/lib/gsap";
-import { DEMO_USERS, getPublicPrices, login } from "@/lib/api";
+import { DEMO_USERS, getPublicPrices, getPublicStats, login } from "@/lib/api";
 import {
   ScanLine, ShieldAlert, MessageCircleHeart, Tag, MapPin, Bell,
   ArrowRight, Stethoscope, Lock, CheckCircle2, Search,
@@ -80,7 +80,7 @@ const FEATURE_DOSSIERS = [
     ep: "DOSSIER 02",
     tag: "Safety Moat",
     title: "Multi-Doctor Interaction Graph",
-    desc: "Cross-checks salts across all active prescriptions against 300,000+ cited interactions. Deferring final clinical judgment to doctors.",
+    desc: "Cross-checks active prescription salts against the currently loaded cited rules. Coverage is limited; a missing alert does not rule out risk.",
     img: "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg",
     key: "safety",
   },
@@ -121,7 +121,7 @@ const FEATURE_DOSSIERS = [
 // ---- Scroll-counting stats band ----
 const STATS = [
   { to: 250, suffix: "K+", label: "Indian medicines mapped", sub: "Brand to salt catalogue powering every parse." },
-  { to: 300, suffix: "K+", label: "Drug interactions catalogued", sub: "Curated, cited safety data we cross-check." },
+  { key: "interaction_rules", label: "Loaded interaction rules", sub: "A limited reference set, not a comprehensive safety database." },
   { to: 9, suffix: "+", label: "Languages, voice & text", sub: "Hindi, Hinglish and more — spoken, not typed." },
 ];
 
@@ -173,6 +173,7 @@ export default function Landing({
   const [slide, setSlide] = useState(0);
   const [problem, setProblem] = useState("adherence");
   const [activeFeatureKey, setActiveFeatureKey] = useState("ocr");
+  const [publicStats, setPublicStats] = useState(null);
 
   // Email brief newsletter state
   const [subEmail, setSubEmail] = useState("");
@@ -192,6 +193,16 @@ export default function Landing({
     return () => {
       alive = false;
       clearInterval(t);
+    };
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    getPublicStats().then((stats) => {
+      if (alive) setPublicStats(stats);
+    });
+    return () => {
+      alive = false;
     };
   }, []);
 
@@ -477,7 +488,7 @@ export default function Landing({
                     <span className="text-xs font-mono text-brand-gray block mb-4">ENGINE / 01</span>
                     <h4 className="font-serif text-2xl text-brand-navy mb-3">Multi-Doctor Graph & Safety Moat</h4>
                     <p className="text-sm text-brand-gray leading-relaxed mb-4 font-light">
-                      Extracts active salts across cardiologist, general physician, and orthopaedic slips. Cross-checks interactions against 300,000+ curated rows to prevent deadly combos.
+                      Extracts active salts across prescriptions and checks the currently loaded interaction rules. Coverage is limited; a missing alert does not rule out risk.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 pt-4 border-t border-brand-navy/10 text-xs font-bold text-brand-navy">
@@ -613,7 +624,7 @@ export default function Landing({
           {STATS.map((s) => (
             <div key={s.label} className="space-y-1">
               <span className="font-serif text-4xl md:text-5xl font-bold text-brand-cream block font-mono">
-                {s.to}{s.suffix}
+                {s.key ? (publicStats?.[s.key] ?? "—") : `${s.to}${s.suffix}`}
               </span>
               <span className="text-xs font-bold uppercase tracking-wider text-brand-orange block">
                 {s.label}

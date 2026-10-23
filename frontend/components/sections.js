@@ -1026,8 +1026,8 @@ export function Interactions() {
         />
         <Stat
           icon={<BookOpen size={20} />}
-          label="Verified interaction rules"
-          value={data?.known_interactions_in_db ?? data?.checked_against ?? 312000}
+          label="Loaded interaction rules"
+          value={data?.known_interactions_in_db ?? data?.checked_against ?? "—"}
         />
         <Stat
           icon={<ShieldAlert size={20} />}
@@ -1038,7 +1038,9 @@ export function Interactions() {
 
       {((data?.findings || data?.interactions || []).length === 0) ? (
         <Card>
-          <Empty icon="✅">No negative drug-drug interactions detected across your active medicines.</Empty>
+          <Note tone="warn">
+            {data?.coverage_note || "No matches were found in the loaded interaction rules. A missing alert does not rule out an interaction."}
+          </Note>
         </Card>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

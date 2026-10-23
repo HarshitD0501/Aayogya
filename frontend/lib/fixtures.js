@@ -278,14 +278,18 @@ export const FIXTURE_DATA = {
 
   interactions: {
     ramesh: {
-      status: "safe",
-      checked_against: 312000,
+      status: "limited",
+      checked_against: 3,
       interactions: [],
-      note: "No critical drug-drug conflicts detected across your 4 active medicines. Always verify with your registered doctor.",
+      coverage_complete: false,
+      coverage_note: "No matches were found in the 3 loaded interaction rules. This limited rule set does not rule out other interaction risks.",
+      note: "Review all medicines with your doctor or pharmacist; this local interaction rule set is not comprehensive.",
     },
     shanti: {
       status: "alert",
-      checked_against: 312000,
+      checked_against: 3,
+      coverage_complete: false,
+      coverage_note: "The loaded interaction rules are limited and do not cover every medicine combination.",
       interactions: [
         {
           severity: "major",

@@ -130,7 +130,7 @@ const SECTIONS = [
     Icon: ShieldAlert,
     Comp: Interactions,
     title: "Drug Conflict Safety Check",
-    sub: "Automated conflict detection across 300,000+ interactions to prevent dangerous drug combinations.",
+    sub: "Checks a limited set of cited interaction rules; a missing alert does not rule out risk.",
   },
   {
     key: "stores",

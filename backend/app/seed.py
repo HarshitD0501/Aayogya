@@ -58,6 +58,7 @@ def seed(db: Session) -> None:
     """Idempotent per-patient: base demo set (Aarav + Shanti), then Ramesh
     (single-doctor free patient matching the demo handwritten prescription),
     then the caregiver family (Sunita + Meera with consented links)."""
+    seed_interactions(db)
     pw = hash_password(DEMO_PASSWORD)
     if not db.get(Patient, "shanti"):
         _seed_base(db, pw)
@@ -68,11 +69,31 @@ def seed(db: Session) -> None:
     _seed_ramesh_caregiver_demo(db, pw)
 
 
-def _seed_base(db: Session, pw: str) -> None:
-    for salt_a, salt_b, sev, note, src in _INTERACTIONS:
-        a, b = sorted([salt_a.lower(), salt_b.lower()])
-        db.add(Interaction(salt_a=a, salt_b=b, severity=sev, note=note, source=src))
+def seed_interactions(db: Session) -> None:
+    """Install the small cited rule set independently from synthetic demos."""
+    existing = {
+        tuple(sorted(((row.salt_a or "").strip().lower(), (row.salt_b or "").strip().lower())))
+        for row in db.query(Interaction).all()
+    }
+    added = False
+    for salt_a, salt_b, severity, note, source in _INTERACTIONS:
+        pair = tuple(sorted((salt_a.strip().lower(), salt_b.strip().lower())))
+        if pair in existing:
+            continue
+        db.add(Interaction(
+            salt_a=pair[0],
+            salt_b=pair[1],
+            severity=severity,
+            note=note,
+            source=source,
+        ))
+        existing.add(pair)
+        added = True
+    if added:
+        db.commit()
 
+
+def _seed_base(db: Session, pw: str) -> None:
     db.add(Patient(id="aarav", name="Aarav Sharma", email="aarav@demo.in",
                    phone="+919000000001", password_hash=pw, plan="free"))
     db.add(Patient(id="shanti", name="Shanti Devi", email="shanti@demo.in",

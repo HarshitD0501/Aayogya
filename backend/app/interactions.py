@@ -60,9 +60,14 @@ def check(db: Session, patient_id: str) -> dict:
     return {
         "checked_pairs": checked,
         "known_interactions_in_db": len(table),
+        "coverage_complete": False,
+        "coverage_note": (
+            f"This check matched against {len(table)} loaded interaction rules only. "
+            "The rule set is not comprehensive, and no match does not rule out an interaction."
+        ),
         "findings": findings,
         "disclaimer": (
-            "Checked against known interactions only - not a guarantee of safety. "
-            "Confirm with your doctor."
+            "Limited interaction coverage: the loaded rules are not comprehensive and a missing alert "
+            "does not establish that a medicine combination is safe. Review your medicines with a doctor or pharmacist."
         ),
     }

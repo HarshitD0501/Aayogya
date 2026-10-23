@@ -70,10 +70,10 @@ This document outlines all currently broken/fragile components, dummy/mock data 
 | Data Component | Current Mock / Dummy State | Real Data Required | How to Replace / Ingest |
 | :--- | :--- | :--- | :--- |
 | **Patient Accounts** | 5 seeded synthetic accounts (`ramesh`, `shanti`, `aarav`, `meera`, `sunita`) with fixed password `pass1234`. | Real user profiles: Name, Real Indian Phone (`+91`), Email, Age, Gender, Primary Conditions. | Build `POST /api/auth/register` + CSV bulk-import script for initial patient onboarding. |
-| **Drug Interactions** | Only 3–14 hardcoded interaction pairs in `seed.py` / `interactions.py`. | Comprehensive Indian Clinical Drug Interaction dataset (e.g. DrugBank / CDSCO / Janaushadhi open data). | Ingest interactions CSV into the `interactions` database table with indexed `salt_a` and `salt_b`. |
+| **Drug Interactions** | Three cited starter rules are seeded idempotently in all environments; no comprehensive interaction dataset is installed. Earlier UI copy overstated coverage and called an empty result no interactions. | A clinically reviewed, appropriately licensed interaction source with provenance. | No-match results explicitly say coverage is limited, and displayed rule counts come from the database. Dataset acquisition and clinical review remain open. |
 | **Medicine Pricing (NPPA & Jan Aushadhi)** | ~35 NPPA caps and ~25 Jan Aushadhi medicines in `prices.py`. Unmatched medicines fall back to a SHA-256 fake price generator (`_seed_price`). | Official PMBJP Jan Aushadhi price list (~1,800 medicines) and NPPA DPCO ceiling price list (~900 formulations). | Ingest PMBJP & NPPA government datasets into a SQLite/Postgres `medicine_prices` table with indexed salt/strength matching. |
 | **Prescription Scans** | Test images (`prescription.jpg`, `prescription_test.jpg`). | High-resolution real handwritten and printed Indian doctor prescriptions. | Upload real prescriptions through the UI/API. |
-| **Landing Page Metrics** | Hardcoded text in `Landing.js` ("250K+ medicines mapped", "300K+ interactions", static reviews). | Real live database counts. | Connect `Landing.js` to dynamic backend endpoint `/api/public/stats`. |
+| **Landing Page Metrics** | Interaction count now reads the database and reflects the limited loaded rules; medicine totals and reviews remain static. | Real catalog counts and sourced reviews. | Interaction metrics use /api/public/stats; finish replacing the remaining static landing metrics with verified sources. |
 
 ---
 

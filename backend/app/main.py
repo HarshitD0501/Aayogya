@@ -38,13 +38,13 @@ from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
-from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report  # noqa: E402
+from .models import DoseAdherence, Interaction, Medicine, Patient, ReminderLog, Report  # noqa: E402
 from .schemas import (  # noqa: E402
     GoogleAuthIn, LoginIn, LoginOut, MedicineOut, PatientOut, RegisterIn, ReminderPrefsIn,
     ReminderPrefsOut, ReportOut, RescheduleIn, StopMedicineIn,
     TelephonyDispatchIn,
 )
-from .seed import seed  # noqa: E402
+from .seed import seed, seed_interactions  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +77,7 @@ async def lifespan(app: FastAPI):
     init_db()
     db = SessionLocal()
     try:
+        seed_interactions(db)
         if settings.enable_demo_accounts:
             seed(db)
     finally:
@@ -172,11 +173,12 @@ def get_public_stats(db: Session = Depends(get_db)):
     jan_count = catalog_counts["jan_aushadhi"]
     total_meds = max(120, nppa_count + jan_count)
     patient_count = db.query(Patient).count()
+    interaction_count = db.query(Interaction).count()
     return {
         "verified_medicines": total_meds,
         "nppa_caps_tracked": nppa_count,
         "jan_aushadhi_generics": jan_count,
-        "interaction_rules": 14,
+        "interaction_rules": interaction_count,
         "active_patients": patient_count,
         "live_partner": "PharmEasy India",
         "status": "online",

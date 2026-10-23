@@ -137,11 +137,11 @@ export async function getPublicStats() {
     return await api("/public/stats", { timeoutMs: 8000 });
   } catch {
     return {
-      verified_medicines: 120,
-      nppa_caps_tracked: 38,
-      jan_aushadhi_generics: 34,
-      interaction_rules: 14,
-      status: "online",
+      verified_medicines: null,
+      nppa_caps_tracked: null,
+      jan_aushadhi_generics: null,
+      interaction_rules: null,
+      status: "offline",
     };
   }
 }
