@@ -34,7 +34,7 @@ class ExtractionResult(BaseModel):
     raw_ocr: str = ""
     overall_confidence: float = 0.7
     meds: list[ExtractedMed] = []
-    mock: bool = False  # True when GEMINI_API_KEY absent
+    mock: bool = False  # True only when explicit development mock extraction is used
 
 
 class MedicineOut(BaseModel):

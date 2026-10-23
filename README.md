@@ -412,7 +412,7 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-> **Zero-Key Out of the Box:** The backend works immediately with zero API keys. Extraction defaults to deterministic mock or local Ollama, and SQLite is initialized and seeded automatically.
+> **Local setup:** SQLite initializes automatically. Prescription extraction needs a configured vision provider; a canned prescription is available only when `ENABLE_MOCK_EXTRACTION=true` is explicitly set for development.
 
 ### 2. Frontend (Next.js 14 PWA) — Port 3000
 

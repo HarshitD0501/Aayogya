@@ -10,6 +10,7 @@ Tests all 4 agents and safety edge cases:
 import base64
 import io
 from datetime import date
+from unittest.mock import patch
 from PIL import Image
 
 from app import catalog, confidence
@@ -218,6 +219,41 @@ def test_agent_4_validation_and_confidence():
     print("  [PASS] Agent 4 Clinical Validation & Confidence passed all tests.")
 
 
+def test_extraction_mock_requires_explicit_opt_in():
+    print("Testing extraction provider failure and explicit mock opt-in...")
+
+    from app import extraction
+    from app.config import settings
+
+    provider = ("test provider", "http://unused", "test-model", "")
+    with (
+        patch.object(extraction, "preprocess_prescription_image", return_value=(b"image", "image/jpeg")),
+        patch.object(extraction, "_providers", return_value=[provider]),
+        patch.object(extraction, "_openai_vlm", side_effect=OSError("offline")),
+        patch.object(settings, "gemini_api_key", ""),
+        patch.object(settings, "enable_mock_extraction", False),
+    ):
+        try:
+            extraction._extract_raw(b"image", "image/jpeg")
+        except extraction.ExtractionUnavailable as exc:
+            assert "providers are unavailable" in str(exc)
+        else:
+            raise AssertionError("Provider failure unexpectedly returned a prescription")
+
+    with (
+        patch.object(extraction, "preprocess_prescription_image", return_value=(b"image", "image/jpeg")),
+        patch.object(extraction, "_providers", return_value=[provider]),
+        patch.object(extraction, "_openai_vlm", side_effect=OSError("offline")),
+        patch.object(settings, "gemini_api_key", ""),
+        patch.object(settings, "enable_mock_extraction", True),
+    ):
+        raw, is_mock = extraction._extract_raw(b"image", "image/jpeg")
+        assert is_mock is True
+        assert raw is extraction._MOCK
+
+    print("  [PASS] Provider failure is explicit; canned output requires opt-in.")
+
+
 # =====================================================================
 # END-TO-END LANGGRAPH PIPELINE TEST (WITH HITL INTERRUPT)
 # =====================================================================
@@ -295,6 +331,7 @@ if __name__ == "__main__":
     test_agent_2_json_cleaner()
     test_agent_3_catalog_fuzzy()
     test_agent_4_validation_and_confidence()
+    test_extraction_mock_requires_explicit_opt_in()
     test_langgraph_pipeline_e2e()
     print("\n=======================================================")
     print("ALL TESTS PASSED WITH 0 ERRORS! SYSTEM PRODUCTION-READY")

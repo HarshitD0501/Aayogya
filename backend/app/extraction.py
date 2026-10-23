@@ -14,7 +14,7 @@ VLM Provider Fallback Chain:
   2. Groq      — genuinely free, RATE-limited not per-token (Llama-4-Scout vision)
   3. HF router — per-token metered; last VLM resort
   4. Gemini    — if key configured
-  5. MOCK      — deterministic canned prescription (zero keys/cost)
+  5. MOCK      — deterministic canned prescription only when explicitly enabled
 
 OCR text is treated strictly as untrusted DATA (design §11).
 """
@@ -35,6 +35,10 @@ from .preprocessor import preprocess_prescription_image
 from .schemas import ExtractedMed, ExtractionResult
 
 logger = logging.getLogger(__name__)
+
+
+class ExtractionUnavailable(RuntimeError):
+    """No configured vision provider could extract the prescription."""
 
 _PROMPT = (
     "You are an expert clinical medical-record data extractor specializing in handwritten Indian prescriptions. "
@@ -130,8 +134,8 @@ def _providers() -> list[tuple[str, str, str, str]]:
 
 def _extract_raw(image_bytes: bytes, mime: str) -> tuple[dict, bool]:
     """Pick the extraction backend. Returns (raw_json, mock_flag). Walks the free-first
-    VLM chain, then Gemini, then MOCK — so an exhausted quota, dead local server,
-    invalid key, or network error never crashes the user request.
+    VLM chain, then Gemini. Mock output is used only when ENABLE_MOCK_EXTRACTION is
+    explicitly enabled; otherwise provider failures are surfaced to the caller.
     
     Agent 1 (Preprocessor) runs first to enhance image quality before vision models.
     """
@@ -142,17 +146,30 @@ def _extract_raw(image_bytes: bytes, mime: str) -> tuple[dict, bool]:
         logger.warning("Image preprocessor failed (%s): %s. Using original bytes.", type(e).__name__, e)
 
     # Agent 2: VLM Deciphering with Multi-Provider Fallback Chain
+    last_error: Exception | None = None
     for name, base_url, model, key in _providers():
         try:
             return _openai_vlm(base_url, model, key, image_bytes, mime), False
         except Exception as e:
+            last_error = e
             logger.warning("%s extraction failed (%s): %s. Trying next...", name, type(e).__name__, e)
     if settings.gemini_api_key:
         try:
             return _gemini_extract(image_bytes, mime), False
         except Exception as e:
-            logger.warning("Gemini extraction failed (%s): %s. Falling back to mock...", type(e).__name__, e)
-    return _MOCK, True
+            last_error = e
+            logger.warning("Gemini extraction failed (%s): %s.", type(e).__name__, e)
+
+    if settings.enable_mock_extraction:
+        logger.warning("Using the explicitly enabled development mock prescription.")
+        return _MOCK, True
+    if last_error is not None:
+        raise ExtractionUnavailable(
+            "Prescription extraction providers are unavailable. Please try again later."
+        ) from last_error
+    raise ExtractionUnavailable(
+        "Prescription extraction is not configured. Configure a vision provider or enable mock extraction for development."
+    )
 
 
 # Canned prescription for MOCK mode — the Shanti Devi multi-prescription demo (design §14).

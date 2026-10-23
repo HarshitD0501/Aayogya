@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./aayogya.db"
 
     # Extraction VLM chain (OpenAI-compatible vision /chat/completions), tried in
-    # order; first success wins, then Gemini, then MOCK. Free/unmetered first, the
+    # order; first success wins, then Gemini. The canned result is development-only
+    # and requires an explicit opt-in. Free/unmetered first, the
     # per-token HF router last (its tiny free credit is the "runs out immediately" trap).
     #
     # 1) Ollama — self-hosted Qwen2.5-VL-7B, unmetered/free (`ollama pull qwen2.5vl:7b`).
@@ -44,6 +45,7 @@ class Settings(BaseSettings):
     # Blank => Gemini path off. gemini-flash-latest alias avoids model-deprecation 404s.
     gemini_api_key: str = ""
     gemini_model: str = "gemini-flash-latest"
+    enable_mock_extraction: bool = False
 
     # Signs session tokens. A per-process random key is used only for local
     # development; production must provide a stable, randomly generated secret.
@@ -101,6 +103,8 @@ class Settings(BaseSettings):
                 raise ValueError("Production requires SECRET_KEY with at least 32 characters")
             if self.enable_demo_accounts:
                 raise ValueError("ENABLE_DEMO_ACCOUNTS cannot be enabled in production")
+            if self.enable_mock_extraction:
+                raise ValueError("ENABLE_MOCK_EXTRACTION cannot be enabled in production")
         elif not self.secret_key:
             # Keep local setup usable without shipping a forgeable shared key.
             # Tokens expire on restart, which is acceptable for a dev-only key.
