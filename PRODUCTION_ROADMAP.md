@@ -49,12 +49,10 @@ This document outlines all currently broken/fragile components, dummy/mock data 
   - Removed the 120-second warning suppression so actual executor stalls remain visible in logs.
 * **Verification**: `agent/test_agent.py` checks the installed SDK options and confirms Python 3.11.9 can spawn a Windows process.
 
-### 🔴 1.5 Default Insecure Secret Key
-* **Current State**: `settings.secret_key` defaults to `"dev-insecure-change-me"`.
-* **Problem**: Anyone knowing this default can forge HMAC session tokens and access any patient's records.
-* **Fix Required**:
-  - Enforce in `config.py` that if `ENVIRONMENT == "production"` and `secret_key` is the default, the backend refuses to boot.
-  - Generate a secure 64-char key in `.env` using `openssl rand -hex 32`.
+### ✅ 1.5 Default Insecure Secret Key
+* **Verified state**: There is no shared insecure default. Local development generates a random key; production rejects a missing or shorter than 32-character `SECRET_KEY`.
+* **Fix applied**: Documented generating a stable 64-hex-character production key with `openssl rand -hex 32`. The actual key belongs in the deployment environment or an ignored `.env` file, never in source control.
+* **Verification**: `backend/test_config_security.py` covers missing, short, stable production, and random development keys.
 
 ### 🔴 1.6 Agent Chat Service Hard Dependency & Failure Handling
 * **Current State**: `backend/app/main.py` proxies `/api/chat` to `http://localhost:8081/chat` via HTTPX.
