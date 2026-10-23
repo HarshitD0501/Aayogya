@@ -6,11 +6,17 @@ scattering os.getenv calls.
 """
 from __future__ import annotations
 
+import secrets
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
+
+    environment: str = "development"
+    enable_demo_accounts: bool = False
 
     # SQLite by default (zero setup). Postgres for scale:
     #   postgresql+psycopg://aayogya:aayogya@localhost:5432/aayogya
@@ -39,8 +45,9 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-flash-latest"
 
-    # Signs session tokens. MUST be a long random value in prod (else forgeable).
-    secret_key: str = "dev-insecure-change-me"
+    # Signs session tokens. A per-process random key is used only for local
+    # development; production must provide a stable, randomly generated secret.
+    secret_key: str = ""
 
     # Text chatbot ("the brain") runs as the separate agent service (its own venv,
     # google-genai + livekit deps). The backend proxies /api/chat to it so the
@@ -81,6 +88,24 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     db_max_overflow: int = 10
     db_pool_recycle: int = 1800  # seconds; recycle before Postgres idle timeout
+
+    @model_validator(mode="after")
+    def validate_security_settings(self) -> "Settings":
+        self.environment = self.environment.strip().lower()
+        if self.environment not in {"development", "test", "production"}:
+            raise ValueError("ENVIRONMENT must be development, test, or production")
+
+        self.secret_key = self.secret_key.strip()
+        if self.environment == "production":
+            if len(self.secret_key) < 32:
+                raise ValueError("Production requires SECRET_KEY with at least 32 characters")
+            if self.enable_demo_accounts:
+                raise ValueError("ENABLE_DEMO_ACCOUNTS cannot be enabled in production")
+        elif not self.secret_key:
+            # Keep local setup usable without shipping a forgeable shared key.
+            # Tokens expire on restart, which is acceptable for a dev-only key.
+            self.secret_key = secrets.token_urlsafe(48)
+        return self
 
     @property
     def is_postgres(self) -> bool:

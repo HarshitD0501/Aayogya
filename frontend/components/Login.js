@@ -15,10 +15,11 @@ const DEMOS = [
   { name: "Aarav Sharma", email: "aarav@demo.in", plan: "Free", desc: "Active medication schedule demo" },
 ];
 const DEMO_PW = "pass1234";
+const DEMOS_ENABLED = process.env.NODE_ENV !== "production";
 
 export default function Login({ onLogin, onBack }) {
-  const [id, setId] = useState("ramesh@demo.in");
-  const [pw, setPw] = useState(DEMO_PW);
+  const [id, setId] = useState(DEMOS_ENABLED ? "ramesh@demo.in" : "");
+  const [pw, setPw] = useState(DEMOS_ENABLED ? DEMO_PW : "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const scope = useReveal([]);
@@ -121,7 +122,7 @@ export default function Login({ onLogin, onBack }) {
           </button>
         </form>
 
-        <div className="demo-list" data-reveal>
+        {DEMOS_ENABLED && <div className="demo-list" data-reveal>
           <div className="lbl" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Sparkles size={13} color="#2563eb" />
             <span>Instant Demo Accounts (pass1234)</span>
@@ -177,7 +178,7 @@ export default function Login({ onLogin, onBack }) {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
       </SpotlightCard>
     </div>
   );

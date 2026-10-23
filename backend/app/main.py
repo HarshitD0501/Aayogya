@@ -76,7 +76,8 @@ async def lifespan(app: FastAPI):
     init_db()
     db = SessionLocal()
     try:
-        seed(db)
+        if settings.enable_demo_accounts:
+            seed(db)
     finally:
         db.close()
     cp, pool = _make_checkpointer()

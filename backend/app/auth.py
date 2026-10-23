@@ -27,6 +27,11 @@ from .models import Patient
 _SECRET = settings.secret_key.encode()
 _TTL = 60 * 60 * 24 * 7  # 7 days
 _ITER = 200_000
+_DEMO_ACCOUNT_IDS = frozenset({"aarav", "shanti", "ramesh", "sunita", "meera"})
+
+
+def _demo_account_blocked(patient_id: str) -> bool:
+    return patient_id in _DEMO_ACCOUNT_IDS and not settings.enable_demo_accounts
 
 
 def hash_password(pw: str) -> str:
@@ -81,7 +86,9 @@ def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
         .filter((Patient.email == identifier) | (Patient.phone == identifier))
         .first()
     )
-    if patient and verify_password(password, patient.password_hash or ""):
+    if patient and not _demo_account_blocked(patient.id) and verify_password(
+        password, patient.password_hash or ""
+    ):
         return patient
     return None
 
@@ -116,6 +123,8 @@ def resolve_actor(
     actor = db.get(Patient, pid)
     if not actor:
         raise HTTPException(401, "Unknown account")
+    if _demo_account_blocked(actor.id):
+        raise HTTPException(401, "Demo accounts are disabled")
 
     if (actor.role or "patient") != "caregiver":
         return actor, actor  # patient role: always self
@@ -153,6 +162,8 @@ def current_caregiver(
     actor = db.get(Patient, pid)
     if not actor:
         raise HTTPException(401, "Unknown account")
+    if _demo_account_blocked(actor.id):
+        raise HTTPException(401, "Demo accounts are disabled")
     if (actor.role or "patient") != "caregiver":
         raise HTTPException(403, "Caregiver login required")
     return actor
