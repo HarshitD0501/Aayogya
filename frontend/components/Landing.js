@@ -1036,7 +1036,7 @@ function PriceSimulatorCard() {
     run("Dolo 650");
   }, []);
 
-  const money = (v, fallback) => Number(v ?? fallback).toFixed(2);
+  const money = (v) => (v != null && v !== "" && Number.isFinite(Number(v)) ? Number(v).toFixed(2) : "—");
 
   return (
     <div className="p-8 bg-brand-cream border-2 border-brand-navy sketchy-box shadow-sketch">
@@ -1065,25 +1065,31 @@ function PriceSimulatorCard() {
       {error && <div className="text-xs text-red-600 font-bold mb-4">{error}</div>}
 
       {data && !loading && (
+        <>
+        {data._development_fixture && (
+          <p className="text-xs font-bold text-amber-800 mb-3">
+            Development sample values only; these are not live or official prices.
+          </p>
+        )}
         <div className="grid md:grid-cols-3 gap-4 pt-4 border-t border-brand-navy/10">
           <div className="p-4 bg-brand-white border border-brand-navy/20 sketchy-box">
             <span className="text-[10px] font-bold text-brand-gray uppercase tracking-widest block">Branded Retail</span>
             <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
-              ₹{money(data.market_price, 32.5)}
+              ₹{money(data.market_price)}
             </span>
           </div>
 
           <div className="p-4 bg-brand-white border border-brand-navy/20 sketchy-box">
             <span className="text-[10px] font-bold text-brand-gray uppercase tracking-widest block">NPPA Price Ceiling</span>
             <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
-              {data.nppa_ceiling_price ? `₹${money(data.nppa_ceiling_price, 24)}` : "—"}
+              {data.nppa_ceiling_price != null ? `₹${money(data.nppa_ceiling_price)}` : "—"}
             </span>
           </div>
 
           <div className="p-4 bg-brand-orange/20 border-2 border-brand-orange sketchy-box relative">
             <span className="text-[10px] font-bold text-brand-orange uppercase tracking-widest block">Jan Aushadhi Generic</span>
             <span className="font-serif text-2xl font-bold text-brand-navy mt-1 block">
-              ₹{money(data.jan_aushadhi_price, 10.5)}
+              ₹{money(data.jan_aushadhi_price)}
             </span>
             {data.max_savings_percent > 0 && (
               <span className="absolute top-2 right-2 text-[10px] font-bold bg-brand-orange text-brand-navy px-1.5 py-0.5 rounded">
@@ -1092,6 +1098,7 @@ function PriceSimulatorCard() {
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   );

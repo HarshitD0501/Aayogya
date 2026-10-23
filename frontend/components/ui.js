@@ -124,7 +124,7 @@ export function Disclaimer({ children }) {
 // Price offers for a medicine — cheapest highlighted with blue-purple aura gradient
 export function Offers({ prices }) {
   if (!prices) return null;
-  if (!prices.matched)
+  if (!prices.matched || !prices.offers?.length)
     return (
       <div className="small muted" style={{ marginTop: 10 }}>
         {prices.reason || "Price unavailable."}
@@ -164,7 +164,7 @@ export function Offers({ prices }) {
 // Eye-catching price comparison for one medicine: Aura hero card + progress bars
 export function PriceVisual({ prices }) {
   const ref = useRef(null);
-  const matched = !!prices?.matched;
+  const matched = !!prices?.matched && !!prices?.offers?.length;
 
   useIsoLayout(() => {
     if (!matched || !ref.current) return;
@@ -203,7 +203,7 @@ export function PriceVisual({ prices }) {
   const offers = prices.offers;
   const max = Math.max(...offers.map((o) => o.price));
   const cheapest = offers[0];
-  const savings = offers[offers.length - 1].price - cheapest.price;
+  const savings = Number(prices.max_savings_amount) || 0;
 
   return (
     <div className="price-visual" ref={ref}>
@@ -211,7 +211,7 @@ export function PriceVisual({ prices }) {
         <div className="ph-cap">Best price available</div>
         <div className="ph-amt">₹{Number(cheapest.price).toFixed(2)}</div>
         <div className="ph-sub">
-          Verified on <strong>{cheapest.platform}</strong>
+          Listed at <strong>{cheapest.platform}</strong>
           {savings > 0 && <span className="ph-save">Save ₹{savings.toFixed(2)}</span>}
         </div>
       </a>

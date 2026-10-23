@@ -8,21 +8,20 @@ Provides real-time price discovery and consumer cost-saving analysis:
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import re
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
 from typing import Any
 
 logger = logging.getLogger("aayogya.prices")
 
 DISCLAIMER = (
-    "Market price from PharmEasy. Legal ceiling from NPPA. "
-    "Subsidized generic rates from PMBJP Jan Aushadhi."
+    "PharmEasy prices are live search results. NPPA and PMBJP amounts are "
+    "reference catalog values; verify current prices and pack sizes with the source. "
+    "Unavailable sources are omitted."
 )
 
 # 24-hour in-memory cache for live market queries: {query_key: (data, timestamp)}
@@ -298,22 +297,12 @@ def _fetch_pharmeasy_live(query: str) -> dict[str, Any] | None:
     return None
 
 
-def _seed_price(*parts: str) -> float:
-    """Deterministic fallback price calculation based on salt+strength hash."""
-    h = hashlib.sha256("|".join(p.lower() for p in parts if p).encode()).hexdigest()
-    base = 18.0 + (int(h[:8], 16) % 180)  # ₹18 to ₹198
-    return round(base, 2)
-
-
 def get_prices(
     salt: str | None,
     strength: str | None,
     brand: str | None = None,
 ) -> dict:
-    """Tri-Pillar Medicine Price Engine:
-    1. PharmEasy: Live discounted market retail price & availability
-    2. NPPA: Official Govt statutory ceiling price (Pharma Sahi Daam)
-    3. Jan Aushadhi (PMBJP): Official subsidized generic alternative (up to 85% savings)
+    """Return only live market prices and explicitly listed reference catalog values.
     """
     if not salt and not brand:
         return {
@@ -326,8 +315,6 @@ def get_prices(
         }
 
     strength_str = strength or ""
-    display_title = brand or f"{salt} {strength_str}".strip()
-
     # Keys for local regulatory and generic catalogs
     combo_key = _norm_key(f"{salt} {strength_str}")
     salt_key = _norm_key(salt or "")
@@ -338,90 +325,77 @@ def get_prices(
     market_query = f"{brand or salt} {strength_str}".strip()
     pe_data = _fetch_pharmeasy_live(market_query)
 
+    offers = []
+    market_sale_price = None
+    market_mrp = None
     if pe_data and pe_data["sale_price"] > 0:
         market_sale_price = pe_data["sale_price"]
         market_mrp = pe_data["mrp"] or market_sale_price
-        pe_name = pe_data["name"]
         pe_url = (
             f"https://pharmeasy.in/online-medicine-order/{pe_data['slug']}"
             if pe_data.get("slug")
             else f"https://pharmeasy.in/search/all?name={urllib.parse.quote(market_query)}"
         )
-    else:
-        # Graceful fallback baseline if PharmEasy is temporarily offline/unmatched
-        base = _seed_price(salt or brand or "", strength_str)
-        market_mrp = round(base * 1.15, 2)
-        market_sale_price = round(base * 0.92, 2)
-        pe_name = display_title
-        pe_url = f"https://pharmeasy.in/search/all?name={urllib.parse.quote(market_query)}"
-
-    # ---------------------------------------------------------
-    # Pillar 2: NPPA (Govt Legal Ceiling Price Cap)
-    # ---------------------------------------------------------
-    nppa_cap = (
-        _NPPA_CEILING_PRICES.get(combo_key)
-        or _NPPA_CEILING_PRICES.get(salt_key)
-        or round(market_mrp * 1.05, 2)
-    )
-
-    # ---------------------------------------------------------
-    # Pillar 3: Jan Aushadhi (Subsidized Generic Alternative)
-    # ---------------------------------------------------------
-    ja_entry = _JAN_AUSHADHI_PRICES.get(combo_key) or _JAN_AUSHADHI_PRICES.get(salt_key)
-    if ja_entry:
-        jan_aushadhi_price = ja_entry["price"]
-        ja_generic_title = ja_entry["generic_name"]
-    else:
-        # Standard PMBJP mandate: Generics cost ~50% to 75% less than private branded MRP
-        jan_aushadhi_price = round(max(5.0, market_sale_price * 0.32), 2)
-        ja_generic_title = f"Jan Aushadhi Generic {salt or display_title} {strength_str}".strip()
-
-    # Calculate savings comparing market price vs Jan Aushadhi generic
-    savings_amt = max(0.0, round(market_sale_price - jan_aushadhi_price, 2))
-    savings_pct = (
-        round((savings_amt / market_sale_price) * 100, 1)
-        if market_sale_price > 0
-        else 0.0
-    )
-
-    # Build the 3 structured offer objects (Cheapest first for the frontend Aura UI)
-    offers = [
-        {
-            "platform": "Jan Aushadhi (PMBJP Generic)",
-            "price": jan_aushadhi_price,
-            "mrp": jan_aushadhi_price,
-            "currency": "INR",
-            "badge": f"Govt Generic (Save {savings_pct}%)",
-            "generic_title": ja_generic_title,
-            "url": "https://janaushadhi.gov.in/ProductList.aspx",
-        },
-        {
-            "platform": "PharmEasy (Market Retail)",
+        offers.append({
+            "platform": "PharmEasy (Live Search)",
             "price": market_sale_price,
             "mrp": market_mrp,
             "currency": "INR",
-            "badge": "Branded Retail",
+            "badge": "Live listing",
             "url": pe_url,
-        },
-        {
-            "platform": "NPPA (Govt Ceiling Cap)",
+        })
+    else:
+        pe_url = f"https://pharmeasy.in/search/all?name={urllib.parse.quote(market_query)}"
+
+    # ---------------------------------------------------------
+    # Pillar 2: NPPA reference catalog ceiling price
+    # ---------------------------------------------------------
+    nppa_cap = _NPPA_CEILING_PRICES.get(combo_key) or _NPPA_CEILING_PRICES.get(salt_key)
+
+    # ---------------------------------------------------------
+    # Pillar 3: Jan Aushadhi reference catalog price
+    # ---------------------------------------------------------
+    ja_entry = _JAN_AUSHADHI_PRICES.get(combo_key) or _JAN_AUSHADHI_PRICES.get(salt_key)
+    jan_aushadhi_price = ja_entry["price"] if ja_entry else None
+    ja_generic_title = ja_entry["generic_name"] if ja_entry else None
+
+    # Calculate savings comparing market price vs Jan Aushadhi generic
+    savings_amt = None
+    savings_pct = None
+    if market_sale_price is not None and jan_aushadhi_price is not None:
+        savings_amt = max(0.0, round(market_sale_price - jan_aushadhi_price, 2))
+        savings_pct = round((savings_amt / market_sale_price) * 100, 1) if market_sale_price > 0 else 0.0
+
+    # Build entries only for sources that supplied a live or catalog value.
+    if jan_aushadhi_price is not None:
+        offers.append({
+            "platform": "Jan Aushadhi (PMBJP Reference Catalog)",
+            "price": jan_aushadhi_price,
+            "mrp": jan_aushadhi_price,
+            "currency": "INR",
+            "badge": "Reference catalog",
+            "generic_title": ja_generic_title,
+            "url": "https://janaushadhi.gov.in/ProductList.aspx",
+        })
+    if nppa_cap is not None:
+        offers.append({
+            "platform": "NPPA Ceiling (Reference Catalog)",
             "price": nppa_cap,
             "mrp": nppa_cap,
             "currency": "INR",
-            "badge": "Max Legal Limit",
+            "badge": "Reference catalog",
             "url": "https://nppa.gov.in",
-        },
-    ]
+        })
 
-    # Ensure strictly sorted by price ascending (Jan Aushadhi is always best price)
+    # Keep only prices backed by a live listing or explicit catalog entry.
     offers.sort(key=lambda o: o["price"])
 
     return {
-        "matched": True,
+        "matched": bool(offers),
+        "reason": None if offers else "No price source was found for this medicine.",
         "brand": brand,
         "salt": salt,
         "strength": strength,
-        "as_of": datetime.now(timezone.utc).isoformat(),
         "disclaimer": DISCLAIMER,
         "market_price": market_sale_price,
         "market_mrp": market_mrp,
