@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
@@ -93,6 +93,7 @@ class RegisterIn(BaseModel):
     email: str = Field(min_length=3, max_length=254)
     phone: str
     password: str = Field(min_length=8, max_length=128)
+    role: Literal["patient", "caregiver"] = "patient"
 
     @field_validator("name")
     @classmethod
@@ -119,6 +120,13 @@ class RegisterIn(BaseModel):
 class LoginIn(BaseModel):
     identifier: str  # email or phone
     password: str
+    role: Optional[Literal["patient", "caregiver"]] = None
+
+
+class GoogleAuthIn(BaseModel):
+    credential: str = Field(min_length=100, max_length=8192)
+    mode: Literal["login", "register"]
+    role: Literal["patient", "caregiver"]
 
 
 class PatientOut(BaseModel):

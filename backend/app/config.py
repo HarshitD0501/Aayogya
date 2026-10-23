@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     # Signs session tokens. A per-process random key is used only for local
     # development; production must provide a stable, randomly generated secret.
     secret_key: str = ""
+    google_client_id: str = ""
 
     # Text chatbot ("the brain") runs as the separate agent service (its own venv,
     # google-genai + livekit deps). The backend proxies /api/chat to it so the

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { login, register as registerAccount } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
+import { googleAuth, login, register as registerAccount } from "@/lib/api";
 import { useReveal } from "@/lib/gsap";
 import { BrandMark, Note, Pill } from "@/components/ui";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
@@ -9,6 +10,8 @@ import ShinyText from "@/components/reactbits/ShinyText";
 import { ArrowRight, ArrowLeft, Lock, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 const DEMOS = [
+  { name: "Ramesh Kulkarni (Caregiver)", email: "ramesh.caregiver@demo.in", role: "caregiver", plan: "Caregiver", desc: "Caregiver dashboard for Ram Sharma" },
+  { name: "Ram Sharma (Patient)", email: "ram@demo.in", role: "patient", plan: "Free", desc: "Patient dashboard with a sample prescription" },
   { name: "Meera Kulkarni (Caregiver)", email: "meera@demo.in", plan: "Caregiver", desc: "Family dashboard — manage 4 members, call & WhatsApp them" },
   { name: "Ramesh Kulkarni", email: "ramesh@demo.in", plan: "Free", desc: "Sample prescription with diabetes & BP meds" },
   { name: "Shanti Devi", email: "shanti@demo.in", plan: "Pro", desc: "Multi-doctor safety demo with detected drug interactions" },
@@ -16,23 +19,28 @@ const DEMOS = [
 ];
 const DEMO_PW = "pass1234";
 const DEMOS_ENABLED = process.env.NODE_ENV !== "production";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
 export default function Login({ onLogin, onBack }) {
   const [id, setId] = useState(DEMOS_ENABLED ? "ramesh@demo.in" : "");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("patient");
   const [pw, setPw] = useState(DEMOS_ENABLED ? DEMO_PW : "");
   const [registering, setRegistering] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const scope = useReveal([]);
+  const googleButton = useRef(null);
+  const googleHandler = useRef(null);
 
   const go = async (identifier, password) => {
     setBusy(true);
     setErr("");
     try {
-      const p = await login(identifier, password);
+      const p = await login(identifier, password, role);
       onLogin(p);
     } catch (e) {
       setErr(e.message);
@@ -45,7 +53,7 @@ export default function Login({ onLogin, onBack }) {
     setBusy(true);
     setErr("");
     try {
-      const p = await registerAccount({ name, email, phone, password: pw });
+      const p = await registerAccount({ name, email, phone, password: pw, role });
       onLogin(p);
     } catch (e) {
       setErr(e.message);
@@ -53,6 +61,50 @@ export default function Login({ onLogin, onBack }) {
       setBusy(false);
     }
   };
+
+  googleHandler.current = async (credential) => {
+    setBusy(true);
+    setErr("");
+    try {
+      const p = await googleAuth({
+        credential,
+        mode: registering ? "register" : "login",
+        role,
+      });
+      onLogin(p);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!googleReady || !GOOGLE_CLIENT_ID || !window.google?.accounts?.id || !googleButton.current) return;
+
+    window.__aayogyaGoogleCredentialHandler = (credential) => {
+      googleHandler.current?.(credential);
+    };
+    if (!window.__aayogyaGoogleInitialized) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => window.__aayogyaGoogleCredentialHandler?.(response.credential),
+      });
+      window.__aayogyaGoogleInitialized = true;
+    }
+    googleButton.current.replaceChildren();
+    window.google.accounts.id.renderButton(googleButton.current, {
+      theme: "outline",
+      size: "large",
+      text: registering ? "signup_with" : "signin_with",
+      shape: "rectangular",
+      width: Math.min(googleButton.current.clientWidth || 360, 360),
+    });
+
+    return () => {
+      window.__aayogyaGoogleCredentialHandler = null;
+    };
+  }, [googleReady, registering]);
 
   return (
     <div className="login" ref={scope}>
@@ -83,9 +135,23 @@ export default function Login({ onLogin, onBack }) {
         </h1>
         <p className="sub" data-reveal>
           {registering
-            ? "Create a patient account to save prescription reviews and manage your medicines."
+            ? `Create a ${role} account to save prescription reviews and manage your medicines.`
             : "Sign in to analyze prescriptions, monitor your daily schedule, check medicine interactions, and compare local pharmacy prices."}
         </p>
+
+        <div role="group" aria-label="Account type" style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          {["patient", "caregiver"].map((accountRole) => (
+            <button
+              key={accountRole}
+              type="button"
+              className={`btn btn-sm ${role === accountRole ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={role === accountRole}
+              onClick={() => setRole(accountRole)}
+            >
+              {accountRole === "patient" ? "Patient" : "Caregiver"}
+            </button>
+          ))}
+        </div>
 
         <form
           data-reveal
@@ -183,12 +249,31 @@ export default function Login({ onLogin, onBack }) {
               <span>Authenticating…</span>
             ) : (
               <>
-                <span>{registering ? "Create patient account" : "Access Health Dashboard"}</span>
+                <span>{registering ? `Create ${role} account` : "Sign in"}</span>
                 <ArrowRight size={16} />
               </>
             )}
           </button>
         </form>
+
+        {GOOGLE_CLIENT_ID ? (
+          <>
+            <div style={{ margin: "14px 0 8px", textAlign: "center", color: "var(--muted)", fontSize: 12 }}>
+              or continue with Google
+            </div>
+            <div ref={googleButton} style={{ display: "flex", justifyContent: "center", minHeight: 40 }} />
+            <Script
+              src="https://accounts.google.com/gsi/client"
+              strategy="afterInteractive"
+              onLoad={() => setGoogleReady(true)}
+              onError={() => setErr("Google sign-in could not load. Please use your password instead.")}
+            />
+          </>
+        ) : (
+          <p className="small muted" style={{ marginTop: 12, textAlign: "center" }}>
+            Google sign-in is unavailable until the OAuth client ID is configured.
+          </p>
+        )}
 
         <button
           type="button"
@@ -250,11 +335,12 @@ export default function Login({ onLogin, onBack }) {
                   onClick={() => {
                     setId(d.email);
                     setPw(DEMO_PW);
-                    go(d.email, DEMO_PW);
+                    setRole(d.role || (d.plan === "Caregiver" ? "caregiver" : "patient"));
+                    setErr("");
                   }}
                   style={{ marginLeft: 8 }}
                 >
-                  Enter →
+                  Use account
                 </button>
               </div>
             ))}

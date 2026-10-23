@@ -105,19 +105,28 @@ export async function api(path, opts = {}) {
   return res.json();
 }
 
-export async function login(identifier, password) {
+export async function login(identifier, password, role) {
   const data = await api("/auth/login", {
     method: "POST",
-    json: { identifier, password },
+    json: { identifier, password, role },
   });
   setToken(data.token);
   return data.patient;
 }
 
-export async function register({ name, email, phone, password }) {
+export async function register({ name, email, phone, password, role }) {
   const data = await api("/auth/register", {
     method: "POST",
-    json: { name, email, phone, password },
+    json: { name, email, phone, password, role },
+  });
+  setToken(data.token);
+  return data.patient;
+}
+
+export async function googleAuth({ credential, mode, role }) {
+  const data = await api("/auth/google", {
+    method: "POST",
+    json: { credential, mode, role },
   });
   setToken(data.token);
   return data.patient;

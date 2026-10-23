@@ -17,6 +17,8 @@ import sys
 import tempfile
 
 os.environ.setdefault("DATABASE_URL", "")  # ensure sqlite default before imports
+os.environ["ENVIRONMENT"] = "test"
+os.environ["ENABLE_DEMO_ACCOUNTS"] = "true"
 
 from fastapi import HTTPException  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -52,6 +54,15 @@ with TestClient(app) as client:
     r = client.post("/api/auth/login", json={"identifier": "ramesh@demo.in", "password": "pass1234"})
     ramesh_tok = r.json()["token"]
     check("patient login returns role=patient", r.json()["patient"]["role"] == "patient")
+
+    r = client.post("/api/auth/login", json={"identifier": "ram@demo.in", "password": "pass1234"})
+    check("Ram demo logs in as a patient", r.status_code == 200 and r.json()["patient"]["role"] == "patient")
+
+    r = client.post("/api/auth/login", json={"identifier": "ramesh.caregiver@demo.in", "password": "pass1234"})
+    ramesh_caregiver_tok = r.json()["token"]
+    check("Ramesh demo logs in as a caregiver", r.status_code == 200 and r.json()["patient"]["role"] == "caregiver")
+    r = client.get("/api/caregiver/patients", headers={"Authorization": f"Bearer {ramesh_caregiver_tok}"})
+    check("Ramesh caregiver demo sees Ram", r.status_code == 200 and [p["name"] for p in r.json()["patients"]] == ["Ram Sharma"])
 
     H = lambda t: {"Authorization": f"Bearer {t}"}  # noqa: E731
 

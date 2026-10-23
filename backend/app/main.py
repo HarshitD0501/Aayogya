@@ -40,7 +40,7 @@ from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
 from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report  # noqa: E402
 from .schemas import (  # noqa: E402
-    LoginIn, LoginOut, MedicineOut, PatientOut, RegisterIn, ReminderPrefsIn,
+    GoogleAuthIn, LoginIn, LoginOut, MedicineOut, PatientOut, RegisterIn, ReminderPrefsIn,
     ReminderPrefsOut, ReportOut, RescheduleIn, StopMedicineIn,
     TelephonyDispatchIn,
 )
@@ -188,6 +188,8 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
     patient = authenticate(db, body.identifier, body.password)
     if not patient:
         raise HTTPException(401, "Invalid email/phone or password.")
+    if body.role and patient.role != body.role:
+        raise HTTPException(403, f"This account is registered as a {patient.role}.")
     return LoginOut(token=make_token(patient.id), patient=PatientOut.model_validate(patient))
 
 
@@ -208,7 +210,7 @@ def register(body: RegisterIn, db: Session = Depends(get_db)):
         phone=body.phone,
         password_hash=hash_password(body.password),
         plan="free",
-        role="patient",
+        role=body.role,
     )
     db.add(patient)
     try:
@@ -216,6 +218,82 @@ def register(body: RegisterIn, db: Session = Depends(get_db)):
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(409, "Email or phone number is already registered.") from exc
+    db.refresh(patient)
+    return LoginOut(token=make_token(patient.id), patient=PatientOut.model_validate(patient))
+
+
+@app.post("/api/auth/google", response_model=LoginOut)
+def google_auth(body: GoogleAuthIn, db: Session = Depends(get_db)):
+    if not settings.google_client_id:
+        raise HTTPException(503, "Google sign-in is not configured on this server.")
+
+    try:
+        from google.auth import exceptions as google_auth_errors
+        from google.auth.transport.requests import Request as GoogleRequest
+        from google.oauth2 import id_token
+    except ImportError as exc:
+        raise HTTPException(503, "Google sign-in dependencies are not installed.") from exc
+
+    try:
+        claims = id_token.verify_oauth2_token(
+            body.credential,
+            GoogleRequest(),
+            audience=settings.google_client_id,
+        )
+    except (ValueError, google_auth_errors.GoogleAuthError) as exc:
+        raise HTTPException(401, "Google credential is invalid or expired.") from exc
+    except Exception as exc:  # Google certificate/network errors are temporary service failures.
+        logger.warning("Google credential verification is unavailable.")
+        raise HTTPException(503, "Google sign-in is temporarily unavailable.") from exc
+
+    google_sub = claims.get("sub")
+    email = str(claims.get("email") or "").strip().lower()
+    email_verified = claims.get("email_verified") is True
+    if not google_sub or not email or not email_verified:
+        raise HTTPException(401, "Google must provide a verified email address.")
+
+    patient = db.query(Patient).filter(Patient.google_sub == google_sub).first()
+    if patient:
+        if body.mode == "register":
+            raise HTTPException(409, "This Google account already exists. Choose sign in.")
+        if patient.role != body.role:
+            raise HTTPException(403, f"This account is registered as a {patient.role}.")
+    else:
+        existing = db.query(Patient).filter(Patient.email == email).first()
+        if existing:
+            if body.mode == "register":
+                raise HTTPException(409, "An account with this email already exists. Choose sign in.")
+            google_domain = str(claims.get("hd") or "").strip().lower()
+            google_is_authoritative = email.endswith("@gmail.com") or (
+                google_domain and email.endswith(f"@{google_domain}")
+            )
+            if not google_is_authoritative:
+                raise HTTPException(409, "Sign in with your password before linking this Google account.")
+            if existing.google_sub and existing.google_sub != google_sub:
+                raise HTTPException(409, "This email is linked to a different Google account.")
+            if existing.role != body.role:
+                raise HTTPException(403, f"This account is registered as a {existing.role}.")
+            existing.google_sub = google_sub
+            patient = existing
+        elif body.mode == "login":
+            raise HTTPException(401, "No account found for this Google account. Choose register.")
+        else:
+            patient = Patient(
+                id=f"patient-{uuid4().hex}",
+                name=str(claims.get("name") or email.split("@", 1)[0])[:100],
+                email=email,
+                password_hash=None,
+                google_sub=google_sub,
+                plan="free",
+                role=body.role,
+            )
+            db.add(patient)
+
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(409, "This Google account or email is already linked.") from exc
     db.refresh(patient)
     return LoginOut(token=make_token(patient.id), patient=PatientOut.model_validate(patient))
 

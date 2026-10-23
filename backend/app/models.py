@@ -91,6 +91,7 @@ class Patient(Base):
     email = Column(String, unique=True, index=True)
     phone = Column(String, unique=True, index=True)
     password_hash = Column(String)
+    google_sub = Column(String, unique=True, index=True, nullable=True)
     plan = Column(String, default="free")  # free | pro
     role = Column(String, default="patient")  # patient | caregiver
     lang = Column(String, default="hi")

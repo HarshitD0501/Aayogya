@@ -65,6 +65,7 @@ def seed(db: Session) -> None:
         _seed_ramesh(db, pw)
     if not db.get(Patient, "meera"):
         _seed_caregiver(db, pw)
+    _seed_ramesh_caregiver_demo(db, pw)
 
 
 def _seed_base(db: Session, pw: str) -> None:
@@ -131,6 +132,36 @@ def _seed_caregiver(db: Session, pw: str) -> None:
     for pid, relation in (("ramesh", "father"), ("shanti", "grandmother"),
                           ("aarav", "brother"), ("sunita", "mother")):
         db.add(CaregiverLink(caregiver_id="meera", patient_id=pid, relation=relation))
+    db.commit()
+
+
+def _seed_ramesh_caregiver_demo(db: Session, pw: str) -> None:
+    """Seed the requested Ramesh-caregiver / Ram-patient demo pair idempotently."""
+    if not db.get(Patient, "ram"):
+        db.add(Patient(
+            id="ram", name="Ram Sharma", email="ram@demo.in",
+            phone="+919454535138", password_hash=pw, plan="free", role="patient",
+        ))
+        report = _report(db, "ram", "Dr. N. Patel", "Family Medicine", follow_up_in=21)
+        report.medicines.append(
+            _med(report, "ram", "Amlong 5", "Amlodipine", "5mg", "1-0-0", 30, "Dr. N. Patel")
+        )
+        _reminders(db, (("ram", 2),))
+
+    caregiver_id = "ramesh-caregiver"
+    if not db.get(Patient, caregiver_id):
+        db.add(Patient(
+            id=caregiver_id, name="Ramesh Kulkarni (Caregiver)",
+            email="ramesh.caregiver@demo.in", phone="+919454535139",
+            password_hash=pw, plan="free", role="caregiver",
+        ))
+
+    link = db.query(CaregiverLink).filter(
+        CaregiverLink.caregiver_id == caregiver_id,
+        CaregiverLink.patient_id == "ram",
+    ).first()
+    if not link:
+        db.add(CaregiverLink(caregiver_id=caregiver_id, patient_id="ram", relation="father"))
     db.commit()
 
 
