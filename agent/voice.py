@@ -19,8 +19,16 @@ import logging
 import ssl
 
 from livekit.agents import (
-    Agent, AgentSession, JobContext, JobProcess, RunContext, WorkerOptions,
-    cli, function_tool, tokenize,
+    Agent,
+    AgentSession,
+    JobContext,
+    JobExecutorType,
+    JobProcess,
+    RunContext,
+    WorkerOptions,
+    cli,
+    function_tool,
+    tokenize,
 )
 from livekit.agents.voice import room_io
 from livekit.plugins import deepgram, google, murf, silero
@@ -36,34 +44,6 @@ logger = logging.getLogger("aayogya.agent")
 # one-shot ~0.2-5s blocking read the SDK does on the event loop at startup.
 # Touch it here, BEFORE the loop exists, so the loop monitor never sees it.
 ssl.create_default_context()
-
-# Windows cold-start, part 2: the job subprocess's own SDK import (ipc._preload)
-# takes ~1s on slow disks, tripping the hardcoded 500ms "job executor is
-# unresponsive" ping threshold DURING STARTUP ONLY. Silence that one message
-# for a short boot window (both worker and subprocess import this module);
-# steady-state unresponsiveness — the kind that matters on a live call — still
-# warns. Advisory log only: the ping watchdog itself is untouched.
-import time as _time
-
-import livekit.agents.ipc.job_thread_executor as _jte
-import livekit.agents.ipc.job_proc_executor as _jpe
-
-_BOOT_AT = _time.monotonic()
-_STARTUP_QUIET_SECS = 120.0
-
-
-def _quiet_during_boot(orig):
-    def _filtered(msg, *args, **kwargs):
-        if "job executor is unresponsive" in str(msg) and (_time.monotonic() - _BOOT_AT) < _STARTUP_QUIET_SECS:
-            logger.debug("suppressed startup-only ping warning: %s", msg)
-            return
-        orig(msg, *args, **kwargs)
-
-    return _filtered
-
-
-_jte.logger.warning = _quiet_during_boot(_jte.logger.warning)
-_jpe.logger.warning = _quiet_during_boot(_jpe.logger.warning)
 
 # Turn detection: uses Silero VAD by default for snappy, instant (<100ms) turns.
 # The heavy multilingual turn-detector ONNX model is optional and can be enabled via ENABLE_TURN_DETECTOR=1.
@@ -478,17 +458,21 @@ async def entrypoint(ctx: JobContext) -> None:
         await session.say(greeting_msg, allow_interruptions=True)
 
 
-if __name__ == "__main__":
-    cli.run_app(
-        WorkerOptions(
-            entrypoint_fnc=entrypoint,
-            prewarm_fnc=prewarm,
-            # Windows: job subprocesses boot slowly (VAD/SSL loads). The default
-            # 10s process-initialize timeout trips "job executor is unresponsive"
-            # warnings on cold starts — give real headroom instead.
-            initialize_process_timeout=90.0,
-            # Agent name lives in livekit.toml ([agent] name) — the SDK's
-            # preferred location; passing it here too would emit a deprecation
-            # warning. The backend's CreateAgentDispatch targets this name.
-        )
+def build_worker_options() -> WorkerOptions:
+    """Configure isolated jobs on Windows and keep two warmed workers ready."""
+    return WorkerOptions(
+        entrypoint_fnc=entrypoint,
+        prewarm_fnc=prewarm,
+        # LiveKit 1.8.3 defaults to THREAD on Windows. Explicit processes isolate
+        # concurrent calls from the shared GIL and each job receives its own VAD.
+        job_executor_type=JobExecutorType.PROCESS,
+        num_idle_processes=2,
+        # Cold imports and local model initialization need more than the 10s SDK default.
+        initialize_process_timeout=90.0,
+        # Agent name lives in livekit.toml ([agent] name) — the SDK's preferred
+        # location; passing it here too would emit a deprecation warning.
     )
+
+
+if __name__ == "__main__":
+    cli.run_app(build_worker_options())

@@ -40,17 +40,14 @@ This document outlines all currently broken/fragile components, dummy/mock data 
   - Catch API errors and return an explicit HTTP 502 error with a clear message: `"Prescription extraction service is temporarily unavailable. Please verify API keys or try again."`
   - Only allow mock data when an explicit `?mock=true` query parameter or development flag is passed.
 
-### 🔴 1.4 LiveKit Agent Windows Thread Concurrency / GIL Freezing
-* **Current State**: On Windows, `livekit-agents` defaults to `JobExecutorType.THREAD`. When reminder checks run, multiple calls are dispatched simultaneously.
-* **Problem**:
-  - 6–10 threads initialize inside a single Python process, concurrently loading PyTorch/ONNX runtime and Silero VAD weights.
-  - CPU usage spikes, freezing the Python event loop for ~1 second, generating:
-    `WARNING livekit.agents - job executor is unresponsive {"delay": 948}`
-  - Initialization of each runner balloons to 30–47 seconds.
-* **Fix Required**:
-  - In `backend/app/whatsapp.py` & `telephony.py`: Throttle/stagger outbound dispatches (e.g. 5-second delay between calls or concurrency queue).
-  - In `agent/voice.py`: Cache the Silero VAD ONNX model as a process-level singleton so threads don't reload it 10 times in parallel.
-  - Pre-warm 1 or 2 idle processes: set `num_idle_processes=2` in `WorkerOptions`.
+### ✅ 1.4 LiveKit Agent Windows Thread Concurrency / GIL Freezing
+* **Verified state**: The installed `livekit-agents 1.8.3` defaults to `JobExecutorType.THREAD` on Windows. Concurrent jobs therefore share the worker process and Python GIL.
+* **Fix applied**:
+  - `agent/voice.py` now explicitly selects `JobExecutorType.PROCESS`, isolating concurrent calls.
+  - Two idle job processes are prewarmed; each loads its own Silero VAD in `prewarm`.
+  - The worker initialization timeout remains 90 seconds for cold starts.
+  - Removed the 120-second warning suppression so actual executor stalls remain visible in logs.
+* **Verification**: `agent/test_agent.py` checks the installed SDK options and confirms Python 3.11.9 can spawn a Windows process.
 
 ### 🔴 1.5 Default Insecure Secret Key
 * **Current State**: `settings.secret_key` defaults to `"dev-insecure-change-me"`.

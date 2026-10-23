@@ -10,11 +10,14 @@ back the path and the Authorization header it received.
 from __future__ import annotations
 
 import asyncio
+import multiprocessing
 
 import httpx
+from livekit.agents import JobExecutorType
 
 import prompt
 from backend_client import BackendClient, safe
+from voice import build_worker_options
 
 
 def test_prompt_has_safety_rules() -> None:
@@ -25,6 +28,31 @@ def test_prompt_has_safety_rules() -> None:
     # escalation (new/worse symptoms, dose changes, results meaning, interactions).
     assert "end every clinical-adjacent answer" not in p
     assert "without any doctor disclaimer" in p
+
+
+def test_worker_isolates_windows_jobs_in_prewarmed_processes() -> None:
+    options = build_worker_options()
+    assert options.job_executor_type is JobExecutorType.PROCESS
+    assert options.num_idle_processes == 2
+    assert options.initialize_process_timeout == 90.0
+
+    # The SDK defaults to threads on Windows because some Python builds have
+    # process-spawn failures. Exercise the current interpreter's spawn path too.
+    context = multiprocessing.get_context("spawn")
+    result = context.Queue()
+    process = context.Process(target=_process_spawn_probe, args=(result,))
+    process.start()
+    process.join(timeout=15)
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=5)
+        raise AssertionError("Windows spawn smoke check timed out")
+    assert process.exitcode == 0
+    assert result.get(timeout=2) == "spawn-ok"
+
+
+def _process_spawn_probe(result) -> None:
+    result.put("spawn-ok")
 
 
 def _mock_client(token: str = "tok-123") -> BackendClient:
@@ -78,5 +106,6 @@ def test_backend_client() -> None:
 
 if __name__ == "__main__":
     test_prompt_has_safety_rules()
+    test_worker_isolates_windows_jobs_in_prewarmed_processes()
     test_backend_client()
     print("ok — prompt safety rules present, BackendClient auth + routing correct")
