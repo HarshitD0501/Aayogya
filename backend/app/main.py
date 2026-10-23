@@ -166,8 +166,9 @@ def get_public_prices(
 @app.get("/api/public/stats")
 def get_public_stats(db: Session = Depends(get_db)):
     """Public platform stats for landing page trust metrics and live indicators."""
-    nppa_count = len(getattr(price_svc, "_NPPA_CEILING_PRICES", {}))
-    jan_count = len(getattr(price_svc, "_JAN_AUSHADHI_PRICES", {}))
+    catalog_counts = price_svc.get_catalog_counts()
+    nppa_count = catalog_counts["nppa"]
+    jan_count = catalog_counts["jan_aushadhi"]
     total_meds = max(120, nppa_count + jan_count)
     patient_count = db.query(Patient).count()
     return {

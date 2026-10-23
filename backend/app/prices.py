@@ -1,10 +1,9 @@
-"""Medicine pricing engine integrating PharmEasy (Live Market), NPPA (Govt Cap),
-and Jan Aushadhi PMBJP (Affordable Generic Substitutes).
+"""Medicine pricing engine integrating PharmEasy live results and price references.
 
 Provides real-time price discovery and consumer cost-saving analysis:
 - Market Retail Price from PharmEasy's public search catalog (cached for efficiency)
-- Legal ceiling price protection under NPPA (Pharma Sahi Daam / DPCO)
-- Subsidized generic alternative rates from PMBJP (Pradhan Mantri Bhartiya Janaushadhi Pariyojana)
+- NPPA ceiling price references (Pharma Sahi Daam / DPCO)
+- PMBJP Jan Aushadhi price references
 """
 from __future__ import annotations
 
@@ -14,6 +13,7 @@ import re
 import time
 import urllib.parse
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("aayogya.prices")
@@ -28,221 +28,9 @@ DISCLAIMER = (
 _CACHE: dict[str, tuple[dict[str, Any], float]] = {}
 _CACHE_TTL_SEC = 86400  # 24 hours
 
-# Official NPPA (DPCO / Pharma Sahi Daam) Ceiling Prices in INR (per standard strip)
-_NPPA_CEILING_PRICES: dict[str, float] = {
-    "paracetamol-650mg": 32.28,   # 15 tabs
-    "paracetamol-500mg": 18.20,   # 15 tabs
-    "paracetamol": 25.00,
-    "pantoprazole-40mg": 89.50,   # 10 tabs
-    "pantoprazole": 89.50,
-    "pantoprazole-domperidone": 135.00,
-    "metformin-500mg": 28.50,     # 10 tabs
-    "metformin-850mg": 38.00,
-    "metformin-1000mg": 45.00,
-    "metformin": 32.00,
-    "amlodipine-5mg": 32.00,      # 10 tabs
-    "amlodipine-10mg": 55.00,
-    "amlodipine": 32.00,
-    "aspirin-75mg": 14.50,        # 14 tabs
-    "aspirin-150mg": 22.00,
-    "aspirin": 16.00,
-    "atorvastatin-10mg": 78.00,   # 10 tabs
-    "atorvastatin-20mg": 135.00,
-    "atorvastatin": 85.00,
-    "azithromycin-500mg": 84.50,  # 3 tabs
-    "azithromycin": 84.50,
-    "amoxicillin-clavulanic-acid-625mg": 138.00,  # 6 tabs
-    "amoxicillin-clavulanic-acid": 138.00,
-    "telmisartan-40mg": 84.00,    # 10 tabs
-    "telmisartan": 84.00,
-    "losartan-50mg": 62.00,
-    "levothyroxine-100mcg": 185.00,  # 100 tabs
-    "levothyroxine-50mcg": 145.00,
-    "levothyroxine": 165.00,
-    "ibuprofen-400mg": 24.50,     # 10 tabs
-    "ibuprofen": 24.50,
-    "ibuprofen-paracetamol": 38.00,
-    "cetirizine-10mg": 24.00,     # 10 tabs
-    "cetirizine": 24.00,
-    "montelukast-levocetirizine": 120.00,
-    "ciprofloxacin-500mg": 48.00,
-    "diclofenac-50mg": 26.50,
-    "ranitidine-150mg": 18.00,
-}
-
-# Official PMBJP (Jan Aushadhi) Subsidized Generic Prices in INR (per standard strip)
-_JAN_AUSHADHI_PRICES: dict[str, dict[str, Any]] = {
-    "paracetamol-650mg": {
-        "price": 10.50,
-        "generic_name": "Paracetamol Tablets IP 650 mg",
-        "pack": "10 Tablets",
-    },
-    "paracetamol-500mg": {
-        "price": 6.50,
-        "generic_name": "Paracetamol Tablets IP 500 mg",
-        "pack": "10 Tablets",
-    },
-    "paracetamol": {
-        "price": 8.00,
-        "generic_name": "Paracetamol Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "pantoprazole-40mg": {
-        "price": 14.50,
-        "generic_name": "Pantoprazole Gastro-resistant Tablets IP 40 mg",
-        "pack": "10 Tablets",
-    },
-    "pantoprazole": {
-        "price": 14.50,
-        "generic_name": "Pantoprazole Tablets 40 mg",
-        "pack": "10 Tablets",
-    },
-    "pantoprazole-domperidone": {
-        "price": 22.00,
-        "generic_name": "Pantoprazole and Domperidone SR Capsules",
-        "pack": "10 Capsules",
-    },
-    "metformin-500mg": {
-        "price": 7.50,
-        "generic_name": "Metformin Hydrochloride Tablets IP 500 mg",
-        "pack": "10 Tablets",
-    },
-    "metformin-850mg": {
-        "price": 10.00,
-        "generic_name": "Metformin Hydrochloride Tablets IP 850 mg",
-        "pack": "10 Tablets",
-    },
-    "metformin-1000mg": {
-        "price": 12.50,
-        "generic_name": "Metformin Hydrochloride Prolonged-release 1000 mg",
-        "pack": "10 Tablets",
-    },
-    "metformin": {
-        "price": 8.50,
-        "generic_name": "Metformin Hydrochloride Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "amlodipine-5mg": {
-        "price": 5.50,
-        "generic_name": "Amlodipine Tablets IP 5 mg",
-        "pack": "10 Tablets",
-    },
-    "amlodipine-10mg": {
-        "price": 9.00,
-        "generic_name": "Amlodipine Tablets IP 10 mg",
-        "pack": "10 Tablets",
-    },
-    "amlodipine": {
-        "price": 6.00,
-        "generic_name": "Amlodipine Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "aspirin-75mg": {
-        "price": 5.00,
-        "generic_name": "Aspirin Gastro-resistant Tablets IP 75 mg",
-        "pack": "14 Tablets",
-    },
-    "aspirin-150mg": {
-        "price": 8.00,
-        "generic_name": "Aspirin Gastro-resistant Tablets IP 150 mg",
-        "pack": "14 Tablets",
-    },
-    "aspirin": {
-        "price": 6.00,
-        "generic_name": "Aspirin Tablets IP",
-        "pack": "14 Tablets",
-    },
-    "atorvastatin-10mg": {
-        "price": 12.00,
-        "generic_name": "Atorvastatin Tablets IP 10 mg",
-        "pack": "10 Tablets",
-    },
-    "atorvastatin-20mg": {
-        "price": 22.00,
-        "generic_name": "Atorvastatin Tablets IP 20 mg",
-        "pack": "10 Tablets",
-    },
-    "atorvastatin": {
-        "price": 14.00,
-        "generic_name": "Atorvastatin Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "azithromycin-500mg": {
-        "price": 34.00,
-        "generic_name": "Azithromycin Tablets IP 500 mg",
-        "pack": "3 Tablets",
-    },
-    "azithromycin": {
-        "price": 34.00,
-        "generic_name": "Azithromycin Tablets IP",
-        "pack": "3 Tablets",
-    },
-    "amoxicillin-clavulanic-acid-625mg": {
-        "price": 58.00,
-        "generic_name": "Amoxicillin and Potassium Clavulanate Tablets IP 625 mg",
-        "pack": "6 Tablets",
-    },
-    "amoxicillin-clavulanic-acid": {
-        "price": 58.00,
-        "generic_name": "Amoxicillin and Potassium Clavulanate Tablets",
-        "pack": "6 Tablets",
-    },
-    "telmisartan-40mg": {
-        "price": 14.00,
-        "generic_name": "Telmisartan Tablets IP 40 mg",
-        "pack": "10 Tablets",
-    },
-    "telmisartan": {
-        "price": 14.00,
-        "generic_name": "Telmisartan Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "levothyroxine-100mcg": {
-        "price": 75.00,
-        "generic_name": "Levothyroxine Sodium Tablets IP 100 mcg",
-        "pack": "100 Tablets",
-    },
-    "levothyroxine-50mcg": {
-        "price": 60.00,
-        "generic_name": "Levothyroxine Sodium Tablets IP 50 mcg",
-        "pack": "100 Tablets",
-    },
-    "levothyroxine": {
-        "price": 65.00,
-        "generic_name": "Levothyroxine Sodium Tablets IP",
-        "pack": "100 Tablets",
-    },
-    "ibuprofen-400mg": {
-        "price": 7.00,
-        "generic_name": "Ibuprofen Tablets IP 400 mg",
-        "pack": "10 Tablets",
-    },
-    "ibuprofen": {
-        "price": 7.00,
-        "generic_name": "Ibuprofen Tablets IP",
-        "pack": "10 Tablets",
-    },
-    "ibuprofen-paracetamol": {
-        "price": 12.00,
-        "generic_name": "Ibuprofen and Paracetamol Tablets",
-        "pack": "10 Tablets",
-    },
-    "cetirizine-10mg": {
-        "price": 4.50,
-        "generic_name": "Cetirizine Hydrochloride Tablets IP 10 mg",
-        "pack": "10 Tablets",
-    },
-    "cetirizine": {
-        "price": 4.50,
-        "generic_name": "Cetirizine Hydrochloride Tablets",
-        "pack": "10 Tablets",
-    },
-    "montelukast-levocetirizine": {
-        "price": 24.00,
-        "generic_name": "Montelukast Sodium and Levocetirizine Tablets",
-        "pack": "10 Tablets",
-    },
-}
+# Reference price data is maintained in the versioned backend dataset. The dataset's
+# PharmEasy estimates are intentionally not consumed by this live pricing service.
+_PRICING_DATA_PATH = Path(__file__).resolve().parent / "data" / "medicine_pricing_dataset.json"
 
 
 def _norm_key(text: str) -> str:
@@ -250,6 +38,45 @@ def _norm_key(text: str) -> str:
     t = text.lower().strip()
     t = re.sub(r"[^a-z0-9]+", "-", t)
     return t.strip("-")
+
+
+def _norm_composition(text: str) -> str:
+    """Normalize salt/strength compositions despite spaces before units."""
+    normalized = re.sub(r"(?<=\d)\s+(?=(?:mg|mcg|ml|g)\b)", "", text.lower())
+    return _norm_key(normalized)
+
+
+def _load_pricing_dataset() -> dict[str, dict[str, Any]]:
+    """Load NPPA and PMBJP reference values keyed by exact salt composition."""
+    try:
+        records = json.loads(_PRICING_DATA_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Unable to load pricing reference dataset: %s", exc)
+        return {}
+
+    if not isinstance(records, list):
+        logger.warning("Pricing reference dataset must be a JSON list")
+        return {}
+
+    catalog = {}
+    for record in records:
+        if not isinstance(record, dict) or not record.get("salt_composition"):
+            continue
+        key = _norm_composition(record["salt_composition"])
+        if key:
+            catalog[key] = record
+    return catalog
+
+
+_PRICING_CATALOG = _load_pricing_dataset()
+
+
+def get_catalog_counts() -> dict[str, int]:
+    """Return the number of non-null NPPA and PMBJP reference entries."""
+    return {
+        "nppa": sum(record.get("nppa_ceiling_price_inr") is not None for record in _PRICING_CATALOG.values()),
+        "jan_aushadhi": sum(record.get("jan_aushadhi_price_inr") is not None for record in _PRICING_CATALOG.values()),
+    }
 
 
 def _fetch_pharmeasy_live(query: str) -> dict[str, Any] | None:
@@ -315,12 +142,18 @@ def get_prices(
         }
 
     strength_str = strength or ""
-    # Keys for local regulatory and generic catalogs
-    combo_key = _norm_key(f"{salt} {strength_str}")
-    salt_key = _norm_key(salt or "")
+    # Match only an exact salt/strength composition from the versioned dataset.
+    catalog_keys = (
+        _norm_composition(f"{salt or ''} {strength_str}"),
+        _norm_composition(salt or ""),
+    )
+    catalog_entry = next(
+        (_PRICING_CATALOG[key] for key in catalog_keys if key and key in _PRICING_CATALOG),
+        None,
+    )
 
     # ---------------------------------------------------------
-    # Pillar 1: PharmEasy (Live Market Price)
+    # Source 1: PharmEasy live market price
     # ---------------------------------------------------------
     market_query = f"{brand or salt} {strength_str}".strip()
     pe_data = _fetch_pharmeasy_live(market_query)
@@ -348,16 +181,16 @@ def get_prices(
         pe_url = f"https://pharmeasy.in/search/all?name={urllib.parse.quote(market_query)}"
 
     # ---------------------------------------------------------
-    # Pillar 2: NPPA reference catalog ceiling price
+    # Source 2: NPPA reference catalog ceiling price
     # ---------------------------------------------------------
-    nppa_cap = _NPPA_CEILING_PRICES.get(combo_key) or _NPPA_CEILING_PRICES.get(salt_key)
+    nppa_cap = catalog_entry.get("nppa_ceiling_price_inr") if catalog_entry else None
 
     # ---------------------------------------------------------
-    # Pillar 3: Jan Aushadhi reference catalog price
+    # Source 3: Jan Aushadhi reference catalog price
     # ---------------------------------------------------------
-    ja_entry = _JAN_AUSHADHI_PRICES.get(combo_key) or _JAN_AUSHADHI_PRICES.get(salt_key)
-    jan_aushadhi_price = ja_entry["price"] if ja_entry else None
-    ja_generic_title = ja_entry["generic_name"] if ja_entry else None
+    jan_aushadhi_price = catalog_entry.get("jan_aushadhi_price_inr") if catalog_entry else None
+    ja_generic_title = catalog_entry.get("jan_aushadhi_generic_name") if catalog_entry else None
+    pack_size = catalog_entry.get("pack_size") if catalog_entry else None
 
     # Calculate savings comparing market price vs Jan Aushadhi generic
     savings_amt = None
@@ -375,6 +208,7 @@ def get_prices(
             "currency": "INR",
             "badge": "Reference catalog",
             "generic_title": ja_generic_title,
+            "pack_size": pack_size,
             "url": "https://janaushadhi.gov.in/ProductList.aspx",
         })
     if nppa_cap is not None:
@@ -384,6 +218,7 @@ def get_prices(
             "mrp": nppa_cap,
             "currency": "INR",
             "badge": "Reference catalog",
+            "pack_size": pack_size,
             "url": "https://nppa.gov.in",
         })
 
