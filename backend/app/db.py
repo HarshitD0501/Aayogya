@@ -52,8 +52,11 @@ def init_db():
     cfg.set_main_option("script_location", str(root / "alembic"))  # cwd-independent
     try:
         command.upgrade(cfg, "head")
-    except Exception:
-        pass
+    except Exception as exc:
+        raise RuntimeError(
+            "Database migrations failed; startup aborted. "
+            "Resolve the Alembic error and retry."
+        ) from exc
     Base.metadata.create_all(bind=engine)
 
     # Safe column auto-addition for SQLite dev environment
