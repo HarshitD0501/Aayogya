@@ -1,11 +1,13 @@
 """Pydantic shapes for extraction output and API responses (Pydantic v2)."""
 from __future__ import annotations
 
+import re
 from typing import Optional
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 
 from . import confidence as _conf
+from .auth import normalize_indian_phone
 
 
 class ExtractedMed(BaseModel):
@@ -84,6 +86,34 @@ class ReportOut(BaseModel):
     created_at: Optional[str] = None
     mock: bool = False
     medicines: list[MedicineOut] = []
+
+
+class RegisterIn(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    email: str = Field(min_length=3, max_length=254)
+    phone: str
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("name")
+    @classmethod
+    def normalize_name(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if len(value) < 2:
+            raise ValueError("Enter your name.")
+        return value
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        value = value.strip().lower()
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
+            raise ValueError("Enter a valid email address.")
+        return value
+
+    @field_validator("phone")
+    @classmethod
+    def normalize_phone(cls, value: str) -> str:
+        return normalize_indian_phone(value)
 
 
 class LoginIn(BaseModel):

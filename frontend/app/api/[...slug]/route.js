@@ -66,11 +66,14 @@ async function handleRequest(request, params, method) {
     // Only if backend is completely offline/unreachable: serve dev fixtures as fallback
     console.warn(`[Proxy] Real backend at ${BACKEND_URL} unreachable for ${path}: ${err.message}. Using dev fixture.`);
     const fixture = getFixtureResponse(path, url.searchParams);
-    return NextResponse.json(fixture, { status: 200 });
+    return NextResponse.json(fixture, { status: path === "/auth/register" ? 503 : 200 });
   }
 }
 
 function getFixtureResponse(path, searchParams) {
+  if (path === "/auth/register") {
+    return { detail: "Account registration is unavailable while the backend is offline." };
+  }
   if (path === "/auth/login") {
     return {
       token: "dev-fixture-token-ramesh",

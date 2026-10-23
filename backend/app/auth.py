@@ -14,6 +14,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import time
 
 from fastapi import Depends, Header, HTTPException
@@ -49,6 +50,30 @@ def verify_password(pw: str, stored: str) -> bool:
     return hmac.compare_digest(dk.hex(), dk_hex)
 
 
+def normalize_indian_phone(value: str) -> str:
+    """Normalize common Indian mobile formats to a unique +91 E.164 value."""
+    compact = re.sub(r"[\s().-]", "", value)
+    if compact.startswith("00"):
+        compact = "+" + compact[2:]
+    if compact.startswith("+91"):
+        digits = compact[3:]
+    elif compact.startswith("91") and len(compact) == 12:
+        digits = compact[2:]
+    elif len(compact) == 10:
+        digits = compact
+    else:
+        raise ValueError("Enter a valid 10-digit Indian mobile number.")
+
+    if (
+        len(digits) != 10
+        or not digits.isascii()
+        or not digits.isdigit()
+        or digits[0] not in "6789"
+    ):
+        raise ValueError("Enter a valid 10-digit Indian mobile number.")
+    return f"+91{digits}"
+
+
 def _b64(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).decode().rstrip("=")
 
@@ -81,9 +106,19 @@ def _verify_token(token: str) -> str:
 def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
     """Look up by email OR phone (elderly-friendly, design §7.1), verify password.
     Returns patients and caregivers alike; role decides the dashboard."""
+    normalized_identifier = identifier.strip()
+    phone_identifier = normalized_identifier
+    try:
+        phone_identifier = normalize_indian_phone(normalized_identifier)
+    except ValueError:
+        pass
+
     patient = (
         db.query(Patient)
-        .filter((Patient.email == identifier) | (Patient.phone == identifier))
+        .filter(
+            (Patient.email == normalized_identifier.lower())
+            | (Patient.phone == phone_identifier)
+        )
         .first()
     )
     if patient and not _demo_account_blocked(patient.id) and verify_password(

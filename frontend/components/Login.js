@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { login } from "@/lib/api";
+import { login, register as registerAccount } from "@/lib/api";
 import { useReveal } from "@/lib/gsap";
 import { BrandMark, Note, Pill } from "@/components/ui";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
@@ -19,7 +19,11 @@ const DEMOS_ENABLED = process.env.NODE_ENV !== "production";
 
 export default function Login({ onLogin, onBack }) {
   const [id, setId] = useState(DEMOS_ENABLED ? "ramesh@demo.in" : "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [pw, setPw] = useState(DEMOS_ENABLED ? DEMO_PW : "");
+  const [registering, setRegistering] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const scope = useReveal([]);
@@ -29,6 +33,19 @@ export default function Login({ onLogin, onBack }) {
     setErr("");
     try {
       const p = await login(identifier, password);
+      onLogin(p);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createAccount = async () => {
+    setBusy(true);
+    setErr("");
+    try {
+      const p = await registerAccount({ name, email, phone, password: pw });
       onLogin(p);
     } catch (e) {
       setErr(e.message);
@@ -62,32 +79,80 @@ export default function Login({ onLogin, onBack }) {
         )}
 
         <h1 data-reveal style={{ marginTop: 24 }}>
-          Your medicines, <ShinyText text="made clear." />
+          {registering ? "Create your account." : <>Your medicines, <ShinyText text="made clear." /></>}
         </h1>
         <p className="sub" data-reveal>
-          Sign in to analyze prescriptions, monitor your daily schedule, check medicine interactions, and compare local pharmacy prices.
+          {registering
+            ? "Create a patient account to save prescription reviews and manage your medicines."
+            : "Sign in to analyze prescriptions, monitor your daily schedule, check medicine interactions, and compare local pharmacy prices."}
         </p>
 
         <form
           data-reveal
           onSubmit={(e) => {
             e.preventDefault();
-            go(id, pw);
+            if (registering) createAccount();
+            else go(id, pw);
           }}
         >
-          <div className="field">
-            <label htmlFor="id" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Mail size={14} /> Email or Phone Number
-            </label>
-            <input
-              id="id"
-              className="input"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              autoComplete="username"
-              placeholder="e.g. ramesh@demo.in"
-            />
-          </div>
+          {registering ? (
+            <>
+              <div className="field">
+                <label htmlFor="register-name">Full name</label>
+                <input
+                  id="register-name"
+                  className="input"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                  required
+                  minLength={2}
+                  maxLength={100}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="register-email">Email address</label>
+                <input
+                  id="register-email"
+                  type="email"
+                  className="input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="register-phone">Indian mobile number</label>
+                <input
+                  id="register-phone"
+                  type="tel"
+                  className="input"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                  placeholder="10-digit mobile number"
+                  required
+                />
+              </div>
+            </>
+          ) : (
+            <div className="field">
+              <label htmlFor="id" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Mail size={14} /> Email or Phone Number
+              </label>
+              <input
+                id="id"
+                className="input"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                autoComplete="username"
+                placeholder="e.g. ramesh@demo.in"
+                required
+              />
+            </div>
+          )}
 
           <div className="field">
             <label htmlFor="pw" style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -99,7 +164,10 @@ export default function Login({ onLogin, onBack }) {
               className="input"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
-              autoComplete="current-password"
+              autoComplete={registering ? "new-password" : "current-password"}
+              minLength={registering ? 8 : undefined}
+              maxLength={128}
+              required
             />
           </div>
 
@@ -115,14 +183,27 @@ export default function Login({ onLogin, onBack }) {
               <span>Authenticating…</span>
             ) : (
               <>
-                <span>Access Health Dashboard</span>
+                <span>{registering ? "Create patient account" : "Access Health Dashboard"}</span>
                 <ArrowRight size={16} />
               </>
             )}
           </button>
         </form>
 
-        {DEMOS_ENABLED && <div className="demo-list" data-reveal>
+        <button
+          type="button"
+          className="btn btn-ghost btn-block"
+          style={{ marginTop: 8 }}
+          onClick={() => {
+            setRegistering((value) => !value);
+            setErr("");
+          }}
+          disabled={busy}
+        >
+          {registering ? "Already have an account? Sign in" : "New here? Create an account"}
+        </button>
+
+        {DEMOS_ENABLED && !registering && <div className="demo-list" data-reveal>
           <div className="lbl" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Sparkles size={13} color="#2563eb" />
             <span>Instant Demo Accounts (pass1234)</span>

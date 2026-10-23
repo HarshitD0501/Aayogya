@@ -84,7 +84,10 @@ export async function api(path, opts = {}) {
     let detail = `Request failed (${res.status})`;
     try {
       const body = await res.json();
-      detail = body.detail || body.message || detail;
+      const bodyDetail = body.detail || body.message;
+      detail = Array.isArray(bodyDetail)
+        ? bodyDetail.map((issue) => issue.msg).filter(Boolean).join(" ") || detail
+        : bodyDetail || detail;
     } catch {
       /* non-JSON error body (e.g. Next.js proxy error when backend is offline) */
       if (res.status === 500 || res.status === 502 || res.status === 504) {
@@ -106,6 +109,15 @@ export async function login(identifier, password) {
   const data = await api("/auth/login", {
     method: "POST",
     json: { identifier, password },
+  });
+  setToken(data.token);
+  return data.patient;
+}
+
+export async function register({ name, email, phone, password }) {
+  const data = await api("/auth/register", {
+    method: "POST",
+    json: { name, email, phone, password },
   });
   setToken(data.token);
   return data.patient;

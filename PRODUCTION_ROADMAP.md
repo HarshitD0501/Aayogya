@@ -15,12 +15,10 @@ This document outlines all currently broken/fragile components, dummy/mock data 
 
 ## 1. Critical Bugs & Fragile Areas
 
-### 🔴 1.1 Missing User Registration Flow
-* **Current State**: Only `/api/auth/login` exists. There is **no registration / sign-up endpoint** or UI.
-* **Problem**: New real users cannot create an account with their own name, phone number, password, or role. They are forced to click demo accounts (`ramesh`, `shanti`, `aarav`, `meera`).
-* **Fix Required**:
-  - Add backend endpoint: `POST /api/auth/register` (validate email/phone uniqueness, hash password via PBKDF2/Argon2, create `Patient` row).
-  - Add frontend registration modal/page in `Login.js` with role selection (`patient` or `caregiver`).
+### 🔴 1.1 Patient Registration (implemented)
+* **Current State**: Patient registration is available through `POST /api/auth/register` and the login screen.
+* **Implemented**: Registration validates and normalizes email and Indian mobile numbers, requires an 8-character password, stores a PBKDF2 hash, rejects duplicate contacts, and signs the new patient in.
+* **Caregiver onboarding**: Caregiver self-registration remains unavailable until patients can issue consent-based links to caregiver accounts. Do not create unlinked caregiver accounts.
 
 ### 🔴 1.2 SQLite + In-Memory Checkpointer (State Loss on Restart)
 * **Current State**: `config.py` defaults to `sqlite:///./aayogya.db`. LangGraph's checkpointer falls back to `MemorySaver()`.
@@ -162,9 +160,9 @@ To move out of `simulated` mode into `live` mode, ensure the following credentia
 ## 5. Step-by-Step Implementation Sprints
 
 ### Sprint 1: Auth & User Onboarding (Immediate)
-- [ ] Implement `POST /api/auth/register` supporting email/phone + password + role (`patient` / `caregiver`).
-- [ ] Build the registration UI in Next.js (`frontend/components/Login.js`).
-- [ ] Eliminate `dev-insecure-change-me` secret key fallback.
+- [x] Implement patient `POST /api/auth/register` and the registration UI in Next.js.
+- [ ] Add consent-based patient-to-caregiver linking before enabling caregiver self-registration.
+- [x] Eliminate `dev-insecure-change-me` secret key fallback.
 
 ### Sprint 2: Real Data Ingestion & Error Fixes
 - [ ] Remove silent mock fallback in `extraction.py`; return proper 502/400 errors when vision extraction fails.

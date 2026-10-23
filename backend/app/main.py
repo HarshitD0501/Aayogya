@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, Response, UploadFile
 from langgraph.types import Command
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 from starlette.concurrency import run_in_threadpool
 import httpx
@@ -32,14 +33,14 @@ from . import summary as summary_svc  # noqa: E402
 from . import telephony as telephony_svc  # noqa: E402
 from . import whatsapp as wa_svc  # noqa: E402
 from . import caregiver as caregiver_svc  # noqa: E402
-from .auth import authenticate, current_patient, make_token, resolve_actor  # noqa: E402
+from .auth import authenticate, current_patient, hash_password, make_token, resolve_actor  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
 from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report  # noqa: E402
 from .schemas import (  # noqa: E402
-    LoginIn, LoginOut, MedicineOut, PatientOut, ReminderPrefsIn,
+    LoginIn, LoginOut, MedicineOut, PatientOut, RegisterIn, ReminderPrefsIn,
     ReminderPrefsOut, ReportOut, RescheduleIn, StopMedicineIn,
     TelephonyDispatchIn,
 )
@@ -187,6 +188,35 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
     patient = authenticate(db, body.identifier, body.password)
     if not patient:
         raise HTTPException(401, "Invalid email/phone or password.")
+    return LoginOut(token=make_token(patient.id), patient=PatientOut.model_validate(patient))
+
+
+@app.post("/api/auth/register", response_model=LoginOut, status_code=201)
+def register(body: RegisterIn, db: Session = Depends(get_db)):
+    existing = (
+        db.query(Patient)
+        .filter((Patient.email == body.email) | (Patient.phone == body.phone))
+        .first()
+    )
+    if existing:
+        raise HTTPException(409, "Email or phone number is already registered.")
+
+    patient = Patient(
+        id=f"patient-{uuid4().hex}",
+        name=body.name,
+        email=body.email,
+        phone=body.phone,
+        password_hash=hash_password(body.password),
+        plan="free",
+        role="patient",
+    )
+    db.add(patient)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(409, "Email or phone number is already registered.") from exc
+    db.refresh(patient)
     return LoginOut(token=make_token(patient.id), patient=PatientOut.model_validate(patient))
 
 
