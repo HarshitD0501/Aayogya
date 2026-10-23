@@ -374,7 +374,7 @@ Aayogya/
 │   ├── lib/
 │   │   ├── api.js                 Authenticated Fetch Client & X-Patient-Id Header
 │   │   └── gsap.js                Smooth Scroll & Interactive Animations
-│   └── next.config.mjs            Next.js Proxy Rewrites (/api/* -> :8000, /agent/* -> :8081)
+│   └── next.config.mjs            Next.js Proxy Rewrites (/api/* -> :8000, /agent/* -> :8080)
 └── agent/                         System B — Voice & Follow-up Companion
     ├── voice.py                   Realtime WebRTC Voice Worker & Telephony Dial
     ├── followup_prompt.py         Outbound Doctor Follow-up Telephony Persona
@@ -392,7 +392,8 @@ Aayogya/
 ### Port Allocation:
 - **Backend (FastAPI):** Port **8000** (`http://localhost:8000`)
 - **Frontend (Next.js):** Port **3000** (`http://localhost:3000`)
-- **Voice/Chat Agent (LiveKit/FastAPI):** Port **8080** / **8081**
+- **Text Chat / Voice Demo API (FastAPI):** Port **8080**
+- **LiveKit Worker Health (production default):** Port **8081**
 
 > **Note on Port 8000:** The frontend automatically proxies all `/api/*` network requests to `http://127.0.0.1:8000` via Next.js rewrites (`next.config.mjs`). Always launch the backend on port **8000**.
 

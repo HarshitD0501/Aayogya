@@ -438,6 +438,25 @@ class ChatIn(BaseModel):
     history: list[dict] = []  # [{"role": "user"|"model", "text": "..."}]
 
 
+@app.get("/api/chat/health")
+async def chat_health(
+    authorization: str = Header(None),
+    x_patient_id: str = Header(None, alias="X-Patient-Id"),
+    db: Session = Depends(get_db),
+):
+    """Check agent availability without exposing upstream errors or URLs."""
+    resolve_actor(authorization, x_patient_id, db)
+    agent_url = httpx.URL(settings.agent_chat_url)
+    health_url = str(agent_url.copy_with(path="/health", query=None, fragment=None))
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            response = await client.get(health_url)
+        available = response.is_success
+    except httpx.HTTPError:
+        available = False
+    return {"available": available}
+
+
 @app.post("/api/chat")
 async def chat(
     body: ChatIn,
@@ -462,9 +481,20 @@ async def chat(
             r = await c.post(settings.agent_chat_url,
                              json={"message": body.message, "history": body.history, "token": token})
         r.raise_for_status()
-    except httpx.HTTPError as e:  # agent down, or its LLM errored (e.g. Gemini quota)
-        raise HTTPException(502, f"Assistant unavailable: {type(e).__name__}. Is the agent service running on {settings.agent_chat_url}?")
-    return r.json()
+    except httpx.HTTPError as exc:
+        logger.warning("Text assistant upstream request failed (%s).", type(exc).__name__)
+        raise HTTPException(
+            503,
+            "The text assistant is temporarily unavailable. Please try again shortly or use Live Voice.",
+        ) from exc
+    try:
+        return r.json()
+    except ValueError as exc:
+        logger.warning("Text assistant returned an invalid response body.")
+        raise HTTPException(
+            503,
+            "The text assistant is temporarily unavailable. Please try again shortly or use Live Voice.",
+        ) from exc
 
 
 @app.post("/api/voice/token")

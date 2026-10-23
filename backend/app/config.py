@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # Text chatbot ("the brain") runs as the separate agent service (its own venv,
     # google-genai + livekit deps). The backend proxies /api/chat to it so the
     # dashboard talks to one origin (no CORS) and auth is enforced here first.
-    agent_chat_url: str = "http://localhost:8081/chat"
+    agent_chat_url: str = "http://localhost:8080/chat"
 
     # LiveKit voice: the backend mints a room-join token for the patient's browser
     # (key+secret sign it locally, no server call). Same project the voice.py worker

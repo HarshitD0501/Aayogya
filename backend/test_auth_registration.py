@@ -9,15 +9,16 @@ from pathlib import Path
 
 os.environ["ENABLE_DEMO_ACCOUNTS"] = "false"
 os.environ["GOOGLE_CLIENT_ID"] = "registration-test-client"
+os.environ["AGENT_CHAT_URL"] = "http://localhost:8080/chat"
 _test_db_dir = tempfile.TemporaryDirectory(prefix="aayogya-registration-")
 os.environ["DATABASE_URL"] = f"sqlite:///{(Path(_test_db_dir.name) / 'registration.db').as_posix()}"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app.auth import verify_password  # noqa: E402
+from app.auth import _verify_token, verify_password  # noqa: E402
 from app.db import SessionLocal, engine  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import Patient  # noqa: E402
+from app.models import CaregiverLink, Patient  # noqa: E402
 
 
 class RegistrationApiTests(unittest.TestCase):
@@ -167,6 +168,82 @@ class RegistrationApiTests(unittest.TestCase):
         )
         self.assertEqual(patient.status_code, 201)
         self.assertEqual(wrong_role_login.status_code, 403)
+
+    def test_caregiver_chat_proxy_uses_linked_patient_scope(self):
+        from unittest.mock import AsyncMock, patch
+
+        patient = self.register(email="chat-patient@example.com", phone="9876543213")
+        caregiver = self.register(
+            email="chat-caregiver@example.com", phone="9876543211", role="caregiver"
+        )
+        self.assertEqual(patient.status_code, 201, patient.text)
+        self.assertEqual(caregiver.status_code, 201, caregiver.text)
+        patient_id = patient.json()["patient"]["id"]
+        caregiver_id = caregiver.json()["patient"]["id"]
+
+        db = SessionLocal()
+        try:
+            db.add(CaregiverLink(caregiver_id=caregiver_id, patient_id=patient_id, relation="child"))
+            db.commit()
+        finally:
+            db.close()
+
+        upstream = AsyncMock()
+        upstream.__aenter__.return_value = upstream
+        upstream.__aexit__.return_value = None
+        response = type(
+            "AgentResponse",
+            (),
+            {"raise_for_status": lambda self: None, "json": lambda self: {"reply": "ok", "history": []}},
+        )()
+        upstream.post.return_value = response
+        headers = {
+            "Authorization": f"Bearer {caregiver.json()['token']}",
+            "X-Patient-Id": patient_id,
+        }
+
+        with patch("app.main.httpx.AsyncClient", return_value=upstream):
+            result = self.client.post(
+                "/api/chat",
+                headers=headers,
+                json={"message": "List my medicines", "history": []},
+            )
+
+        self.assertEqual(result.status_code, 200, result.text)
+        agent_body = upstream.post.call_args.kwargs["json"]
+        self.assertEqual(_verify_token(agent_body["token"]), patient_id)
+
+    def test_chat_health_and_upstream_failure_are_graceful(self):
+        import httpx
+        from unittest.mock import AsyncMock, patch
+
+        registered = self.register(email="chat-health@example.com", phone="9876543212")
+        self.assertEqual(registered.status_code, 201, registered.text)
+        headers = {"Authorization": f"Bearer {registered.json()['token']}"}
+
+        health_upstream = AsyncMock()
+        health_upstream.__aenter__.return_value = health_upstream
+        health_upstream.__aexit__.return_value = None
+        health_upstream.get.side_effect = httpx.ConnectError("agent is restarting")
+        with patch("app.main.httpx.AsyncClient", return_value=health_upstream):
+            health = self.client.get("/api/chat/health", headers=headers)
+        self.assertEqual(health.status_code, 200, health.text)
+        self.assertEqual(health.json(), {"available": False})
+        health_upstream.get.assert_awaited_once_with("http://localhost:8080/health")
+
+        failed_upstream = AsyncMock()
+        failed_upstream.__aenter__.return_value = failed_upstream
+        failed_upstream.__aexit__.return_value = None
+        failed_upstream.post.side_effect = httpx.ConnectError("agent is restarting")
+        with patch("app.main.httpx.AsyncClient", return_value=failed_upstream):
+            failed = self.client.post(
+                "/api/chat", headers=headers, json={"message": "Hello", "history": []}
+            )
+        self.assertEqual(failed.status_code, 503)
+        self.assertEqual(
+            failed.json()["detail"],
+            "The text assistant is temporarily unavailable. Please try again shortly or use Live Voice.",
+        )
 
 
 if __name__ == "__main__":

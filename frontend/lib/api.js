@@ -208,38 +208,18 @@ export function confirmReport(id) {
   return api(`/reports/${id}/confirm`, { method: "POST" });
 }
 
-// Talk to the voice/chat agent (System B) at /agent/chat. The patient's bearer
-// token IS the auth — the agent makes every tool call as that patient, so the
-// backend's per-patient isolation still holds. Threads {role,text} history.
+// Talk to the agent through the backend so it can enforce caregiver links and
+// mint a patient-scoped token where needed. Threads {role,text} history.
 export async function askAssistant(message, history = []) {
-  const token = getToken();
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 90000);
-  let res;
-  try {
-    res = await fetch("/agent/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, token, history }),
-      signal: ac.signal,
-    });
-  } catch (e) {
-    if (e.name === "AbortError")
-      throw new Error("The assistant took too long to respond — please try again.");
-    throw new Error("Assistant is offline. Start it with: uvicorn chat:app --port 8081");
-  } finally {
-    clearTimeout(timer);
-  }
-  if (!res.ok) {
-    let detail = `Assistant error (${res.status})`;
-    try {
-      detail = (await res.json()).detail || detail;
-    } catch {
-      /* non-JSON error body */
-    }
-    throw new Error(detail);
-  }
-  return res.json(); // { reply, history }
+  return api("/chat", {
+    method: "POST",
+    json: { message, history },
+    timeoutMs: 90000,
+  });
+}
+
+export function getAssistantHealth() {
+  return api("/chat/health", { timeoutMs: 5000 });
 }
 
 // --- Caregiver portal helpers ---

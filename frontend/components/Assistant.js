@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { askAssistant } from "@/lib/api";
+import { askAssistant, getAssistantHealth } from "@/lib/api";
 import { useReveal } from "@/lib/gsap";
 import { Card, Note } from "@/components/ui";
 import LiveVoiceAgent from "@/components/LiveVoiceAgent";
@@ -31,6 +31,8 @@ export default function Assistant({ patient }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [assistantAvailable, setAssistantAvailable] = useState(null);
+  const [healthCheckNonce, setHealthCheckNonce] = useState(0);
   const [listening, setListening] = useState(false);
   const [speak, setSpeak] = useState(true);
   const [lang, setLang] = useState("hi-IN");
@@ -64,10 +66,16 @@ export default function Assistant({ patient }) {
     setBusy(true);
     try {
       const data = await askAssistant(text, prior);
+      setAssistantAvailable(true);
       setMessages(data.history);
       speakText(data.history[data.history.length - 1]?.text);
     } catch (e) {
-      setErr(e.message); // keep the user bubble; surface the reason
+      const unavailable = e.message.toLowerCase().includes("text assistant is temporarily unavailable");
+      if (unavailable) {
+        setAssistantAvailable(false);
+      } else {
+        setErr(e.message); // keep the user bubble; surface the reason
+      }
     } finally {
       setBusy(false);
     }
@@ -99,6 +107,26 @@ export default function Assistant({ patient }) {
       }
     };
   }, []);
+
+  // Check the backend's authenticated agent-health proxy while text chat is open.
+  useEffect(() => {
+    if (mode !== "chat") return undefined;
+    let active = true;
+    const check = async () => {
+      try {
+        const health = await getAssistantHealth();
+        if (active) setAssistantAvailable(Boolean(health.available));
+      } catch {
+        if (active) setAssistantAvailable(false);
+      }
+    };
+    check();
+    const timer = window.setInterval(check, 30000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [mode, healthCheckNonce, patient?.id]);
 
   // Autoscroll to the newest message in chat mode.
   useEffect(() => {
@@ -335,6 +363,35 @@ export default function Assistant({ patient }) {
                 </div>
               )}
             </div>
+
+            {assistantAvailable === false && (
+              <div
+                role="status"
+                aria-live="polite"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  marginTop: 10,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "var(--danger-soft, #fef2f2)",
+                  color: "var(--danger, #991b1b)",
+                }}
+              >
+                <span style={{ fontSize: 13 }}>
+                  Text assistant is temporarily unavailable. Try again shortly or switch to Live Voice.
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => setHealthCheckNonce((n) => n + 1)}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
 
             {err && (
               <div style={{ marginTop: 10 }}>

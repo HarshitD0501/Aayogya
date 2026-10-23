@@ -4,6 +4,7 @@
     uvicorn chat:app --port 8080
 
 POST /chat  {token?, message, history?}  ->  {reply, history}
+GET /health  ->  {status: "ok"} (liveness only; does not call Gemini)
 - `token` is the patient's backend bearer token (from app login). If omitted, the
   server falls back to demo creds when configured. The token IS the auth: every tool
   call is made as that patient against the backend, which enforces per-patient
@@ -31,6 +32,12 @@ logger = logging.getLogger("aayogya.agent")
 
 app = FastAPI(title="Sahayak — Aayogya text chatbot")
 _genai = genai.Client(api_key=config.GOOGLE_API_KEY)
+
+
+@app.get("/health")
+async def health():
+    """Liveness probe for the agent process; does not call the model provider."""
+    return {"status": "ok"}
 
 # Codes worth OUR extra retry: transient 5xx overload only. We deliberately do NOT
 # retry 429 here — the SDK already retries rate-limits internally honoring the

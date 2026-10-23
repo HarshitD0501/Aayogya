@@ -54,11 +54,14 @@ This document outlines all currently broken/fragile components, dummy/mock data 
 * **Fix applied**: Documented generating a stable 64-hex-character production key with `openssl rand -hex 32`. The actual key belongs in the deployment environment or an ignored `.env` file, never in source control.
 * **Verification**: `backend/test_config_security.py` covers missing, short, stable production, and random development keys.
 
-### 🔴 1.6 Agent Chat Service Hard Dependency & Failure Handling
-* **Current State**: `backend/app/main.py` proxies `/api/chat` to `http://localhost:8081/chat` via HTTPX.
-* **Problem**: If `agent/chat.py` is not running on port 8081, the chat widget crashes with a generic 502 Bad Gateway.
-* **Fix Required**:
-  - Add graceful health check and user-friendly error response in the chat widget if the chat service is restarting or down.
+### ✅ 1.6 Agent Chat Service Failure Handling
+* **Problem found**: The UI called the agent directly, bypassing the backend chat proxy and caregiver-to-patient authorization. Upstream failures could surface as generic proxy errors.
+* **Fix applied**:
+  - Text chat now goes through the authenticated backend proxy, which preserves patient isolation for caregivers.
+  - Added an agent liveness endpoint and authenticated backend health proxy; the chat UI checks availability while open and offers a retry action.
+  - Agent connection, upstream status, and invalid response failures return a stable 503 message without exposing internal URLs or exception details.
+  - Aligned the backend chat URL and standalone voice-token fallback with the documented agent/demo port `8080`.
+* **Verification**: Backend chat tests cover caregiver-scoped tokens, health-check failure, friendly 503 handling, and the health URL; frontend production build validates the status UI.
 
 ---
 
