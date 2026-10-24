@@ -1,0 +1,23 @@
+
+=======================================================
+RUNNING AAYOGYA AGENT FOLLOW-UP PROMPT & RESCHEDULE TEST
+=======================================================
+
+  [PASS] Devanagari Hindi opening greeting with computed lead-time.
+  [PASS] Dynamic bilingual language switching rules validated.
+  [PASS] Reschedule negotiation and tool triggering verified.
+  [PASS] 108 Emergency and non-clinical safety verified.
+
+=======================================================
+ALL AGENT FOLLOW-UP TESTS PASSED WITH 0 ERRORS!
+=======================================================
+
+  [PASS] Lead-time text computed from the actual follow-up date.
+C:\Users\harsh\Desktop\Aaroya\Aayogya\agent\.venv\Lib\site-packages\google\api_core\_python_version_support.py:254: FutureWarning: You are using a Python version (3.11.9) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+C:\Users\harsh\Desktop\Aaroya\Aayogya\agent\.venv\Lib\site-packages\google\api_core\_python_version_support.py:254: FutureWarning: You are using a Python version (3.11.9) which Google will stop supporting in new releases of google.cloud.speech_v1 once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.cloud.speech_v1 past that date.
+  warnings.warn(message, FutureWarning)
+C:\Users\harsh\Desktop\Aaroya\Aayogya\agent\.venv\Lib\site-packages\google\api_core\_python_version_support.py:254: FutureWarning: You are using a Python version (3.11.9) which Google will stop supporting in new releases of google.cloud.speech_v2 once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.cloud.speech_v2 past that date.
+  warnings.warn(message, FutureWarning)
+C:\Users\harsh\Desktop\Aaroya\Aayogya\agent\.venv\Lib\site-packages\google\api_core\_python_version_support.py:254: FutureWarning: You are using a Python version (3.11.9) which Google will stop supporting in new releases of google.cloud.texttospeech_v1 once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.cloud.texttospeech_v1 past that date.
+  warnings.warn(message, FutureWarning)

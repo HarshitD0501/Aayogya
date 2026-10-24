@@ -1,0 +1,27 @@
+CAREGIVER AUTH & ISOLATION TEST
+==================================================
+  [PASS] caregiver login returns role=caregiver
+  [PASS] patient login returns role=patient
+  [PASS] Ram demo logs in as a patient
+  [PASS] Ramesh demo logs in as a caregiver
+  [PASS] Ramesh caregiver demo sees Ram
+  [PASS] patient token + forged header -> still own meds only
+  [PASS] caregiver + shanti header -> shanti's meds
+  [PASS] caregiver default -> first link (ramesh's meds)
+  [PASS] caregiver + unlinked patient -> 403
+  [PASS] caregiver with zero links -> 403
+  [PASS] patient on caregiver route -> 403
+  [PASS] family overview lists 4 linked patients
+  [PASS] cards carry relations
+  [PASS] cards carry days_until
+  [PASS] contact update normalizes to +91 E.164
+  [PASS] overview reflects new phone
+  [PASS] contact update on unlinked patient -> 403
+  [PASS] duplicate phone on another patient -> 409
+  [PASS] invalid phone rejected 422
+  [PASS] resolver returns actor=caregiver, patient=shanti
+  [PASS] patient resolves to self regardless of header
+==================================================
+ALL 21 CAREGIVER TESTS PASSED
+C:\Users\harsh\Desktop\Aaroya\Aayogya\backend\.venv\Lib\site-packages\langgraph\checkpoint\base\__init__.py:18: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer

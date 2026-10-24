@@ -1,0 +1,28 @@
+
+=======================================================
+RUNNING AAYOGYA MULTI-AGENT EXTRACTION TEST SUITE
+=======================================================
+
+Testing Agent 1: Vision Preprocessor...
+  [PASS] Agent 1 Preprocessor passed all tests.
+Testing Agent 2: JSON Cleaner & Robust Parser...
+  [PASS] Agent 2 JSON Cleaner passed all tests.
+Testing Agent 3: Indian Drug Knowledge Graph & Fuzzy Matcher...
+  [PASS] Agent 3 Drug Catalog & Fuzzy Matcher passed all tests.
+Testing Agent 4: Clinical Validation & Confidence Orchestrator...
+  [PASS] Agent 4 Clinical Validation & Confidence passed all tests.
+Testing extraction provider failure and explicit mock opt-in...
+  [PASS] Provider failure is explicit; canned output requires opt-in.
+Testing LangGraph Multi-Agent Pipeline with Human-in-the-Loop Interrupt...
+  [PASS] LangGraph Multi-Agent Pipeline E2E passed with 100% success.
+
+=======================================================
+ALL TESTS PASSED WITH 0 ERRORS! SYSTEM PRODUCTION-READY
+=======================================================
+
+C:\Users\harsh\Desktop\Aaroya\Aayogya\backend\.venv\Lib\site-packages\langgraph\checkpoint\base\__init__.py:18: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+Agent 1 (Preprocessor) encountered non-fatal error: cannot identify image file <_io.BytesIO object at 0x000001E9298C3F10>. Proceeding with original bytes.
+test provider extraction failed (OSError): offline. Trying next...
+test provider extraction failed (OSError): offline. Trying next...
+Using the explicitly enabled development mock prescription.

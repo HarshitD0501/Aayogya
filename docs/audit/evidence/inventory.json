@@ -1,0 +1,802 @@
+[
+  {
+    "path": "DESIGN.md",
+    "lines": 556,
+    "sha256": "729fbdcc8d9953fa9201dd423244e7e4a73dc943d57a5b25f4d8b4c8228fc307"
+  },
+  {
+    "path": "PRODUCTION_ROADMAP.md",
+    "lines": 181,
+    "sha256": "360904d6e3b5b0a43231b4b79c0515737b941ef685c8271602c81abe3711c107"
+  },
+  {
+    "path": "README.md",
+    "lines": 510,
+    "sha256": "ed04c234f14d63a48eec0c38696fce8ea0fe6681bfcacc0c73e055f8ecf9e7a4"
+  },
+  {
+    "path": "voice.md",
+    "lines": 234,
+    "sha256": "7ac8ad9c400854d3c25e7fa8f8b52d0d8d2b12e4466f66b75934d6aefab886d8"
+  },
+  {
+    "path": "agent/backend_client.py",
+    "lines": 91,
+    "sha256": "5df35cf0b977ab695b2be1a4996f090123f543ea5b6f7d84626cfcfcb81ff80d"
+  },
+  {
+    "path": "agent/chat.py",
+    "lines": 164,
+    "sha256": "328d081d5c60f2978778928f6cb2404fdacf3ce59cb132861cebed80c97ad6f5"
+  },
+  {
+    "path": "agent/config.py",
+    "lines": 57,
+    "sha256": "732772ca1ff90bfec9bf9f5df90f553c2389050bb190e5ac53f1cd5f920cc935"
+  },
+  {
+    "path": "agent/demo.py",
+    "lines": 57,
+    "sha256": "69ff7af1ef6f54dbd988089ce85c40f0d94d2b4c7fa7c9206f3154652dcdde20"
+  },
+  {
+    "path": "agent/followup_prompt.py",
+    "lines": 87,
+    "sha256": "748fe9ee8a9336d7563f24f74f12b0a7295d4a6893d370192443b8f30a8febfd"
+  },
+  {
+    "path": "agent/livekit.toml",
+    "lines": 2,
+    "sha256": "0841bdf1ded4496001aab4c42f51246ab248a19dd7cbc5d4a27a8dae9f88eea5"
+  },
+  {
+    "path": "agent/prompt.py",
+    "lines": 77,
+    "sha256": "a740b617e245351b0d17da96b047c4258ce791239bda3df14b81c6ab59f1861d"
+  },
+  {
+    "path": "agent/README.md",
+    "lines": 113,
+    "sha256": "dc32664ad2677e875fee9de0ae457821dac7de253e33833fc6dca393a4937c50"
+  },
+  {
+    "path": "agent/requirements.txt",
+    "lines": 22,
+    "sha256": "3af5041391f67bed81cb51912a0e25de22ec0271d7b9727a574518ef973699a5"
+  },
+  {
+    "path": "agent/test_agent.py",
+    "lines": 111,
+    "sha256": "2e47a06df0402477c34f787df135df2c2e9882ca885b7e3a8e927b9f85415f4f"
+  },
+  {
+    "path": "agent/test_followup.py",
+    "lines": 99,
+    "sha256": "c504a1974c1219efc459780de725765aafc9026a726ec97758284d0dbcc1a58c"
+  },
+  {
+    "path": "agent/voice.py",
+    "lines": 478,
+    "sha256": "765c9947d3f732a1770e9a3c074c8466bbe2dea759d7e6b3e6b605eb99a4c55c"
+  },
+  {
+    "path": "agent/.frontend-candidate/AUSHADH_LICENSE.txt",
+    "lines": 21,
+    "sha256": "d43c5c784687a2c6754cc954e15cba59b684801fb466ace7f80fa9f891b82a7c"
+  },
+  {
+    "path": "agent/.frontend-candidate/jsconfig.json",
+    "lines": 6,
+    "sha256": "d7b17d973bda9cc05abb863963396694eda587c50c4fcc79764ce898cf40b0e4"
+  },
+  {
+    "path": "agent/.frontend-candidate/next.config.mjs",
+    "lines": 26,
+    "sha256": "8c56d41a5ecf186ef6f927bcaa806f60a3237803ab7862e274d6b537ac1609b0"
+  },
+  {
+    "path": "agent/.frontend-candidate/package-lock.json",
+    "lines": 1712,
+    "sha256": "c28b3cfa026ccd5474edd13a12e96842f0cd475cd99e5644bb894d88785411f2"
+  },
+  {
+    "path": "agent/.frontend-candidate/package.json",
+    "lines": 26,
+    "sha256": "409154c769a338ddd0baacd87f6d182969c60a9f03adf871dc09919db4b39221"
+  },
+  {
+    "path": "agent/.frontend-candidate/postcss.config.js",
+    "lines": 6,
+    "sha256": "b78f5d0a0a449ecf58b6b6252e26cd2216c7aa41235e2d6d01a26b9a065cd439"
+  },
+  {
+    "path": "agent/.frontend-candidate/README.md",
+    "lines": 19,
+    "sha256": "7547092773ff21f208f4f33721af09198f30c38995b2392712a15dec3406e28a"
+  },
+  {
+    "path": "agent/.frontend-candidate/tailwind.config.js",
+    "lines": 34,
+    "sha256": "d3f3cc3aa7814a9d927b758d1477cacaebe3998ca0e2989bedf281de4c026ed9"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/globals.css",
+    "lines": 3405,
+    "sha256": "f2fc779283d075d90de61512d9ba2dde9e3e35a4331bf247214ff0e3e6894d5d"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/layout.js",
+    "lines": 49,
+    "sha256": "825f803cf24ff2508a635b8fe4a21bb1a909555b8c09893a95b19f8f33277631"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/page.js",
+    "lines": 22,
+    "sha256": "bcd6ebea541aac610e08a3aca89853365dc7353b3376f3b83fe70f45c0acb314"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/app/page.js",
+    "lines": 91,
+    "sha256": "4932cb0fc0b4d4edb3a0129a2edeb11d2fe9e756a429f60c5e797448f805c6b1"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/history/page.js",
+    "lines": 294,
+    "sha256": "9d0601725b394cfa75dbbc6d3a9733bf713f7475fc110574c162d30ed83f51b0"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/prescriptions/[id]/page.js",
+    "lines": 589,
+    "sha256": "c9c969935db6be037d4d9d183d351c10d4c7a4a06c51c38b69b265bedca807d3"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/scan/page.js",
+    "lines": 399,
+    "sha256": "9231d3571ed0296075a8ed9da21a92dd59c0811dcabc5f2dd279ad39b2b8234a"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/search/page.js",
+    "lines": 341,
+    "sha256": "f90b85500c466e3c199f3f3f4c953b7047b329075f3479ce7e32d4126cb5a88a"
+  },
+  {
+    "path": "agent/.frontend-candidate/app/stores/page.js",
+    "lines": 374,
+    "sha256": "7ea84d0ec206acd79c9e858705aea9fc8fd2ce894b3e2ac14cbbca6bd0286624"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Assistant.js",
+    "lines": 384,
+    "sha256": "b1ffa9d58b3a0cdfa7eab03b05c016466a222c6392188049fdf82324885fcdde"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Caregiver.js",
+    "lines": 531,
+    "sha256": "a98b09329f7f11fa36b8bcf6fcc31b17614034c5f60841b30c2f495212797a18"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/ChemistSlip.js",
+    "lines": 143,
+    "sha256": "ee005b5d72d66eabdf611e8dc5fcba142b1697410bc9f31dbaee569a64e1a5e7"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Dashboard.js",
+    "lines": 312,
+    "sha256": "edf406ac2d9877190426591902e842ca727528d7835c3240c0805b3c7f044fb6"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Disclaimer.js",
+    "lines": 47,
+    "sha256": "cabe5239f0b75a805ba23215569f4da39362addf0e3fd64a0f05c37ba497f3a0"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Landing.js",
+    "lines": 1044,
+    "sha256": "4e8b162ad5828ac487d42e5c81565bacc631c85c5278300c56e32d0b3cc90e43"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/LazyStoreMap.js",
+    "lines": 144,
+    "sha256": "b660f1b22160e03b56fd04d7a884483c22024d0d07cf27aa59c15a61fb8a3d90"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/LiveVoiceAgent.js",
+    "lines": 499,
+    "sha256": "d7aadd14f89e6f5e3e2a423a4fa2036c42d9f739381ff6c5f53b340ba059c578"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Login.js",
+    "lines": 184,
+    "sha256": "ccd804ba4a9f1919ba94bb0fc8fcf89f77fa69b8ea1d3d71742c294b283de027"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Navbar.js",
+    "lines": 188,
+    "sha256": "e0b33fda76d61a085b8c7f6f988056c8edce5b0048fa912f243f8a15f3aa33be"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/Pharmacies.js",
+    "lines": 222,
+    "sha256": "a65b05de5dbc6e7cdf1e0eb020cc6bc61da0d29c7f9a29214f3f340b37a7ec79"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/PriceComparisonHero.js",
+    "lines": 222,
+    "sha256": "0b2d26bf622013c5671a1719eacf9fe6a012f5475591633bdbe04ebb7a5c4083"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/SearchSuggestions.js",
+    "lines": 94,
+    "sha256": "44f65b3d5a329bf61df6fef56e5541f880672047b9245079090a59405f7b577f"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/sections.js",
+    "lines": 1348,
+    "sha256": "e2c8a5da6422dfdf6edf42655ac6abf774724e0a7559f19653882b7976516118"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/ui.js",
+    "lines": 241,
+    "sha256": "b4f3fa825163c33c19d55504973b9d513eacfd1161d7bf40e9e793771398787a"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/reactbits/AuraBackground.js",
+    "lines": 67,
+    "sha256": "aae6f2df581fff23e83af92b3b6d7b830f5c9c4521ad798caa66b0c0d6dbfd23"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/reactbits/GlowPill.js",
+    "lines": 16,
+    "sha256": "6bb41d2141fc04ffcf4ff29e55a4a5f4073cefccf899decef4e5c723c1868376"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/reactbits/ShinyText.js",
+    "lines": 23,
+    "sha256": "bb8e4a32fdb66ab594a0ec1d749a8e914f14378958fdc6ed41be4b02003e7d6d"
+  },
+  {
+    "path": "agent/.frontend-candidate/components/reactbits/SpotlightCard.js",
+    "lines": 23,
+    "sha256": "dfa61674e08088f351ff07491c733d1ba229e5a25b281a628a1abad01c333b15"
+  },
+  {
+    "path": "agent/.frontend-candidate/contexts/LanguageContext.js",
+    "lines": 143,
+    "sha256": "6157a91c455c31a435965131da2e7f1827461d9962547c2167110fe883990cc5"
+  },
+  {
+    "path": "agent/.frontend-candidate/lib/api.js",
+    "lines": 267,
+    "sha256": "ccc60c66eed50144000a4b558f94a3a60abec584845138ff80a81321f31c1757"
+  },
+  {
+    "path": "agent/.frontend-candidate/lib/client.js",
+    "lines": 136,
+    "sha256": "9f08402d2770c3f270073c97ff60d7b0927621c38e81dfca88f9f03b3eccda95"
+  },
+  {
+    "path": "agent/.frontend-candidate/lib/currency.js",
+    "lines": 26,
+    "sha256": "571805ab6e852ef9ed2ca2d71f238a6c7374132f2a8c883e61b529a1dcb42739"
+  },
+  {
+    "path": "agent/.frontend-candidate/lib/gsap.js",
+    "lines": 132,
+    "sha256": "edb900dc509a83297f701577099f868f73a2e77a0c1cb9f1667c87f221ba845b"
+  },
+  {
+    "path": "agent/.frontend-candidate/lib/indexedDb.js",
+    "lines": 260,
+    "sha256": "8d02ac0f717efe51802f3c83f728115915e752dc02419c71dd900552a7b9ca5c"
+  },
+  {
+    "path": "agent/.frontend-candidate/public/manifest.json",
+    "lines": 32,
+    "sha256": "fd0ee7aad7d7f50200293061b7a623747eee3abb8fbc0910b7703829124de956"
+  },
+  {
+    "path": "agent/.frontend-candidate/public/sw.js",
+    "lines": 77,
+    "sha256": "8156a2cc70299c26b9da1a80f8a8ebc9dd496683b237e660eb5afb72d8d69e15"
+  },
+  {
+    "path": "backend/audit_credentials.py",
+    "lines": 109,
+    "sha256": "4ae24c0a4edb3d99c484f2123a4ae959963ae07f4733a068bfbd110c8c89bc46"
+  },
+  {
+    "path": "backend/docker-compose.yml",
+    "lines": 23,
+    "sha256": "e66f2aa70705848b41d1db52ac4ad477db1fc5698f6b26a4803dd3a9a7165184"
+  },
+  {
+    "path": "backend/recover_sqlite.py",
+    "lines": 74,
+    "sha256": "dbf5916c76eb5930838b81c81685dfc1d21ce95fbaaf0f30c3e2f0aff0dced46"
+  },
+  {
+    "path": "backend/requirements.txt",
+    "lines": 16,
+    "sha256": "eca2264246a2ed0aa87eff9eebb49eb4cb53e22b0925887f3651d4312c8d7bae"
+  },
+  {
+    "path": "backend/test_auth_registration.py",
+    "lines": 281,
+    "sha256": "25537c680564d7fada2fca5b30af3e04e32ddfa9645edef35a1efcb3504f9644"
+  },
+  {
+    "path": "backend/test_caregiver.py",
+    "lines": 146,
+    "sha256": "745ba7a32edf6aab0504f8e765e7a7cfc93a442eaa901693c9b01b7e0e1dd330"
+  },
+  {
+    "path": "backend/test_confidence.py",
+    "lines": 43,
+    "sha256": "b3761528db03cf6ad11c582952f833cf1a510664555374804f9018f355cb87a1"
+  },
+  {
+    "path": "backend/test_config_security.py",
+    "lines": 42,
+    "sha256": "6cfd24abdcbd04ea88f286b84942fddb3e9b2cc13c3fcb359abf27ae13df975a"
+  },
+  {
+    "path": "backend/test_db_recovery.py",
+    "lines": 137,
+    "sha256": "7786b7a85823e2c0e8bf62c73ee238857f52bbb858e9c9cdf5d9da388ec5f799"
+  },
+  {
+    "path": "backend/test_dosage.py",
+    "lines": 40,
+    "sha256": "8ee340e1992a4f4f62882cf1b871b2cfc10327ac105bd25827253872b546976a"
+  },
+  {
+    "path": "backend/test_interactions.py",
+    "lines": 68,
+    "sha256": "464090ee1105c480a83eb56d09524021fec2f1ac3a4cb38db07d7b46ad7226ee"
+  },
+  {
+    "path": "backend/test_multiagent_extraction.py",
+    "lines": 338,
+    "sha256": "bc783ea4fe41211b60d9202267c619ea99d1811611fc9ac735ac1c9f138860ee"
+  },
+  {
+    "path": "backend/test_prices.py",
+    "lines": 62,
+    "sha256": "95c70ecb60ae769bc4e79d8642fa82b04ec35152e117d024984a2cbcf63fc8aa"
+  },
+  {
+    "path": "backend/test_telephony.py",
+    "lines": 209,
+    "sha256": "347ba989096a8ffc9c8bf79b993f3986e2053481bf1636c70b4aa949047e35ec"
+  },
+  {
+    "path": "backend/test_whatsapp.py",
+    "lines": 511,
+    "sha256": "715db85d84b85a64eef40fced2ec4e4dc4dfe380154177cf881f62f324b3e2ad"
+  },
+  {
+    "path": "backend/alembic/env.py",
+    "lines": 46,
+    "sha256": "8c1fc02125cc16a75c91a20f7daf46e47b9d997f545c88c5c4549bc0bea80b42"
+  },
+  {
+    "path": "backend/alembic/versions/04972bb8e1f9_caregiver_role_and_links.py",
+    "lines": 55,
+    "sha256": "54874ada3a1821c07e277baa768233ea05d8013072eef8137c51a46f68a7b29b"
+  },
+  {
+    "path": "backend/alembic/versions/44cc55323247_telephony_follow_up_status_and_.py",
+    "lines": 46,
+    "sha256": "b0bfeadb6e8d49d889a467533dede6be94691de1dd46053d23cd51d4c3f5569a"
+  },
+  {
+    "path": "backend/alembic/versions/4778ad4cf3af_patient_summary_follow_up_date_reminder_.py",
+    "lines": 54,
+    "sha256": "bacae5ac359083d91c3387fdae11444c8a517615017b862c5100ba8e0bbc8f9f"
+  },
+  {
+    "path": "backend/alembic/versions/94a6140ff1ff_initial_schema.py",
+    "lines": 126,
+    "sha256": "28d4b4fba88847518e44f1a27a2acf71ed0d2163b9549151b28994ea0a31ead5"
+  },
+  {
+    "path": "backend/alembic/versions/b103a9018f2c_google_identity.py",
+    "lines": 28,
+    "sha256": "a65a8155519a7b7d8452c3335707e1941040b020d21b630cb1c64035973a481c"
+  },
+  {
+    "path": "backend/app/auth.py",
+    "lines": 205,
+    "sha256": "5357ea4e7533463462052dd93f083b0a765060e6fbc5b1d545839efbe67179f7"
+  },
+  {
+    "path": "backend/app/caregiver.py",
+    "lines": 156,
+    "sha256": "da3d1423eb52c55bc52a41d727087e1861a98a69f5c2c5de2e95d9af932fed1e"
+  },
+  {
+    "path": "backend/app/catalog.py",
+    "lines": 214,
+    "sha256": "4c857faeb090e7e724b123ed88186248be0239affa6c045134338408355d6c91"
+  },
+  {
+    "path": "backend/app/conditions.py",
+    "lines": 28,
+    "sha256": "3bfa93732f7f1cef110fb3d95c578c683a28e638720b15c457783bfca5728db6"
+  },
+  {
+    "path": "backend/app/confidence.py",
+    "lines": 61,
+    "sha256": "521ea0f7949b3cc8e096ddf9766035f911bf961dd3d3138a40e05d2c4cc111bc"
+  },
+  {
+    "path": "backend/app/config.py",
+    "lines": 125,
+    "sha256": "423faf97f68bfe583394162578b6709cd869a6b315481601b7a9418052bca19c"
+  },
+  {
+    "path": "backend/app/db.py",
+    "lines": 100,
+    "sha256": "5a42a8adf7611e3598f7178283fa86a4f78d36c49cb9dfd18cc63b0321e95140"
+  },
+  {
+    "path": "backend/app/dosage.py",
+    "lines": 115,
+    "sha256": "625575b775205845c394a0ab4556053ec8081066ddc6d87ae8985367b4c0f8f7"
+  },
+  {
+    "path": "backend/app/extraction.py",
+    "lines": 258,
+    "sha256": "ec3090cf1b1a1f34bdf0620de7cdcf9c90bfe44d77f7dd2d16c11b5ae0f7c556"
+  },
+  {
+    "path": "backend/app/graph.py",
+    "lines": 156,
+    "sha256": "b08b0445f3c4e10b1367e2fc4560a2996ec89d409f76edc89e614d75aa318566"
+  },
+  {
+    "path": "backend/app/interactions.py",
+    "lines": 73,
+    "sha256": "34bce0a8879fdc473e280d78f2cea38d126ecb8151f0963c4a2ff5390c30e4be"
+  },
+  {
+    "path": "backend/app/main.py",
+    "lines": 950,
+    "sha256": "7164b3f784d99878df2dcbd546299aaa4992ecceada0dfba43a849e3cc0a1532"
+  },
+  {
+    "path": "backend/app/models.py",
+    "lines": 189,
+    "sha256": "611cba61450e49f5b27996f0ad796e301bd78e83aace7b54f62bbd4c09ed10f1"
+  },
+  {
+    "path": "backend/app/preprocessor.py",
+    "lines": 78,
+    "sha256": "c4f6b9baf16c1f6c7aef2a7ab3e20813bcfdd99c14e244ef6e6e793a88cec748"
+  },
+  {
+    "path": "backend/app/prices.py",
+    "lines": 242,
+    "sha256": "69cae724c720a058f4be8c8dbef97f74683ad8311de8b960610335e90a26e6b7"
+  },
+  {
+    "path": "backend/app/schemas.py",
+    "lines": 185,
+    "sha256": "0f611dfeefb8d9324516e3629dfa9c4f2325368532f13a52c7fce71aad52c035"
+  },
+  {
+    "path": "backend/app/seed.py",
+    "lines": 198,
+    "sha256": "9825ce6083deba952b2867fbfe36cf0da5677546b5dd674601df8ce048c0d24d"
+  },
+  {
+    "path": "backend/app/summary.py",
+    "lines": 177,
+    "sha256": "92c84a77a1bce2e790237f8805ba85157d37f5b75bd29a2a8e0e60101c2ac884"
+  },
+  {
+    "path": "backend/app/telephony.py",
+    "lines": 260,
+    "sha256": "7e3ea4fa35bf1ec723f91fc2cb67dd2f12c4bd00fb75c32522d4fad3f4ce9a80"
+  },
+  {
+    "path": "backend/app/whatsapp.py",
+    "lines": 1015,
+    "sha256": "a7779bd47af5371cb61f120d48f858dace941b05dc85719dce8170ac7ca72e49"
+  },
+  {
+    "path": "backend/app/__init__.py",
+    "lines": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "backend/app/data/indian_medicines.json",
+    "lines": 488,
+    "sha256": "57580ab0b54b5e170c535a49340d5099eef18e578ecf0abd1201acea5eb677ff"
+  },
+  {
+    "path": "backend/app/data/medicine_pricing_dataset.csv",
+    "lines": 120,
+    "sha256": "dd8e4a92681019399407b608745303918bebc45f1d35002fcbf50153d5307658"
+  },
+  {
+    "path": "backend/app/data/medicine_pricing_dataset.json",
+    "lines": 1787,
+    "sha256": "6d673b8df60ae6212b4be78df667b6eebecedc1bb358004238771efdc7543bef"
+  },
+  {
+    "path": "backend/data/kendras.json",
+    "lines": 208,
+    "sha256": "3648f2b83f4baeb87733ec5c40c06833025836ab62897b42e52fe98340d222ca"
+  },
+  {
+    "path": "backend/data/kendras.schema.json",
+    "lines": 65,
+    "sha256": "ed27d0ca1b383ec253995c7e1ba826d428673b4b3ff412e289e53e9b81f2c687"
+  },
+  {
+    "path": "backend/data/medicines.json",
+    "lines": 194,
+    "sha256": "3a382db73c163a01e6d41941812f60a9d3eb180f8bb1884d785e984199ae585c"
+  },
+  {
+    "path": "backend/data/medicines.schema.json",
+    "lines": 106,
+    "sha256": "a2e41cfa320aa1d2a2585659b4e6d9a8957fd7cb4fd9952f7ddda1957e98b72f"
+  },
+  {
+    "path": "backend/data/Product List_21_10_2026 @ 11_28_19.csv",
+    "lines": 2440,
+    "sha256": "4fb1753879b75946372496c8fe8e104f3bc8f55e868dbcb329ac8f4712b66a2f"
+  },
+  {
+    "path": "frontend/AUSHADH_LICENSE.txt",
+    "lines": 21,
+    "sha256": "d43c5c784687a2c6754cc954e15cba59b684801fb466ace7f80fa9f891b82a7c"
+  },
+  {
+    "path": "frontend/jsconfig.json",
+    "lines": 6,
+    "sha256": "d7b17d973bda9cc05abb863963396694eda587c50c4fcc79764ce898cf40b0e4"
+  },
+  {
+    "path": "frontend/next.config.mjs",
+    "lines": 21,
+    "sha256": "4aba364ad1f7a9147a8e9e5844b6631fe5ecabbe760e699793fd740b26877820"
+  },
+  {
+    "path": "frontend/package-lock.json",
+    "lines": 1712,
+    "sha256": "c28b3cfa026ccd5474edd13a12e96842f0cd475cd99e5644bb894d88785411f2"
+  },
+  {
+    "path": "frontend/package.json",
+    "lines": 26,
+    "sha256": "409154c769a338ddd0baacd87f6d182969c60a9f03adf871dc09919db4b39221"
+  },
+  {
+    "path": "frontend/postcss.config.js",
+    "lines": 6,
+    "sha256": "b78f5d0a0a449ecf58b6b6252e26cd2216c7aa41235e2d6d01a26b9a065cd439"
+  },
+  {
+    "path": "frontend/README.md",
+    "lines": 85,
+    "sha256": "7d23221bca9a2aa9d57c1e85e2f477d3b7bc039485daefa8b710fb25ceef3695"
+  },
+  {
+    "path": "frontend/tailwind.config.js",
+    "lines": 34,
+    "sha256": "d3f3cc3aa7814a9d927b758d1477cacaebe3998ca0e2989bedf281de4c026ed9"
+  },
+  {
+    "path": "frontend/app/globals.css",
+    "lines": 3405,
+    "sha256": "c80b3d1d3d0d2fd6848bdacc6090c3955c6fca5aa9b4efa1280d5704ade7e8ee"
+  },
+  {
+    "path": "frontend/app/layout.js",
+    "lines": 53,
+    "sha256": "710ac12e144daf1241547a4775dad581eb4b496777074751471a431b4a269c72"
+  },
+  {
+    "path": "frontend/app/page.js",
+    "lines": 22,
+    "sha256": "bcd6ebea541aac610e08a3aca89853365dc7353b3376f3b83fe70f45c0acb314"
+  },
+  {
+    "path": "frontend/app/api/[...slug]/route.js",
+    "lines": 126,
+    "sha256": "772e06cdf3f2792f130ce5d67e806ccab930452af07ec46a9978a97b0a00f4e6"
+  },
+  {
+    "path": "frontend/app/app/page.js",
+    "lines": 143,
+    "sha256": "817b8ef7665dc0293146c73e8c01ba0a11b732d691659d42f5b3e02fde49c4a6"
+  },
+  {
+    "path": "frontend/app/history/page.js",
+    "lines": 7,
+    "sha256": "d36d006abdabab3d2b7226da9a7d2b18298d95321ea158200a128b14c1685643"
+  },
+  {
+    "path": "frontend/app/prescriptions/[id]/page.js",
+    "lines": 589,
+    "sha256": "c9c969935db6be037d4d9d183d351c10d4c7a4a06c51c38b69b265bedca807d3"
+  },
+  {
+    "path": "frontend/app/scan/page.js",
+    "lines": 7,
+    "sha256": "4a98fe8a51c5be173b1df9cbcff31b24246739a6abc4b5265eb676de355a279d"
+  },
+  {
+    "path": "frontend/app/search/page.js",
+    "lines": 7,
+    "sha256": "f644a35ea192f0707a9cec7a998b75f17bd1967759f5391953d973aacd16c06c"
+  },
+  {
+    "path": "frontend/app/stores/page.js",
+    "lines": 7,
+    "sha256": "cc12431a305af52e4b5be343c3d8a386fc5dda85c2eb68708fc33432b23b5757"
+  },
+  {
+    "path": "frontend/components/Assistant.js",
+    "lines": 441,
+    "sha256": "b80ed51dbe481c44f2f2c45df931713ddf152442cc93a48e275d69de11889850"
+  },
+  {
+    "path": "frontend/components/Caregiver.js",
+    "lines": 531,
+    "sha256": "66e7e1d851ee1144d22b2bb356f156a8480693fcbfe0e9ffa5a6b5598c03320a"
+  },
+  {
+    "path": "frontend/components/ChemistSlip.js",
+    "lines": 143,
+    "sha256": "f816b8cf3c059e4c3d900c6d9ac6fb6d0b7adb7d835f0d6ce9644efc28fd712f"
+  },
+  {
+    "path": "frontend/components/Dashboard.js",
+    "lines": 355,
+    "sha256": "ee529f4ebfc9b5dfd546f03003f344ef66e527566dae7da48f7b22d0d7994d4e"
+  },
+  {
+    "path": "frontend/components/Disclaimer.js",
+    "lines": 47,
+    "sha256": "cabe5239f0b75a805ba23215569f4da39362addf0e3fd64a0f05c37ba497f3a0"
+  },
+  {
+    "path": "frontend/components/Landing.js",
+    "lines": 1116,
+    "sha256": "1dc18abe95f71012823e8c96d189247dbe984be84391f6c02c18f4582636fa5e"
+  },
+  {
+    "path": "frontend/components/LazyStoreMap.js",
+    "lines": 144,
+    "sha256": "b660f1b22160e03b56fd04d7a884483c22024d0d07cf27aa59c15a61fb8a3d90"
+  },
+  {
+    "path": "frontend/components/LiveVoiceAgent.js",
+    "lines": 499,
+    "sha256": "d7aadd14f89e6f5e3e2a423a4fa2036c42d9f739381ff6c5f53b340ba059c578"
+  },
+  {
+    "path": "frontend/components/Login.js",
+    "lines": 352,
+    "sha256": "135e0f48909455fadd989e0155475c51a0654c092007ff5dbc37379b63d2074c"
+  },
+  {
+    "path": "frontend/components/Navbar.js",
+    "lines": 240,
+    "sha256": "82cf649bf8d31fe0f25bf1ffd0292d11be5274d550f9d10b2963080f2dc53b89"
+  },
+  {
+    "path": "frontend/components/Pharmacies.js",
+    "lines": 222,
+    "sha256": "a65b05de5dbc6e7cdf1e0eb020cc6bc61da0d29c7f9a29214f3f340b37a7ec79"
+  },
+  {
+    "path": "frontend/components/PriceComparisonHero.js",
+    "lines": 222,
+    "sha256": "0b2d26bf622013c5671a1719eacf9fe6a012f5475591633bdbe04ebb7a5c4083"
+  },
+  {
+    "path": "frontend/components/SearchSuggestions.js",
+    "lines": 94,
+    "sha256": "44f65b3d5a329bf61df6fef56e5541f880672047b9245079090a59405f7b577f"
+  },
+  {
+    "path": "frontend/components/sections.js",
+    "lines": 1350,
+    "sha256": "0145422a94f0967a7b8963ef5160c206521dc0c6d782622e12a55e5d0634589f"
+  },
+  {
+    "path": "frontend/components/ui.js",
+    "lines": 239,
+    "sha256": "e5e681ca6c5a79b66ca6d08c215d581859a2d8be9bf4747f81ddedf75667a23a"
+  },
+  {
+    "path": "frontend/components/reactbits/AuraBackground.js",
+    "lines": 67,
+    "sha256": "aae6f2df581fff23e83af92b3b6d7b830f5c9c4521ad798caa66b0c0d6dbfd23"
+  },
+  {
+    "path": "frontend/components/reactbits/GlowPill.js",
+    "lines": 16,
+    "sha256": "6bb41d2141fc04ffcf4ff29e55a4a5f4073cefccf899decef4e5c723c1868376"
+  },
+  {
+    "path": "frontend/components/reactbits/ShinyText.js",
+    "lines": 23,
+    "sha256": "bb8e4a32fdb66ab594a0ec1d749a8e914f14378958fdc6ed41be4b02003e7d6d"
+  },
+  {
+    "path": "frontend/components/reactbits/SpotlightCard.js",
+    "lines": 23,
+    "sha256": "dfa61674e08088f351ff07491c733d1ba229e5a25b281a628a1abad01c333b15"
+  },
+  {
+    "path": "frontend/components/views/HistoryView.js",
+    "lines": 294,
+    "sha256": "02856a4a93651391e695fb402bb1df8e923d52fdace53059ffab71be5688b178"
+  },
+  {
+    "path": "frontend/components/views/ScanView.js",
+    "lines": 399,
+    "sha256": "50da2ba4fd18308befc819328198b9915654eb0886602cf0a6a0433180100ae3"
+  },
+  {
+    "path": "frontend/components/views/SearchView.js",
+    "lines": 341,
+    "sha256": "d2598a0d7f92c4ed1718253302ae62417dbeb37b92daf0a7555db77dda174b4a"
+  },
+  {
+    "path": "frontend/components/views/StoresView.js",
+    "lines": 362,
+    "sha256": "101bba051fc150f37ee9cb3c783c6eaee110904d694106bfb5ffd81d0fddbba7"
+  },
+  {
+    "path": "frontend/contexts/LanguageContext.js",
+    "lines": 145,
+    "sha256": "b64b1ea4d6e29ded8d7f06467b95bdcab0491a1cb2926d89e4b2adc2d0fcdc74"
+  },
+  {
+    "path": "frontend/lib/api.js",
+    "lines": 326,
+    "sha256": "5a97a9fb86d7a1443b0586c844dce21ad81ed01d1406dae433d450d3e63bfb0e"
+  },
+  {
+    "path": "frontend/lib/client.js",
+    "lines": 603,
+    "sha256": "2ace38144d50bf05b002db4ed1c828779748e49f019cc128c86f9b07baf2c6fb"
+  },
+  {
+    "path": "frontend/lib/currency.js",
+    "lines": 26,
+    "sha256": "571805ab6e852ef9ed2ca2d71f238a6c7374132f2a8c883e61b529a1dcb42739"
+  },
+  {
+    "path": "frontend/lib/fixtures.js",
+    "lines": 368,
+    "sha256": "5dbcc7b872876351c3c9dbb167c2c1554919bc7732eab651f330056908b35922"
+  },
+  {
+    "path": "frontend/lib/gsap.js",
+    "lines": 132,
+    "sha256": "edb900dc509a83297f701577099f868f73a2e77a0c1cb9f1667c87f221ba845b"
+  },
+  {
+    "path": "frontend/lib/indexedDb.js",
+    "lines": 260,
+    "sha256": "21705c5a887e4e4347f003da9e80a4509439662f6780e1143cc4ed1155181bd7"
+  },
+  {
+    "path": "frontend/public/manifest.json",
+    "lines": 32,
+    "sha256": "e19cd04551b62a6fe70517be4a6954e4e64b9b5c20aa8ac546dce6ed9b6194ae"
+  },
+  {
+    "path": "frontend/public/sw.js",
+    "lines": 80,
+    "sha256": "3965e40b3b0b4a67b425c3fbdbfe9a7207f6564358e9dbdece5aef9bde2cf5fd"
+  }
+]

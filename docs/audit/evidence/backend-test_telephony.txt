@@ -1,0 +1,17 @@
+
+=======================================================
+RUNNING AAYOGYA TWILIO TELEPHONY & RESCHEDULE TEST SUITE
+=======================================================
+
+  [PASS] Validation correctly rejects missing follow_up_date.
+  [PASS] Outbound call dispatch succeeds and logs to ReminderLog.
+  [PASS] Scheduler path: dispatch metadata carries a freshly minted token.
+  [PASS] Reschedule request updates Report model and records audit log.
+  [PASS] FastAPI Telephony endpoints roundtrip validated.
+
+=======================================================
+ALL TELEPHONY & RESCHEDULE TESTS PASSED WITH 0 ERRORS!
+=======================================================
+
+C:\Users\harsh\Desktop\Aaroya\Aayogya\backend\.venv\Lib\site-packages\langgraph\checkpoint\base\__init__.py:18: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer

@@ -1,0 +1,11 @@
+{
+  "method": "One local production browser visit to /stores, Next 14.2.35, port 3017; performance navigation/resource entries",
+  "navigation_ms": {"ttfb": 693.7, "dom_content_loaded": 1490.4, "load_event": 1492.7},
+  "resource_ms": {"cities": 935.8, "stores": 1015.0, "tile_min_observed": 3950.5, "tile_max_observed": 8337.6},
+  "manual_fetch_confirmed_status": {"/api/v1/cities": 404, "/api/v1/search?q=dolo": 404, "/api/v1/routes": 404},
+  "map_instances_observed": 1,
+  "fixture_markers_observed": 4,
+  "lcp_measured": false,
+  "inp_measured": false,
+  "notes": "Cross-origin tile transferSize zero cannot establish actual bytes, cache state or request success. No real facility/routing response was obtained. Tile timings are one observation, not a provider SLA."
+}

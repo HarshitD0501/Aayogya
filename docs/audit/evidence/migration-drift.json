@@ -1,0 +1,9 @@
+{
+  "method": "Fresh temporary SQLite database, alembic upgrade head only, compare installed model columns through SQLAlchemy Inspector; no init_db/create_all repairs",
+  "missing_columns": {
+    "medicines": ["reminders_enabled", "stopped_at", "stopped_reason"],
+    "patients": ["auto_reminders_enabled", "call_reminders_enabled", "reminder_time_afternoon", "reminder_time_morning", "reminder_time_night", "whatsapp_reminders_enabled"]
+  },
+  "missing_tables": ["dose_adherences"],
+  "postgres_runtime_tested": false
+}

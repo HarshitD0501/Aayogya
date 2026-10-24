@@ -20,7 +20,8 @@ export async function DELETE(request, { params }) {
 }
 
 async function handleRequest(request, params, method) {
-  const path = "/" + (params.slug || []).join("/");
+  const resolvedParams = await params;
+  const path = "/" + (resolvedParams?.slug || []).join("/");
   const url = new URL(request.url);
   const targetUrl = `${BACKEND_URL}/api${path}${url.search}`;
 

@@ -1,0 +1,7 @@
+{
+  "required_reports": 6,
+  "issue_ids": 34,
+  "application_files_changed": [],
+  "credential_value_matches": [],
+  "audit_server_shutdown": "Ctrl+C sent; owned process session exited"
+}

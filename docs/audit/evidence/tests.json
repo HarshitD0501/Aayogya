@@ -1,0 +1,67 @@
+[
+  {
+    "suite": "backend/test_auth_registration.py",
+    "exit_code": 0,
+    "seconds": 18.585
+  },
+  {
+    "suite": "backend/test_caregiver.py",
+    "exit_code": 0,
+    "seconds": 15.48
+  },
+  {
+    "suite": "backend/test_confidence.py",
+    "exit_code": 0,
+    "seconds": 0.471
+  },
+  {
+    "suite": "backend/test_config_security.py",
+    "exit_code": 0,
+    "seconds": 1.397
+  },
+  {
+    "suite": "backend/test_db_recovery.py",
+    "exit_code": 0,
+    "seconds": 11.223
+  },
+  {
+    "suite": "backend/test_dosage.py",
+    "exit_code": 0,
+    "seconds": 0.324
+  },
+  {
+    "suite": "backend/test_interactions.py",
+    "exit_code": 0,
+    "seconds": 4.365
+  },
+  {
+    "suite": "backend/test_multiagent_extraction.py",
+    "exit_code": 0,
+    "seconds": 13.994
+  },
+  {
+    "suite": "backend/test_prices.py",
+    "exit_code": 0,
+    "seconds": 1.144
+  },
+  {
+    "suite": "backend/test_telephony.py",
+    "exit_code": 0,
+    "seconds": 10.012
+  },
+  {
+    "suite": "backend/test_whatsapp.py",
+    "exit_code": 0,
+    "seconds": 5.67
+  },
+  {
+    "suite": "agent/test_agent.py",
+    "exit_code": 1,
+    "seconds": 48.649
+  },
+  {
+    "suite": "agent/test_followup.py",
+    "exit_code": 0,
+    "seconds": 18.038
+  }
+]

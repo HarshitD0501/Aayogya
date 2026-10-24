@@ -1,0 +1,54 @@
+{
+  "invalid_image_reaches_extractor": {
+    "status": 200,
+    "report_created": true
+  },
+  "unconfirmed_medicine_gate": {
+    "report_confirmed": false,
+    "active_medicine_count": 1,
+    "scheduled_dose_count": 2
+  },
+  "prn_expired_dose": {
+    "sos_doses": 1
+  },
+  "negative_reply": {
+    "input": "nahi li",
+    "actions": [
+      "marked_taken_via_text"
+    ]
+  },
+  "global_trigger_scope": {
+    "status": 200,
+    "other_patient_in_send_targets": true,
+    "voice_dispatch_attempts": 1
+  },
+  "unsigned_webhook_production": true,
+  "missing_v1_contracts": {
+    "/api/v1/search": 404,
+    "/api/v1/stores": 404,
+    "/api/v1/routes": 404,
+    "/api/v1/cities": 404
+  },
+  "report_after_stop_status": 500,
+  "new_caregiver": {
+    "register": 201,
+    "me": 403
+  },
+  "testclient_benchmarks": {
+    "/": {
+      "n": 30,
+      "p50_ms": 0.68,
+      "p95_ms": 1.176
+    },
+    "/api/public/stats": {
+      "n": 30,
+      "p50_ms": 1.671,
+      "p95_ms": 3.339
+    },
+    "/api/adherence/today": {
+      "n": 30,
+      "p50_ms": 2.83,
+      "p95_ms": 4.909
+    }
+  }
+}

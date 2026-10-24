@@ -1,0 +1,712 @@
+[
+  {
+    "file": "DESIGN.md",
+    "lines": 556,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "PRODUCTION_ROADMAP.md",
+    "lines": 181,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "README.md",
+    "lines": 510,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/AUSHADH_LICENSE.txt",
+    "lines": 21,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/README.md",
+    "lines": 19,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/app/page.js",
+    "lines": 91,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/globals.css",
+    "lines": 3405,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/history/page.js",
+    "lines": 294,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/layout.js",
+    "lines": 49,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/page.js",
+    "lines": 22,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/prescriptions/[id]/page.js",
+    "lines": 589,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/scan/page.js",
+    "lines": 399,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/search/page.js",
+    "lines": 341,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/app/stores/page.js",
+    "lines": 374,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Assistant.js",
+    "lines": 384,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Caregiver.js",
+    "lines": 531,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/ChemistSlip.js",
+    "lines": 143,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Dashboard.js",
+    "lines": 312,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Disclaimer.js",
+    "lines": 47,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Landing.js",
+    "lines": 1044,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/LazyStoreMap.js",
+    "lines": 144,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/LiveVoiceAgent.js",
+    "lines": 499,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Login.js",
+    "lines": 184,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Navbar.js",
+    "lines": 188,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/Pharmacies.js",
+    "lines": 222,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/PriceComparisonHero.js",
+    "lines": 222,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/SearchSuggestions.js",
+    "lines": 94,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/reactbits/AuraBackground.js",
+    "lines": 67,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/reactbits/GlowPill.js",
+    "lines": 16,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/reactbits/ShinyText.js",
+    "lines": 23,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/reactbits/SpotlightCard.js",
+    "lines": 23,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/sections.js",
+    "lines": 1348,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/components/ui.js",
+    "lines": 241,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/contexts/LanguageContext.js",
+    "lines": 143,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/lib/api.js",
+    "lines": 267,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/lib/client.js",
+    "lines": 136,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/lib/currency.js",
+    "lines": 26,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/lib/gsap.js",
+    "lines": 132,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/lib/indexedDb.js",
+    "lines": 260,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/next.config.mjs",
+    "lines": 26,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/postcss.config.js",
+    "lines": 6,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/public/sw.js",
+    "lines": 77,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/.frontend-candidate/tailwind.config.js",
+    "lines": 34,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/README.md",
+    "lines": 113,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/backend_client.py",
+    "lines": 91,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/chat.py",
+    "lines": 164,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/config.py",
+    "lines": 57,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/demo.py",
+    "lines": 57,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/followup_prompt.py",
+    "lines": 87,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/livekit.toml",
+    "lines": 2,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/prompt.py",
+    "lines": 77,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/requirements.txt",
+    "lines": 22,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/test_agent.py",
+    "lines": 111,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/test_followup.py",
+    "lines": 99,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "agent/voice.py",
+    "lines": 478,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/env.py",
+    "lines": 46,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/versions/04972bb8e1f9_caregiver_role_and_links.py",
+    "lines": 55,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/versions/44cc55323247_telephony_follow_up_status_and_.py",
+    "lines": 46,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/versions/4778ad4cf3af_patient_summary_follow_up_date_reminder_.py",
+    "lines": 54,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/versions/94a6140ff1ff_initial_schema.py",
+    "lines": 126,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/alembic/versions/b103a9018f2c_google_identity.py",
+    "lines": 28,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/__init__.py",
+    "lines": 0,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/auth.py",
+    "lines": 205,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/caregiver.py",
+    "lines": 156,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/catalog.py",
+    "lines": 214,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/conditions.py",
+    "lines": 28,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/confidence.py",
+    "lines": 61,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/config.py",
+    "lines": 125,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/db.py",
+    "lines": 100,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/dosage.py",
+    "lines": 115,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/extraction.py",
+    "lines": 258,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/graph.py",
+    "lines": 156,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/interactions.py",
+    "lines": 73,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/main.py",
+    "lines": 950,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/models.py",
+    "lines": 189,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/preprocessor.py",
+    "lines": 78,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/prices.py",
+    "lines": 242,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/schemas.py",
+    "lines": 185,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/seed.py",
+    "lines": 198,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/summary.py",
+    "lines": 177,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/telephony.py",
+    "lines": 260,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/app/whatsapp.py",
+    "lines": 1015,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/audit_credentials.py",
+    "lines": 109,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/docker-compose.yml",
+    "lines": 23,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/requirements.txt",
+    "lines": 16,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_auth_registration.py",
+    "lines": 281,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_caregiver.py",
+    "lines": 146,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_confidence.py",
+    "lines": 43,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_config_security.py",
+    "lines": 42,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_dosage.py",
+    "lines": 40,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_interactions.py",
+    "lines": 68,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_multiagent_extraction.py",
+    "lines": 338,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_prices.py",
+    "lines": 62,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_telephony.py",
+    "lines": 209,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "backend/test_whatsapp.py",
+    "lines": 511,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/AUSHADH_LICENSE.txt",
+    "lines": 21,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/README.md",
+    "lines": 85,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/api/[...slug]/route.js",
+    "lines": 126,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/app/page.js",
+    "lines": 143,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/globals.css",
+    "lines": 3405,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/history/page.js",
+    "lines": 7,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/layout.js",
+    "lines": 53,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/page.js",
+    "lines": 22,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/prescriptions/[id]/page.js",
+    "lines": 589,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/scan/page.js",
+    "lines": 7,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/search/page.js",
+    "lines": 7,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/app/stores/page.js",
+    "lines": 7,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Assistant.js",
+    "lines": 441,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Caregiver.js",
+    "lines": 531,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/ChemistSlip.js",
+    "lines": 143,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Dashboard.js",
+    "lines": 355,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Disclaimer.js",
+    "lines": 47,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Landing.js",
+    "lines": 1116,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/LazyStoreMap.js",
+    "lines": 144,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/LiveVoiceAgent.js",
+    "lines": 499,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Login.js",
+    "lines": 352,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Navbar.js",
+    "lines": 240,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/Pharmacies.js",
+    "lines": 222,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/PriceComparisonHero.js",
+    "lines": 222,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/SearchSuggestions.js",
+    "lines": 94,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/reactbits/AuraBackground.js",
+    "lines": 67,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/reactbits/GlowPill.js",
+    "lines": 16,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/reactbits/ShinyText.js",
+    "lines": 23,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/reactbits/SpotlightCard.js",
+    "lines": 23,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/sections.js",
+    "lines": 1350,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/ui.js",
+    "lines": 239,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/views/HistoryView.js",
+    "lines": 294,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/views/ScanView.js",
+    "lines": 399,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/views/SearchView.js",
+    "lines": 341,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/components/views/StoresView.js",
+    "lines": 362,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/contexts/LanguageContext.js",
+    "lines": 145,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/api.js",
+    "lines": 326,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/client.js",
+    "lines": 603,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/currency.js",
+    "lines": 26,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/fixtures.js",
+    "lines": 368,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/gsap.js",
+    "lines": 132,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/lib/indexedDb.js",
+    "lines": 260,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/next.config.mjs",
+    "lines": 21,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/postcss.config.js",
+    "lines": 6,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/public/sw.js",
+    "lines": 80,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "frontend/tailwind.config.js",
+    "lines": 34,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  },
+  {
+    "file": "voice.md",
+    "lines": 234,
+    "status": "source inventoried; inspect coverage in ARCHITECTURE_AUDIT.md"
+  }
+]
