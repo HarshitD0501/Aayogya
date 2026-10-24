@@ -53,6 +53,19 @@ def init_db():
     try:
         command.upgrade(cfg, "head")
     except Exception as exc:
+        from sqlalchemy.exc import DatabaseError
+
+        if engine.dialect.name == "sqlite" and isinstance(exc, DatabaseError) and (
+            "malformed" in str(exc.orig).lower()
+            or "disk image" in str(exc.orig).lower()
+        ):
+            raise RuntimeError(
+                "SQLite database corruption detected; startup aborted without resetting data. "
+                "Stop all backend processes and preserve the database and any -wal/-shm files. "
+                "For an invalid index rootpage, run: python recover_sqlite.py "
+                "<database.db> <recovered.db>. Verify the recovered copy before replacing "
+                "the original. Other corruption requires restoring a backup or SQLite recovery."
+            ) from exc
         raise RuntimeError(
             "Database migrations failed; startup aborted. "
             "Resolve the Alembic error and retry."

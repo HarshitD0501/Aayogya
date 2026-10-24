@@ -7,6 +7,9 @@ __pycache__/
 .env
 .env.*
 *.db
+*.db-wal
+*.db-shm
+*.db-journal
 
 # OS / editor
 .DS_Store

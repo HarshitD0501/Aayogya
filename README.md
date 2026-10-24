@@ -484,3 +484,27 @@ python test_agent.py
 ## Disclaimer
 
 Aayogya is **not a substitute for professional medical advice, diagnosis, or treatment**. Under India's Telemedicine Practice Guidelines 2020, Aayogya never prescribes medication, modifies clinical regimens, or alters dosages. Always consult a registered medical practitioner with any health-related questions. In a medical emergency in India, call **108** immediately.
+
+
+## SQLite startup recovery (local development)
+
+Start the backend from `backend/` with `python -m uvicorn app.main:app --reload --port 8000`.
+A `malformed database schema ... invalid rootpage` error indicates database corruption;
+rerunning migrations cannot repair the file. Stop all processes using the database first.
+Preserve the original database together with any `-wal` and `-shm` files; never delete a WAL
+to repair corruption, because it may contain committed data. These files must stay out of Git.
+
+For an out-of-range explicit index root, create a separate recovery copy:
+
+```powershell
+python recover_sqlite.py aayogya.db aayogya.recovered.db
+python -m unittest test_db_recovery -v
+```
+
+The utility uses SQLite backup to include committed WAL data, rebuilds only invalid index
+roots, and checks integrity, foreign keys, and unchanged table contents. It never changes
+the source or overwrites an existing output. A failed recovery output must not be used.
+After successful verification, keep an offline backup of the original database and sidecars,
+then replace the database with the recovered file while all database users remain stopped.
+Other corruption needs a known-good backup or the official
+[SQLite recovery procedure](https://www.sqlite.org/recovery.html).
