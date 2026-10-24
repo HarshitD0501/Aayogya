@@ -91,7 +91,14 @@ export async function searchOfflineCatalogue(query) {
 }
 
 // Prescription report functions
-export async function savePrescriptionReport(report) {
+export async function savePrescriptionReport(report, patientId = null) {
+  const resolvedPid =
+    patientId ||
+    report.patient_id ||
+    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
+  if (resolvedPid) {
+    report.patient_id = resolvedPid;
+  }
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('prescriptions', 'readwrite');
@@ -113,14 +120,25 @@ export async function getPrescriptionReport(reportId) {
   });
 }
 
-export async function getAllPrescriptionReports() {
+export async function getAllPrescriptionReports(patientId = null) {
+  const resolvedPid =
+    patientId ||
+    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
+
+  // Tenant isolation: unauthenticated sessions see zero stored reports
+  if (!resolvedPid) {
+    return [];
+  }
+
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('prescriptions', 'readonly');
     const store = tx.objectStore('prescriptions');
     const req = store.getAll();
     req.onsuccess = () => {
-      const reports = req.result || [];
+      const allReports = req.result || [];
+      // Filter reports strictly scoped to the active patient
+      const reports = allReports.filter((r) => r.patient_id === resolvedPid);
       // Sort newest first
       reports.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -140,6 +158,38 @@ export async function deletePrescriptionReport(reportId) {
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
+}
+
+export async function clearSensitiveStorage(patientId = null) {
+  try {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['prescriptions', 'action_tokens'], 'readwrite');
+      const prescStore = tx.objectStore('prescriptions');
+      const tokenStore = tx.objectStore('action_tokens');
+
+      if (!patientId) {
+        prescStore.clear();
+        tokenStore.clear();
+      } else {
+        const req = prescStore.getAll();
+        req.onsuccess = () => {
+          const list = req.result || [];
+          for (const item of list) {
+            if (item.patient_id === patientId || !item.patient_id) {
+              prescStore.delete(item.report_id);
+            }
+          }
+        };
+        tokenStore.clear();
+      }
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (err) {
+    console.warn("Failed to clear sensitive storage from IndexedDB:", err);
+  }
 }
 
 export function computeReportTotals(items) {
@@ -180,7 +230,8 @@ export async function addOrUpdateReportWithItem(
   item,
   packCount = 1,
   existingReportId = null,
-  checkup = null
+  checkup = null,
+  patientId = null
 ) {
   const reportId = existingReportId || `rep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
   let existing = await getPrescriptionReport(reportId);
@@ -208,18 +259,23 @@ export async function addOrUpdateReportWithItem(
     },
   };
 
+  const resolvedPid =
+    patientId ||
+    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
+
   if (!existing) {
     const items = [confirmedItem];
     const totals = computeReportTotals(items);
     const newReport = {
       report_id: reportId,
+      patient_id: resolvedPid,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       items,
       totals_snapshot: totals,
       checkup: checkup || null,
     };
-    await savePrescriptionReport(newReport);
+    await savePrescriptionReport(newReport, resolvedPid);
   } else {
     const idx = existing.items.findIndex((i) => i.medicine_id === item.medicine_id);
     if (idx >= 0) {

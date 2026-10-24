@@ -1,7 +1,5 @@
 "use client";
 
-import { FIXTURE_DATA } from "./fixtures";
-
 export class ApiClientError extends Error {
   constructor(status, message, code = "API_ERROR", requestId) {
     super(message);
@@ -315,52 +313,36 @@ class Client {
         timeout: 90000,
         signal,
       });
-      if (res.ok) {
-        const report = await res.json();
-        const meds = report.medicines || [];
-        return {
-          report_id: report.id,
-          prescriber_name: report.prescriber_name,
-          prescriber_specialty: report.prescriber_specialty,
-          ocr_text:
-            report.raw_ocr ||
-            meds.map((m) => `${m.brand} ${m.dosage_notation || ""}`).join("\n"),
-          suggestions: meds.map((m) => ({
-            observed_text: `${m.brand || m.salt} ${m.strength || ""} ${
-              m.dosage_notation || ""
-            }`.trim(),
-            query_tokens: [m.brand, m.salt].filter(Boolean),
-            candidate_medicine_ids: [],
-          })),
-          isFixture: false,
-        };
+      if (!res.ok) {
+        let errDetail = "Failed to process prescription image.";
+        try {
+          const errData = await res.json();
+          errDetail = errData.detail || errDetail;
+        } catch {}
+        throw new ApiClientError(res.status, errDetail);
       }
+      const report = await res.json();
+      const meds = report.medicines || [];
+      return {
+        report_id: report.id,
+        prescriber_name: report.prescriber_name,
+        prescriber_specialty: report.prescriber_specialty,
+        ocr_text:
+          report.raw_ocr ||
+          meds.map((m) => `${m.brand} ${m.dosage_notation || ""}`).join("\n"),
+        suggestions: meds.map((m) => ({
+          observed_text: `${m.brand || m.salt} ${m.strength || ""} ${
+            m.dosage_notation || ""
+          }`.trim(),
+          query_tokens: [m.brand, m.salt].filter(Boolean),
+          candidate_medicine_ids: [],
+        })),
+        isFixture: false,
+      };
     } catch (e) {
-      console.warn("Real OCR extraction fell back to fixture:", e);
+      if (e instanceof ApiClientError) throw e;
+      throw new ApiClientError(500, e.message || "Failed to process prescription image.");
     }
-
-    // Simulated OCR extraction from image
-    return {
-      ocr_text: "Rx\n1. Tab Dolo 500mg 1-0-1\n2. Tab Glycomet 500mg SR 1-0-0 (Before Meals)\n3. Tab Atorva 10mg 0-0-1\nDr. R. Sharma, MBBS MD\nReg: DL-92842",
-      suggestions: [
-        {
-          observed_text: "Tab Dolo 500mg 1-0-1",
-          query_tokens: ["dolo", "500mg"],
-          candidate_medicine_ids: ["pmbjp-001-paracetamol-500"]
-        },
-        {
-          observed_text: "Tab Glycomet 500mg SR",
-          query_tokens: ["glycomet", "500mg", "sr"],
-          candidate_medicine_ids: ["pmbjp-023-metformin-500"]
-        },
-        {
-          observed_text: "Tab Atorva 10mg",
-          query_tokens: ["atorva", "10mg"],
-          candidate_medicine_ids: ["pmbjp-045-atorvastatin-10"]
-        }
-      ],
-      isFixture: true
-    };
   }
 
   // 4. Cities
@@ -573,13 +555,16 @@ class Client {
         body: JSON.stringify(payload)
       });
       if (res.ok) return await res.json();
-    } catch {}
-
-    return {
-      call_id: "call-" + Date.now().toString(36),
-      status: "requested",
-      management_token: "tok-call-" + Math.random().toString(36).slice(2)
-    };
+      let errDetail = "Call request failed";
+      try {
+        const errJson = await res.json();
+        errDetail = errJson.detail || errDetail;
+      } catch {}
+      throw new ApiClientError(res.status, errDetail);
+    } catch (e) {
+      if (e instanceof ApiClientError) throw e;
+      throw new ApiClientError(500, e.message || "Could not connect to call service.");
+    }
   }
 
   async getCallStatus(callId, managementToken) {
@@ -591,12 +576,16 @@ class Client {
     try {
       const res = await this.fetchWithTimeout(`/api/v1/calls/${encodeURIComponent(callId)}`, { headers });
       if (res.ok) return await res.json();
-    } catch {}
-
-    return {
-      call_id: callId,
-      status: "completed"
-    };
+      let errDetail = "Failed to fetch call status";
+      try {
+        const errJson = await res.json();
+        errDetail = errJson.detail || errDetail;
+      } catch {}
+      throw new ApiClientError(res.status, errDetail);
+    } catch (e) {
+      if (e instanceof ApiClientError) throw e;
+      throw new ApiClientError(500, e.message || "Could not retrieve call status.");
+    }
   }
 }
 

@@ -104,69 +104,118 @@ function FamilyGrid({ caregiver, cards, loading, err, onOpenPatient }) {
             gradient="linear-gradient(135deg, #111827 0%, #9a6b26 60%, #b07f14 100%)"
           />
           <p className="cg-sub">
-            You manage {cards.length} family members. Tap a card to open their
-            full health profile.
+            {cards.length > 0
+              ? `You manage ${cards.length} family member${cards.length === 1 ? "" : "s"}. Tap a card to open their full health profile.`
+              : "Welcome to your family caregiving hub. Link family members to begin monitoring their prescriptions."}
           </p>
         </div>
       </div>
 
-      <div className="cg-cards" ref={cardsRef}>
-        {cards.map((p) => {
-          const fu = p.next_followup;
-          const tone = fu ? dueTone(fu.days_until) : "muted";
-          const adherPct = p.doses_today ? Math.round((p.taken_today / p.doses_today) * 100) : null;
-          return (
-            <button key={p.id} className="cg-card" onClick={() => onOpenPatient(p.id)}>
-              <div className="cg-card-top">
-                <div className="cg-avatar">{initialsOf(p.name)}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="cg-name">{p.name}</div>
-                  <div className="cg-relation">
-                    {p.relation} · {p.plan === "pro" ? "Pro" : "Free"}
+      {cards.length === 0 ? (
+        <div
+          className="cg-empty"
+          style={{
+            padding: "36px 24px",
+            background: "#ffffff",
+            borderRadius: 12,
+            border: "2px dashed #9a6b26",
+            textAlign: "center",
+            marginTop: 20,
+          }}
+        >
+          <Users size={36} color="#9a6b26" style={{ margin: "0 auto 12px" }} />
+          <h3 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 8px", color: "#111827" }}>
+            No Family Members Linked Yet
+          </h3>
+          <p
+            style={{
+              fontSize: 14,
+              color: "#6b7280",
+              maxWidth: 480,
+              margin: "0 auto 16px",
+              lineHeight: 1.5,
+            }}
+          >
+            You are registered as a Caregiver. Once a patient links you with your registered contact (
+            <strong style={{ color: "#111827" }}>{caregiver.phone || caregiver.email}</strong>
+            ), their active medicines, upcoming doctor appointments, and daily dose schedules will appear here.
+          </p>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              background: "rgba(154, 107, 38, 0.08)",
+              borderRadius: 6,
+              fontSize: 13,
+              color: "#9a6b26",
+              fontWeight: 600,
+            }}
+          >
+            <Heart size={14} />
+            <span>Ready for patient linking</span>
+          </div>
+        </div>
+      ) : (
+        <div className="cg-cards" ref={cardsRef}>
+          {cards.map((p) => {
+            const fu = p.next_followup;
+            const tone = fu ? dueTone(fu.days_until) : "muted";
+            const adherPct = p.doses_today ? Math.round((p.taken_today / p.doses_today) * 100) : null;
+            return (
+              <button key={p.id} className="cg-card" onClick={() => onOpenPatient(p.id)}>
+                <div className="cg-card-top">
+                  <div className="cg-avatar">{initialsOf(p.name)}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="cg-name">{p.name}</div>
+                    <div className="cg-relation">
+                      {p.relation} · {p.plan === "pro" ? "Pro" : "Free"}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="cg-stats">
-                <span>
-                  <PillIcon size={13} /> {p.active_medicines} medicines
-                </span>
-                <span>
-                  <Calendar size={13} />
-                  {fu ? `${fu.days_until}d to doctor` : "No visit set"}
-                </span>
-              </div>
+                <div className="cg-stats">
+                  <span>
+                    <PillIcon size={13} /> {p.active_medicines} medicines
+                  </span>
+                  <span>
+                    <Calendar size={13} />
+                    {fu ? `${fu.days_until}d to doctor` : "No visit set"}
+                  </span>
+                </div>
 
-              {adherPct != null && (
-                <div className="cg-adher">
-                  <div className="cg-adher-bar">
-                    <div className="cg-adher-fill" style={{ width: `${adherPct}%` }} />
+                {adherPct != null && (
+                  <div className="cg-adher">
+                    <div className="cg-adher-bar">
+                      <div className="cg-adher-fill" style={{ width: `${adherPct}%` }} />
+                    </div>
+                    <span>
+                      {p.taken_today}/{p.doses_today} doses taken today
+                    </span>
                   </div>
-                  <span>
-                    {p.taken_today}/{p.doses_today} doses taken today
-                  </span>
-                </div>
-              )}
+                )}
 
-              {fu && fu.days_until != null && fu.days_until <= 3 && (
-                <div className={`cg-alert ${tone === "danger" ? "danger" : "warn"}`}>
-                  <AlertCircle size={14} />
-                  <span>
-                    {fu.doctor ? `Dr. ${fu.doctor.replace(/^Dr\.?\s*/i, "")}` : "Doctor"} visit in{" "}
-                    {fu.days_until === 0 ? "today" : `${fu.days_until} day${fu.days_until === 1 ? "" : "s"}`} — remind them?
-                  </span>
-                </div>
-              )}
-              {fu?.follow_up_status === "reschedule_requested" && (
-                <div className="cg-alert warn">
-                  <Calendar size={14} />
-                  <span>Reschedule requested: {fu.reschedule_preferred_date}</span>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
+                {fu && fu.days_until != null && fu.days_until <= 3 && (
+                  <div className={`cg-alert ${tone === "danger" ? "danger" : "warn"}`}>
+                    <AlertCircle size={14} />
+                    <span>
+                      {fu.doctor ? `Dr. ${fu.doctor.replace(/^Dr\.?\s*/i, "")}` : "Doctor"} visit in{" "}
+                      {fu.days_until === 0 ? "today" : `${fu.days_until} day${fu.days_until === 1 ? "" : "s"}`} — remind them?
+                    </span>
+                  </div>
+                )}
+                {fu?.follow_up_status === "reschedule_requested" && (
+                  <div className="cg-alert warn">
+                    <Calendar size={14} />
+                    <span>Reschedule requested: {fu.reschedule_preferred_date}</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

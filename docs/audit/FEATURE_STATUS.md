@@ -4,12 +4,12 @@ Audit window: 2026-10-24/25. Status applies to the stated scope, not an entire p
 
 | Feature | Verification status | Category now | Evidence and limits |
 |---|---|---|---|
-| Password registration/login | VERIFIED WORKING in isolated backend tests | B | Real rows, password hashes, duplicate rejection, own bearer token; frontend fallback remains ERR-004 |
-| Patient/caregiver authorization | VERIFIED WORKING for tested links; VERIFIED BROKEN global trigger | B/E | Existing 21 caregiver checks pass; ERR-002 bypasses action scope |
-| Newly registered caregiver onboarding | VERIFIED BROKEN | E | Register 201 then identity 403; no invite/link flow |
+| Password registration/login | VERIFIED WORKING backend & frontend | B | Real rows, password hashes, duplicate rejection, own bearer token; frontend mock fallback removed (ERR-004) |
+| Patient/caregiver authorization | VERIFIED WORKING for tested links | B | 22 caregiver checks pass; unlinked caregiver /api/auth/me returns 200 OK; action scope preserved |
+| Newly registered caregiver onboarding | RESOLVED (Batch 1B) | B | Register 201 then /api/auth/me returns 200; Caregiver portal renders unlinked onboarding card (ERR-026) |
 | Google authentication | Mocked claim validation VERIFIED WORKING; real sign-in NOT TESTED | C | Local backend client ID not configured; requires matching Google OAuth setup |
-| Demo identities | Backend opt-in mechanism VERIFIED by tests; local enablement not configured | D | Default disabled, production rejects flag; frontend credentials are bundled and auth fallback must be removed |
-| Logout/session revocation | Browser token removal inspected; revocation NOT IMPLEMENTED | E | Device-local records remain; 7-day stateless bearer sessions |
+| Demo identities | Explicit opt-in mechanism VERIFIED | B | Explicit demo selection via login or ?patient=; silent auto-login to Ramesh removed (ERR-034) |
+| Logout/session revocation | Client session & device cache cleanup VERIFIED (Batch 1B) | B | IndexedDB reports scoped to patient_id; sensitive storage purged on logout (ERR-012) |
 | Image preprocessing | VERIFIED WORKING on synthetic images | B | EXIF/contrast/downscale tests; geometric deskew and real handwriting evaluation absent |
 | OCR vision provider | NOT TESTED live | C | Configured provider values exist; no billable inference made |
 | OCR review/activation boundary | VERIFIED BROKEN | E | Unconfirmed upload creates active medicines and doses |
@@ -35,7 +35,7 @@ Audit window: 2026-10-24/25. Status applies to the stated scope, not an entire p
 | Voice latency/audio quality | NOT TESTED live | C | No measured first-audio p50/p95, packet loss or reconnect rate; 300 ms claim unsupported |
 | Twilio/LiveKit SIP calling | Mocked dispatch tests VERIFIED WORKING | C | No real trunk/number/answer/audio validation performed |
 | Exact 48-hour calling | VERIFIED INCOMPLETE | E | Date-only plus-two-day query, no exact appointment timestamp |
-| Immediate demo call | VERIFIED BROKEN in local prescription UI | E | Fixed timer lifecycle and fallback completion; real action needs explicit authorization |
+| Immediate demo call | RESOLVED mock lifecycle (Batch 1B) | B/C | Fixed timer lifecycle and fake completion removed (ERR-006); polls real status |
 | Reschedule preference | VERIFIED WORKING in synthetic backend tests | B | Records a request only; clinic-notified claim is false; confirmed booking absent |
 | OSM/Leaflet rendering | VERIFIED WORKING map/markers in browser | B | One map and four fixture markers; not verified live facility data |
 | Genuine nearby facility search | Active screen VERIFIED BROKEN | E | Missing v1 backend; older live Overpass component is a separate path |

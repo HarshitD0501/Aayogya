@@ -3,9 +3,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, getToken, clearToken, loginAsDemo, setActivePatientId } from "@/lib/api";
-import { FIXTURE_DATA } from "@/lib/fixtures";
 import Dashboard from "@/components/Dashboard";
 import Caregiver from "@/components/Caregiver";
+import Login from "@/components/Login";
 
 function AppContent() {
   const router = useRouter();
@@ -13,11 +13,8 @@ function AppContent() {
   const patientParam = searchParams?.get("patient");
   const tabParam = searchParams?.get("tab");
 
-  const [patient, setPatient] = useState(() => {
-    const requested = patientParam || "ramesh";
-    return FIXTURE_DATA?.patients?.[requested] || FIXTURE_DATA?.patients?.ramesh || null;
-  });
-  const [ready, setReady] = useState(true);
+  const [patient, setPatient] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -50,17 +47,10 @@ function AppContent() {
         }
       }
 
-      // 3. Fallback: Automatically load primary demo patient (Ramesh Kulkarni)
-      // Ensures the PWA workspace is ALWAYS live, populated, and never static!
-      try {
-        const defaultDemo = await loginAsDemo("ramesh");
-        if (alive) {
-          setPatient(defaultDemo);
-          setReady(true);
-        }
-      } catch (err) {
-        console.error("Failed to load default demo patient:", err);
-        if (alive) setReady(true);
+      // 3. Unauthenticated session: prompt for sign-in or explicit demo selection
+      if (alive) {
+        setPatient(null);
+        setReady(true);
       }
     })();
 
@@ -77,7 +67,6 @@ function AppContent() {
     clearToken();
     setActivePatientId(null);
     setPatient(null);
-    router.push("/");
   };
 
   const handleSwitchPatient = async (patientId) => {
@@ -102,6 +91,14 @@ function AppContent() {
         <p className="font-sans text-xs text-brand-gray mt-1">
           Loading verified prescriptions and clinical modules
         </p>
+      </div>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <div className="min-h-screen bg-brand-cream flex flex-col justify-center py-10 sm:px-6 lg:px-8">
+        <Login onLogin={(p) => setPatient(p)} onBack={handleGoHome} />
       </div>
     );
   }

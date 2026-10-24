@@ -212,14 +212,39 @@ export default function PrescriptionDetailPage() {
         created_at: new Date().toISOString(),
       });
 
-      // Telephony Lifecycle Progression
-      setTimeout(() => setCallState("ringing"), 1800);
-      setTimeout(() => setCallState("answered"), 4500);
-      setTimeout(() => setCallState("completed"), 10000);
+      setCallState(res.status || "requested");
+
+      // Poll real telephony status if a call was dispatched
+      if (res.call_id && res.management_token) {
+        let callDelay = 2500;
+        const pollCall = async () => {
+          try {
+            const statusRes = await apiClient.getCallStatus(res.call_id, res.management_token);
+            if (statusRes.status) {
+              setCallState(statusRes.status);
+            }
+            if (!["completed", "failed", "cancelled"].includes(statusRes.status)) {
+              callDelay = Math.min(callDelay * 1.5, 10000);
+              pollIntervalRef.current = setTimeout(pollCall, callDelay);
+            }
+          } catch {
+            // Polling ended or network interruption
+          }
+        };
+        pollIntervalRef.current = setTimeout(pollCall, callDelay);
+      }
     } catch (err) {
       setCallState("failed");
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearTimeout(pollIntervalRef.current);
+      }
+    };
+  }, []);
 
   if (loading) {
     return (

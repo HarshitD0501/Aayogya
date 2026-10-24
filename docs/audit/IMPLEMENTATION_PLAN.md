@@ -17,11 +17,11 @@ Order: dependency/security containment and truthful identity/data -> patient/rev
 - **Checks:** Audit dependency paths, production build, API proxy body/error/header handling, dynamic imports, routing, hydration and smoke tests on Windows. Python vulnerability scanning must be added separately; pip check is insufficient.
 - **Risk/rollback:** Major Next changes can alter route parameter/caching semantics. Keep the original lockfile and branch; revert the dependency batch if correctness fails. Do not revert to an exposed vulnerable server as the deployment solution.
 
-## Batch 1B — Truthful authentication and explicit demo entry
+## Batch 1B — Truthful authentication and explicit demo entry [COMPLETED]
 
-- **Issues:** ERR-004/005/012/026/034. Priority P0.
-- **Outcome:** Real registration/login gates patient UI; outages fail visibly. One canonical backend client contract. Explicit demo entry uses real backend auth and an isolated synthetic account; no arbitrary password fallback or automatic account replacement.
-- **Files:** frontend/app/app/page.js, app/api/[...slug]/route.js, lib/api.js, lib/client.js, components/Login.js, lib/indexedDb.js; backend auth identity resolver and seed/config only as needed.
+- **Issues:** ERR-004/005/012/026/034. Priority P0. Status: COMPLETED.
+- **Outcome:** Real registration/login gates patient UI; outages fail visibly. Canonical client contract with real error statuses. Explicit demo entry uses real backend auth and selectable demo accounts; no silent Ramesh auto-login. IndexedDB multi-tenant partition prevents report leakage; sensitive cache cleared on logout. Caregiver identity decoupled from patient link requirement on /api/auth/me with onboarding state.
+- **Files:** frontend/app/app/page.js, app/api/[...slug]/route.js, lib/api.js, lib/client.js, components/Login.js, components/Caregiver.js, frontend/app/prescriptions/[id]/page.js, frontend/components/views/HistoryView.js, lib/indexedDb.js, backend/app/auth.py, backend/app/main.py, backend/test_caregiver.py.
 - **Steps:** Inventory every client URL against OpenAPI. Remove unconditional fixture success. Preserve unavailable/401/403 statuses. Use an auth loading state, then real account state. Separate actor identity from selected patient. Partition/clear sensitive offline cache; make server report IDs canonical. Keep caregiver registration disabled or show unlinked onboarding until the invitation flow exists.
 - **Environment:** Existing ENABLE_DEMO_ACCOUNTS is development-only and production rejects true. Proposed DEMO_ACCOUNT_EMAIL/PASSWORD/seed-profile settings would be new; do not assume they already exist. Load demo credentials through protected setup, never bundle real secrets. Provide judges a documented nonprivileged demo credential via the demo setup mechanism; publish only intentionally disposable credentials, with a rotation/disable plan.
 - **Checks:** Valid/invalid login, new user, Google unavailable, empty account, logout/back/offline, separate A/B local records, demo account and linked/unlinked caregiver. Assert no fixtures on a real-user route in either development or production builds.

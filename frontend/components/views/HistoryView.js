@@ -8,6 +8,7 @@ import {
   getAllPrescriptionReports,
   deletePrescriptionReport,
 } from "@/lib/indexedDb";
+import { getActivePatientId } from "@/lib/api";
 import { formatPaise, formatPercent } from "@/lib/currency";
 import {
   History,
@@ -33,7 +34,8 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
   const loadReports = useCallback(async () => {
     setLoading(true);
     try {
-      const stored = await getAllPrescriptionReports();
+      const pid = getActivePatientId();
+      const stored = await getAllPrescriptionReports(pid);
       setReports(stored || []);
     } catch (err) {
       console.error("Failed to load local reports:", err);
