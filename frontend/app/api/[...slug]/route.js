@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { FIXTURE_DATA } from "@/lib/fixtures";
 
 const BACKEND_URL = process.env.BACKEND_ORIGIN || "http://127.0.0.1:8000";
 
@@ -64,64 +63,15 @@ async function handleRequest(request, params, method) {
       },
     });
   } catch (err) {
-    // Only if backend is completely offline/unreachable: serve dev fixtures as fallback
-    console.warn(`[Proxy] Real backend at ${BACKEND_URL} unreachable for ${path}: ${err.message}. Using dev fixture.`);
-    const fixture = getFixtureResponse(path, url.searchParams);
-    const authUnavailable = path === "/auth/register" || path === "/auth/google";
-    return NextResponse.json(fixture, { status: authUnavailable ? 503 : 200 });
+    const isTimeout = err.name === "AbortError";
+    console.error(`[Proxy] Backend at ${BACKEND_URL} unreachable for ${path}: ${err.message}`);
+    return NextResponse.json(
+      {
+        detail: isTimeout
+          ? "The server took too long to respond. Please try again."
+          : `Backend server at ${BACKEND_URL} is unreachable. Ensure the backend is running.`,
+      },
+      { status: isTimeout ? 504 : 503 }
+    );
   }
-}
-
-function getFixtureResponse(path, searchParams) {
-  if (path === "/auth/register" || path === "/auth/google") {
-    return { detail: "Authentication is unavailable while the backend is offline." };
-  }
-  if (path === "/auth/login") {
-    return {
-      token: "dev-fixture-token-ramesh",
-      patient: FIXTURE_DATA.patients.ramesh,
-    };
-  }
-  if (path === "/auth/me") {
-    return FIXTURE_DATA.patients.ramesh;
-  }
-  if (path.includes("/summary")) {
-    return FIXTURE_DATA.summary.ramesh;
-  }
-  if (path.includes("/medicines")) {
-    return FIXTURE_DATA.medicines.ramesh;
-  }
-  if (path.includes("/interactions")) {
-    return FIXTURE_DATA.interactions.ramesh;
-  }
-  if (path.includes("/pharmacies") || path.includes("/stores")) {
-    return FIXTURE_DATA.pharmacies;
-  }
-  if (path.includes("/reports")) {
-    return FIXTURE_DATA.reports;
-  }
-  if (path.includes("/prices")) {
-    const brand = searchParams.get("brand") || "Dolo 650";
-    return {
-      brand,
-      salt: "Paracetamol",
-      strength: "650 mg",
-      market_price: 32.5,
-      nppa_ceiling_price: 24.0,
-      jan_aushadhi_price: 10.5,
-      max_savings_percent: 68,
-      _development_fixture: true,
-    };
-  }
-  if (path.includes("/public/stats")) {
-    return {
-      verified_medicines: 250000,
-      nppa_caps_tracked: 840,
-      jan_aushadhi_generics: 1800,
-      interaction_rules: 3,
-      status: "online",
-      _development_fixture: true,
-    };
-  }
-  return { status: "ok", _development_fixture: true };
 }

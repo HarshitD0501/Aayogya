@@ -146,12 +146,15 @@ def resolve_actor(
     authorization: str = Header(None),
     x_patient_id: str = Header(None, alias="X-Patient-Id"),
     db: Session = Depends(get_db),
-) -> tuple[Patient, Patient]:
+    require_linked: bool = True,
+) -> tuple[Patient, Patient | None]:
     """Auth + caregiver routing. Returns (actor, patient):
     actor = the logged-in row (patient or caregiver), patient = the row whose
     data is acted on. For patients: actor is patient, X-Patient-Id is IGNORED
     (no self-impersonation escape hatch). For caregivers: patient must be a
     linked, consented patient — defaulting to the first link when no header.
+    When require_linked is False (e.g. for /api/auth/me), returns (actor, None)
+    if no patients are linked yet.
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "Login required")
@@ -167,14 +170,20 @@ def resolve_actor(
 
     linked = _linked_patient_ids(db, actor.id)
     if not linked:
-        raise HTTPException(403, "No patients linked to this caregiver yet")
+        if require_linked:
+            raise HTTPException(403, "No patients linked to this caregiver yet")
+        return actor, None
 
     target_id = x_patient_id or linked[0]  # default: first linked patient
     if target_id not in linked:
-        raise HTTPException(403, "Not a linked patient of this caregiver")
+        if require_linked:
+            raise HTTPException(403, "Not a linked patient of this caregiver")
+        return actor, None
     patient = db.get(Patient, target_id)
     if not patient:
-        raise HTTPException(404, "Linked patient no longer exists")
+        if require_linked:
+            raise HTTPException(404, "Linked patient no longer exists")
+        return actor, None
     return actor, patient
 
 

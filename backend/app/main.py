@@ -311,7 +311,7 @@ def me(
     caregiver reloading the page would lose their caregiver identity (or 403
     on a stale X-Patient-Id) and the caregiver dashboard would never load.
     resolve_actor[0] is the account; data routes keep using the patient."""
-    actor, _patient = resolve_actor(authorization, x_patient_id, db)
+    actor, _patient = resolve_actor(authorization, x_patient_id, db, require_linked=False)
     return PatientOut.model_validate(actor)
 
 

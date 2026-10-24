@@ -32,23 +32,23 @@
   "report_after_stop_status": 500,
   "new_caregiver": {
     "register": 201,
-    "me": 403
+    "me": 200
   },
   "testclient_benchmarks": {
     "/": {
       "n": 30,
-      "p50_ms": 0.68,
-      "p95_ms": 1.176
+      "p50_ms": 0.819,
+      "p95_ms": 1.113
     },
     "/api/public/stats": {
       "n": 30,
-      "p50_ms": 1.671,
-      "p95_ms": 3.339
+      "p50_ms": 2.052,
+      "p95_ms": 3.628
     },
     "/api/adherence/today": {
       "n": 30,
-      "p50_ms": 2.83,
-      "p95_ms": 4.909
+      "p50_ms": 3.975,
+      "p95_ms": 6.217
     }
   }
 }

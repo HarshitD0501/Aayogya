@@ -93,6 +93,8 @@ with TestClient(app) as client:
     from app.auth import make_token
     r = client.get("/api/medicines", headers=H(make_token("lonely")))
     check("caregiver with zero links -> 403", r.status_code == 403)
+    r_me = client.get("/api/auth/me", headers=H(make_token("lonely")))
+    check("caregiver with zero links calling /api/auth/me -> 200", r_me.status_code == 200 and r_me.json()["role"] == "caregiver")
 
     # 6. patient token on caregiver route -> 403
     r = client.get("/api/caregiver/patients", headers=H(ramesh_tok))
