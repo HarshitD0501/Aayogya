@@ -34,8 +34,12 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
   const timerRef = useRef(null);
   const animFrameRef = useRef(null);
   const audioCtxRef = useRef(null);
-  const analyserRef = useRef(null);
+  const localAnalyserRef = useRef(null);
+  const remoteAnalyserRef = useRef(null);
   const canvasRef = useRef(null);
+  const connectGenRef = useRef(0);
+  const agentSpeakingRef = useRef(false);
+  const userSpeakingRef = useRef(false);
 
   // Format seconds to mm:ss
   const formatTime = (secs) => {
@@ -46,27 +50,30 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
     return `${m}:${s}`;
   };
 
-  // Canvas visualizer loop
+  // Canvas visualizer loop with live refs (no stale closures or rapid setState thrashing)
   const drawVisualizer = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const analyser = analyserRef.current;
-    if (!analyser || !ctx) return;
+    if (!ctx) return;
 
-    const bufferLength = analyser.frequencyBinCount;
+    const bufferLength = 64;
     const dataArray = new Uint8Array(bufferLength);
 
     const render = () => {
       animFrameRef.current = requestAnimationFrame(render);
-      analyser.getByteFrequencyData(dataArray);
+      const isAgent = agentSpeakingRef.current;
+      const isUser = userSpeakingRef.current;
 
-      let sum = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        sum += dataArray[i];
+      const activeAnalyser = isAgent
+        ? remoteAnalyserRef.current
+        : (localAnalyserRef.current || remoteAnalyserRef.current);
+
+      if (activeAnalyser) {
+        activeAnalyser.getByteFrequencyData(dataArray);
+      } else {
+        dataArray.fill(0);
       }
-      const avg = sum / bufferLength;
-      setUserSpeaking(avg > 18);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -86,12 +93,11 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
         const x = startX + i * (barWidth + gap);
         const y = (canvas.height - barHeight) / 2;
 
-        // Gradient color based on agent vs user speaking
         const grad = ctx.createLinearGradient(0, y, 0, y + barHeight);
-        if (agentSpeaking) {
+        if (isAgent) {
           grad.addColorStop(0, "#10b981");
           grad.addColorStop(1, "#059669");
-        } else if (normalized > 0.15) {
+        } else if (isUser || normalized > 0.15) {
           grad.addColorStop(0, "#e4a635");
           grad.addColorStop(1, "#1d4ed8");
         } else {
@@ -107,10 +113,11 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
     };
 
     render();
-  }, [agentSpeaking]);
+  }, []);
 
-  // Cleanup WebRTC room and audio resources
+  // Cleanup WebRTC room and audio resources safely
   const cleanupCall = useCallback(() => {
+    connectGenRef.current += 1;
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -127,30 +134,38 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
       }
       audioCtxRef.current = null;
     }
+    localAnalyserRef.current = null;
+    remoteAnalyserRef.current = null;
     if (roomRef.current) {
+      const r = roomRef.current;
+      roomRef.current = null;
       try {
-        roomRef.current.disconnect();
+        r.disconnect();
       } catch {
         /* ignore */
       }
-      roomRef.current = null;
     }
     if (audioContainerRef.current) {
       audioContainerRef.current.innerHTML = "";
     }
+    agentSpeakingRef.current = false;
+    userSpeakingRef.current = false;
     setAgentSpeaking(false);
     setUserSpeaking(false);
   }, []);
 
-  // Connect to LiveKit Room
+  // Connect to LiveKit Room with generation check to prevent async race conditions
   const startCall = async () => {
+    cleanupCall();
+    const currentGen = ++connectGenRef.current;
     try {
-      cleanupCall();
       setErrorMsg("");
       setCallState("connecting");
 
       // 1. Get LiveKit room token
       const creds = await getVoiceToken();
+      if (connectGenRef.current !== currentGen) return;
+
       if (!creds?.url || !creds?.token) {
         throw new Error("Invalid voice token received from server.");
       }
@@ -170,18 +185,23 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
       });
       roomRef.current = room;
 
-      // 3. Audio visualizer setup
+      // 3. Audio visualizer setup: independent local and remote analysers
       let audioCtx = null;
-      let analyser = null;
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (AudioCtx) {
           audioCtx = new AudioCtx();
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 128;
-          analyser.smoothingTimeConstant = 0.8;
+          const remoteAnalyser = audioCtx.createAnalyser();
+          remoteAnalyser.fftSize = 128;
+          remoteAnalyser.smoothingTimeConstant = 0.8;
+
+          const localAnalyser = audioCtx.createAnalyser();
+          localAnalyser.fftSize = 128;
+          localAnalyser.smoothingTimeConstant = 0.8;
+
           audioCtxRef.current = audioCtx;
-          analyserRef.current = analyser;
+          remoteAnalyserRef.current = remoteAnalyser;
+          localAnalyserRef.current = localAnalyser;
         }
       } catch (e) {
         console.warn("AudioContext init error:", e);
@@ -196,17 +216,16 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
             audioContainerRef.current.appendChild(el);
           }
 
-          // If AudioContext exists, route incoming agent audio into analyser
-          if (audioCtx && analyser && track.mediaStreamTrack) {
+          if (audioCtx && remoteAnalyserRef.current && track.mediaStreamTrack) {
             try {
               if (audioCtx.state === "suspended") {
                 audioCtx.resume();
               }
               const stream = new MediaStream([track.mediaStreamTrack]);
               const source = audioCtx.createMediaStreamSource(stream);
-              source.connect(analyser);
+              source.connect(remoteAnalyserRef.current);
             } catch (err) {
-              console.warn("Failed to connect agent audio to analyser:", err);
+              console.warn("Failed to connect agent audio to remote analyser:", err);
             }
           }
         }
@@ -216,10 +235,14 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
         track.detach().forEach((el) => el.remove());
       });
 
-      // Active speaker detection
+      // Active speaker detection via LiveKit's native speaker event
       room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
         const isAgentTalking = speakers.some((s) => !s.isLocal);
+        const isUserTalking = speakers.some((s) => s.isLocal);
+        agentSpeakingRef.current = isAgentTalking;
+        userSpeakingRef.current = isUserTalking;
         setAgentSpeaking(isAgentTalking);
+        setUserSpeaking(isUserTalking);
       });
 
       room.on(RoomEvent.Disconnected, () => {
@@ -229,21 +252,23 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
 
       // 4. Connect to WebRTC room
       await room.connect(creds.url, creds.token);
+      if (connectGenRef.current !== currentGen) return;
 
       // 5. Enable Local Microphone & publish track
       await room.localParticipant.setMicrophoneEnabled(true);
+      if (connectGenRef.current !== currentGen) return;
       setIsMuted(false);
 
-      // Connect local mic to analyser as well
+      // Connect local mic exclusively to local analyser
       const localTrackPub = room.localParticipant.getTrackPublication(Track.Source.Microphone);
-      if (localTrackPub?.track?.mediaStreamTrack && audioCtx && analyser) {
+      if (localTrackPub?.track?.mediaStreamTrack && audioCtx && localAnalyserRef.current) {
         try {
           if (audioCtx.state === "suspended") {
             audioCtx.resume();
           }
           const localStream = new MediaStream([localTrackPub.track.mediaStreamTrack]);
           const localSource = audioCtx.createMediaStreamSource(localStream);
-          localSource.connect(analyser);
+          localSource.connect(localAnalyserRef.current);
         } catch (e) {
           console.warn("Local mic analyser connect error:", e);
         }
@@ -258,6 +283,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
       // Start drawing frequency bars
       drawVisualizer();
     } catch (err) {
+      if (connectGenRef.current !== currentGen) return;
       console.error("LiveKit connection error:", err);
       cleanupCall();
       setCallState("error");
@@ -482,7 +508,7 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
         <div className="voice-features-footer">
           <div className="voice-feat">
             <span className="feat-dot green" />
-            <span>Sub-second Latency (~300ms)</span>
+            <span>Real-time Streaming Voice</span>
           </div>
           <div className="voice-feat">
             <span className="feat-dot blue" />

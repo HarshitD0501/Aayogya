@@ -57,11 +57,39 @@ def _make_tools(client: BackendClient) -> list:
 
     async def get_my_profile() -> dict:
         """Get the patient's name, subscription plan (free/pro) and preferred language."""
-        return await safe(client.get_profile())
+        raw = await safe(client.get_profile())
+        if not raw or not isinstance(raw, dict) or "error" in raw:
+            return raw or {}
+        lang = raw.get("lang") or raw.get("language") or config.DEFAULT_LANG or "hi"
+        plan = raw.get("plan") or raw.get("subscription_plan") or "free"
+        return {
+            "name": raw.get("name", ""),
+            "lang": lang,
+            "language": lang,
+            "plan": plan,
+            "subscription_plan": plan,
+            "role": raw.get("role", "patient"),
+        }
 
     async def get_my_medicines() -> list | dict:
-        """List the patient's current active medicines with how and when to take them and indicative prices."""
-        return await safe(client.get_medicines())
+        """List the patient's current active medicines with how and when to take them."""
+        raw = await safe(client.get_medicines(include_prices=False))
+        if not raw or isinstance(raw, dict):
+            return raw or []
+        return [
+            {
+                "brand": m.get("brand"),
+                "salt": m.get("salt"),
+                "strength": m.get("strength"),
+                "form": m.get("form"),
+                "dosage_notation": m.get("dosage_notation"),
+                "timing": m.get("timing"),
+                "status": m.get("status"),
+                "prescriber": m.get("prescriber_name"),
+            }
+            for m in raw
+            if isinstance(m, dict)
+        ]
 
     async def check_drug_interactions() -> dict:
         """Check for dangerous interactions across ALL the patient's active medicines."""
@@ -69,31 +97,45 @@ def _make_tools(client: BackendClient) -> list:
 
     async def get_prescription_history() -> list | dict:
         """List the patient's past prescriptions and reports, newest first."""
-        return await safe(client.list_reports())
+        raw = await safe(client.list_reports(include_prices=False))
+        if not raw or isinstance(raw, dict):
+            return raw or []
+        return [
+            {
+                "id": r.get("id"),
+                "prescription_date": r.get("prescription_date"),
+                "follow_up_date": r.get("follow_up_date"),
+                "prescriber_name": r.get("prescriber_name"),
+                "prescriber_specialty": r.get("prescriber_specialty"),
+                "medicines": [m.get("brand") for m in r.get("medicines", []) if isinstance(m, dict) and m.get("brand")],
+            }
+            for r in raw[:5]
+        ]
 
     return [get_my_profile, get_my_medicines, check_drug_interactions, get_prescription_history]
 
 
 def _to_history(history: list[dict]) -> list[types.Content]:
-    """Prior turns as genai Contents. The new user message is NOT included here —
-    it's sent via chat.send_message so automatic function calling runs on it."""
+    """Prior turns as genai Contents, bounded to the most recent 10 turns.
+    The new user message is sent via chat.send_message."""
+    bounded = history[-10:] if history else []
     return [
         types.Content(role=h.get("role", "user"), parts=[types.Part(text=h.get("text", ""))])
-        for h in history
+        for h in bounded
         if h.get("text")
     ]
 
 
-async def _with_retry(call, *, tries: int = 4, base_delay: float = 1.0):
-    """Retry an async Gemini call through transient overload/quota (503/429/5xx),
-    backing off 1s, 2s, 4s... Permanent errors (404 bad model, 400) re-raise at once."""
+async def _with_retry(call, *, tries: int = 2, base_delay: float = 1.0):
+    """Retry an async Gemini call through transient overload/quota (503/5xx),
+    bounded to 2 attempts to protect latency budgets. Permanent errors re-raise at once."""
     for attempt in range(tries):
         try:
             return await call()
         except errors.APIError as e:
             if e.code not in _RETRY_CODES or attempt == tries - 1:
                 raise
-            await asyncio.sleep(base_delay * 2 ** attempt)
+            await asyncio.sleep(base_delay * (attempt + 1))
 
 
 @app.post("/chat")

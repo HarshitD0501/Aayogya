@@ -14,6 +14,7 @@ falls back to demo creds (set AAYOGYA_DEMO_IDENTIFIER / AAYOGYA_DEMO_PASSWORD).
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import ssl
@@ -69,37 +70,46 @@ except Exception:  # noqa: BLE001
     noise_cancellation = None
 
 
+from profile_adapter import build_patient_instructions as _build_instructions, normalize_profile
+
+
+def build_patient_instructions(profile: dict | None = None) -> str:
+    """Build Sahayak system instructions with truthful, non-hallucinated patient context."""
+    return _build_instructions(prompt.SYSTEM_PROMPT, profile)
+
+
 class SahayakAssistant(Agent):
     """The brain, wearing its voice frontend. Instructions + tools are shared."""
 
     def __init__(self, client: BackendClient, profile: dict | None = None) -> None:
-        p = profile or {}
-        name = p.get("name", "")
-        lang = p.get("language", config.DEFAULT_LANG or "hi")
-        age = p.get("age", "")
-        gender = p.get("gender", "")
-        plan = p.get("subscription_plan", "free")
-        
-        instructions = prompt.SYSTEM_PROMPT
-        if name:
-            instructions += (
-                f"\n\n# PATIENT CONTEXT\n"
-                f"You are speaking directly with patient {name}.\n"
-                f"- Age: {age or 'Not specified'}, Gender: {gender or 'Not specified'}\n"
-                f"- Preferred language: {lang}\n"
-                f"- Subscription plan: {plan}\n"
-                f"Always address them warmly by name in their language ({lang})."
-            )
+        self.profile = normalize_profile(profile)
+        instructions = build_patient_instructions(self.profile)
         super().__init__(instructions=instructions)
         self._client = client
 
     @function_tool
     async def get_my_medicines(self, context: RunContext) -> str:
-        """List the patient's current active medicines with how and when to take them and indicative prices."""
-        meds = await safe(self._client.get_medicines())
+        """List the patient's current active medicines with how and when to take them."""
+        meds = await safe(self._client.get_medicines(include_prices=False))
         if not meds:
             return "No active medicines found in patient records."
-        return json.dumps(meds, ensure_ascii=False)
+        if isinstance(meds, dict) and "error" in meds:
+            return meds["error"]
+        projected = [
+            {
+                "brand": m.get("brand"),
+                "salt": m.get("salt"),
+                "strength": m.get("strength"),
+                "form": m.get("form"),
+                "dosage_notation": m.get("dosage_notation"),
+                "timing": m.get("timing"),
+                "status": m.get("status"),
+                "prescriber": m.get("prescriber_name"),
+            }
+            for m in meds
+            if isinstance(m, dict)
+        ]
+        return json.dumps(projected, ensure_ascii=False)
 
     @function_tool
     async def check_drug_interactions(self, context: RunContext) -> str:
@@ -112,10 +122,23 @@ class SahayakAssistant(Agent):
     @function_tool
     async def get_prescription_history(self, context: RunContext) -> str:
         """List the patient's past prescriptions and reports, newest first."""
-        reports = await safe(self._client.list_reports())
+        reports = await safe(self._client.list_reports(include_prices=False))
         if not reports:
             return "No past prescriptions or reports found."
-        return json.dumps(reports, ensure_ascii=False)
+        if isinstance(reports, dict) and "error" in reports:
+            return reports["error"]
+        projected = [
+            {
+                "id": r.get("id"),
+                "prescription_date": r.get("prescription_date"),
+                "follow_up_date": r.get("follow_up_date"),
+                "prescriber_name": r.get("prescriber_name"),
+                "prescriber_specialty": r.get("prescriber_specialty"),
+                "medicines": [m.get("brand") for m in r.get("medicines", []) if isinstance(m, dict) and m.get("brand")],
+            }
+            for r in (reports[:5] if isinstance(reports, list) else [])
+        ]
+        return json.dumps(projected, ensure_ascii=False)
 
 
 class DoctorFollowupAssistant(Agent):
@@ -157,10 +180,26 @@ class DoctorFollowupAssistant(Agent):
     @function_tool
     async def get_my_medicines(self, context: RunContext) -> str:
         """List the patient's current active medicines with how and when to take them."""
-        meds = await safe(self._client.get_medicines())
+        meds = await safe(self._client.get_medicines(include_prices=False))
         if not meds:
             return "No active medicines found in patient records."
-        return json.dumps(meds, ensure_ascii=False)
+        if isinstance(meds, dict) and "error" in meds:
+            return meds["error"]
+        projected = [
+            {
+                "brand": m.get("brand"),
+                "salt": m.get("salt"),
+                "strength": m.get("strength"),
+                "form": m.get("form"),
+                "dosage_notation": m.get("dosage_notation"),
+                "timing": m.get("timing"),
+                "status": m.get("status"),
+                "prescriber": m.get("prescriber_name"),
+            }
+            for m in meds
+            if isinstance(m, dict)
+        ]
+        return json.dumps(projected, ensure_ascii=False)
 
     @function_tool
     async def check_drug_interactions(self, context: RunContext) -> str:
@@ -353,6 +392,11 @@ async def entrypoint(ctx: JobContext) -> None:
             )
     client = BackendClient(token)
     ctx.add_shutdown_callback(client.aclose)
+    profile_task = None
+    if not is_outbound_followup:
+        # Fetch profile while STT/TTS and the session are being prepared. A slow
+        # backend must not hold the first spoken greeting for the HTTP timeout.
+        profile_task = asyncio.create_task(safe(client.get_profile()))
 
     if is_outbound_followup:
         # The agent dials the phone itself and waits for the answer. Any SIP
@@ -365,7 +409,7 @@ async def entrypoint(ctx: JobContext) -> None:
             ctx.shutdown()
             return
 
-    # For outbound telephony, min_sentence_len=1 provides sub-300ms speech onset
+    # Shorter sentences can reduce time to first audio; measure provider latency.
     min_len = 1 if is_outbound_followup else 2
     murf_kwargs: dict = {
         "voice": config.MURF_VOICE,
@@ -407,6 +451,19 @@ async def entrypoint(ctx: JobContext) -> None:
         turn_handling=turn_opts,
     )
 
+    # Telemetry: capture redacted latency/timing metrics without PII (Batch 6A)
+    try:
+        from livekit.agents.metrics import log_metrics
+
+        @session.on("metrics_collected")
+        def _on_metrics_collected(event):
+            try:
+                log_metrics(event, logger=logger)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Metrics collection logging error: %s", exc)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("Metrics hooks unavailable: %s", exc)
+
     # Telephony noise cancellation filter
     nc_filter = None
     if noise_cancellation:
@@ -420,45 +477,61 @@ async def entrypoint(ctx: JobContext) -> None:
     )
 
     if is_outbound_followup:
-        agent_instance = DoctorFollowupAssistant(client, call_meta=call_meta)
-        await session.start(agent=agent_instance, room=ctx.room, room_options=room_options)
-
-        # Strict Devanagari Hindi initial greeting. The lead-time is computed
-        # from the actual follow-up date (the call may fire any day in the
-        # window), never hardcoded as "2 दिन बाद".
-        patient_name = call_meta.get("patient_name", "")
-        doc_name = call_meta.get("doctor_name", "डॉक्टर")
-        follow_date = call_meta.get("follow_up_date", "")
-        when_txt = _lead_time_text(follow_date)
-        greeting_msg = (
-            f"नमस्ते {patient_name} जी! मैं Aayogya से सहायक बोल रहा हूँ। "
-            f"डॉक्टर {doc_name} के साथ आपका चेकअप {when_txt} तय है। "
-            f"क्या आप जा पाएंगे?"
-        )
-        await session.say(greeting_msg, allow_interruptions=True)
+        await start_followup_session(session, client, ctx.room, room_options, call_meta)
     else:
-        profile = await safe(client.get_profile()) or {}
-        patient_name = profile.get("name", "")
-        preferred_lang = profile.get("language", config.DEFAULT_LANG or "hi")
-        first_name = patient_name.split()[0] if patient_name else ""
+        raw_profile = await bounded_profile(profile_task)
+        profile = normalize_profile(raw_profile if isinstance(raw_profile, dict) else {})
+        await start_browser_session(session, client, ctx.room, room_options, profile)
 
-        await session.start(
-            agent=SahayakAssistant(client, profile=profile),
-            room=ctx.room,
-            room_options=room_options,
+
+async def bounded_profile(task: asyncio.Task, timeout: float = 0.75) -> dict:
+    """Bound greeting delay when the backend profile API is slow or unavailable."""
+    try:
+        result = await asyncio.wait_for(task, timeout=timeout)
+        return result if isinstance(result, dict) and "error" not in result else {}
+    except asyncio.TimeoutError:
+        return {}
+
+
+async def start_followup_session(session, client, room, room_options, call_meta: dict) -> None:
+    """Start exactly one outbound session after the SIP participant has answered."""
+    await session.start(
+        agent=DoctorFollowupAssistant(client, call_meta=call_meta),
+        room=room,
+        room_options=room_options,
+    )
+    patient_name = call_meta.get("patient_name", "")
+    doc_name = call_meta.get("doctor_name", "डॉक्टर")
+    when_txt = _lead_time_text(call_meta.get("follow_up_date", ""))
+    await session.say(
+        f"नमस्ते {patient_name} जी! मैं Aayogya से सहायक बोल रहा हूँ। "
+        f"डॉक्टर {doc_name} के साथ आपका चेकअप {when_txt} तय है। "
+        "क्या आप जा पाएंगे?",
+        allow_interruptions=True,
+    )
+
+
+async def start_browser_session(session, client, room, room_options, profile: dict) -> None:
+    """Greet the connected patient once, in their preferred language."""
+    await session.start(
+        agent=SahayakAssistant(client, profile=profile),
+        room=room,
+        room_options=room_options,
+    )
+    first_name = profile["name"].split()[0] if profile["name"] else ""
+    address = f" {first_name}" if first_name else ""
+    if profile["lang"].lower().startswith("hi"):
+        greeting = (
+            f"नमस्ते{address}! मैं सहायक हूँ, आयोग्या का वॉइस असिस्टेंट। "
+            "मैं आपकी दवाओं और प्रिस्क्रिप्शन की जानकारी समझने में मदद कर सकता हूँ। "
+            "आज मैं आपकी क्या मदद करूँ?"
         )
-
-        if not preferred_lang or preferred_lang == "hi" or preferred_lang.startswith("hi"):
-            greeting_msg = (
-                f"नमस्ते {first_name or patient_name}! मैं सहायक हूँ, आयोग्या से आपकी सेहत का साथी। "
-                f"आज मैं आपकी दवाओं या सेहत के बारे में क्या मदद कर सकता हूँ?"
-            )
-        else:
-            greeting_msg = (
-                f"Namaste {first_name or patient_name}! I am Sahayak, your health companion from Aayogya. "
-                f"How can I help you with your medicines or prescription today?"
-            )
-        await session.say(greeting_msg, allow_interruptions=True)
+    else:
+        greeting = (
+            f"Hello{address}! I’m Sahayak, Aayogya’s voice assistant. "
+            "I can help explain your medicines and prescription. How can I help today?"
+        )
+    await session.say(greeting, allow_interruptions=True)
 
 
 def build_worker_options() -> WorkerOptions:
@@ -466,14 +539,14 @@ def build_worker_options() -> WorkerOptions:
     return WorkerOptions(
         entrypoint_fnc=entrypoint,
         prewarm_fnc=prewarm,
+        agent_name=config.AGENT_NAME,
         # LiveKit 1.8.3 defaults to THREAD on Windows. Explicit processes isolate
         # concurrent calls from the shared GIL and each job receives its own VAD.
         job_executor_type=JobExecutorType.PROCESS,
         num_idle_processes=2,
         # Cold imports and local model initialization need more than the 10s SDK default.
         initialize_process_timeout=90.0,
-        # Agent name lives in livekit.toml ([agent] name) — the SDK's preferred
-        # location; passing it here too would emit a deprecation warning.
+        # The Python 1.8.3 CLI reads this option when registering the worker.
     )
 
 

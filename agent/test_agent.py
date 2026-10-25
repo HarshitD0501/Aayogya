@@ -17,7 +17,7 @@ from livekit.agents import JobExecutorType
 
 import prompt
 from backend_client import BackendClient, safe
-from voice import build_worker_options
+from voice import build_patient_instructions, build_worker_options, normalize_profile
 
 
 def test_prompt_has_safety_rules() -> None:
@@ -42,7 +42,10 @@ def test_worker_isolates_windows_jobs_in_prewarmed_processes() -> None:
     result = context.Queue()
     process = context.Process(target=_process_spawn_probe, args=(result,))
     process.start()
-    process.join(timeout=15)
+    # Windows spawn re-imports the LiveKit/Google plugin tree in the child.
+    # The worker itself allows 90s for process initialization; 15s here was
+    # shorter than a normal cold import on this machine.
+    process.join(timeout=45)
     if process.is_alive():
         process.terminate()
         process.join(timeout=5)
@@ -100,12 +103,56 @@ async def _run_backend_client_checks() -> None:
     assert isinstance(out, dict) and "error" in out
 
 
+def test_profile_normalization_and_instruction_safety() -> None:
+    # 1. Backend PatientOut schema format (lang, plan)
+    p_backend = {"id": "p1", "name": "Ramesh Kumar", "lang": "hi", "plan": "pro"}
+    norm = normalize_profile(p_backend)
+    assert norm["name"] == "Ramesh Kumar"
+    assert norm["lang"] == "hi"
+    assert norm["language"] == "hi"
+    assert norm["plan"] == "pro"
+    assert norm["subscription_plan"] == "pro"
+    assert norm["age"] is None
+    assert norm["gender"] is None
+
+    # Instructions must NOT contain hallucinated 'Age: Not specified'
+    instr = build_patient_instructions(p_backend)
+    assert "You are speaking directly with patient Ramesh Kumar." in instr
+    assert "- Preferred language: hi" in instr
+    assert "- Subscription plan: pro" in instr
+    assert "Not specified" not in instr
+    assert "Age:" not in instr
+    assert "Gender:" not in instr
+
+    # 2. Legacy format (language, subscription_plan)
+    p_legacy = {"name": "Priya", "language": "en", "subscription_plan": "free", "age": 30, "gender": "female"}
+    norm_leg = normalize_profile(p_legacy)
+    assert norm_leg["lang"] == "en"
+    assert norm_leg["plan"] == "free"
+    assert norm_leg["age"] == 30
+    assert norm_leg["gender"] == "female"
+
+    instr_leg = build_patient_instructions(p_legacy)
+    assert "You are speaking directly with patient Priya." in instr_leg
+    assert "- Age: 30" in instr_leg
+    assert "- Gender: female" in instr_leg
+    assert "- Preferred language: en" in instr_leg
+    assert "- Subscription plan: free" in instr_leg
+
+    # 3. Empty profile defaults
+    empty = normalize_profile(None)
+    assert empty["lang"] in ("hi", "en")
+    assert empty["plan"] == "free"
+    assert "PATIENT CONTEXT" not in build_patient_instructions(None)
+
+
 def test_backend_client() -> None:
     asyncio.run(_run_backend_client_checks())
 
 
 if __name__ == "__main__":
     test_prompt_has_safety_rules()
+    test_profile_normalization_and_instruction_safety()
     test_worker_isolates_windows_jobs_in_prewarmed_processes()
     test_backend_client()
-    print("ok — prompt safety rules present, BackendClient auth + routing correct")
+    print("ok — prompt safety rules present, profile normalization verified, BackendClient auth + routing correct")

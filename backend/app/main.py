@@ -37,6 +37,7 @@ from . import telephony as telephony_svc  # noqa: E402
 from . import whatsapp as wa_svc  # noqa: E402
 from . import caregiver as caregiver_svc  # noqa: E402
 from . import scheduler as scheduler_svc  # noqa: E402
+from .v1_router import router as v1_router  # noqa: E402
 from .auth import authenticate, current_patient, hash_password, make_token, resolve_actor  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
@@ -123,15 +124,17 @@ app.add_middleware(
 )
 
 app.include_router(caregiver_svc.router)
+app.include_router(v1_router)
 
 
-def _med_out(m: Medicine) -> MedicineOut:
+def _med_out(m: Medicine, include_prices: bool = True) -> MedicineOut:
     out = MedicineOut.model_validate(m)
-    out.prices = price_svc.get_prices(m.salt, m.strength, brand=m.brand)
+    if include_prices:
+        out.prices = price_svc.get_prices(m.salt, m.strength, brand=m.brand)
     return out
 
 
-def _report_out(r: Report) -> ReportOut:
+def _report_out(r: Report, include_prices: bool = True) -> ReportOut:
     return ReportOut(
         id=r.id, patient_id=r.patient_id, filename=r.filename,
         prescriber_name=r.prescriber_name, prescriber_specialty=r.prescriber_specialty,
@@ -143,7 +146,7 @@ def _report_out(r: Report) -> ReportOut:
         ocr_confidence=r.ocr_confidence,
         confirmed=r.confirmed,
         created_at=r.created_at.isoformat() if r.created_at else None,
-        medicines=[_med_out(m) for m in r.medicines],
+        medicines=[_med_out(m, include_prices=include_prices) for m in r.medicines],
     )
 
 
@@ -183,7 +186,7 @@ def get_public_stats(db: Session = Depends(get_db)):
     catalog_counts = price_svc.get_catalog_counts()
     nppa_count = catalog_counts["nppa"]
     jan_count = catalog_counts["jan_aushadhi"]
-    total_meds = max(120, nppa_count + jan_count)
+    total_meds = nppa_count + jan_count
     patient_count = db.query(Patient).count()
     interaction_count = db.query(Interaction).count()
     return {
@@ -192,7 +195,7 @@ def get_public_stats(db: Session = Depends(get_db)):
         "jan_aushadhi_generics": jan_count,
         "interaction_rules": interaction_count,
         "active_patients": patient_count,
-        "live_partner": "PharmEasy India",
+        "data_sources": ["NPPA Ceiling Prices", "PMBJP Jan Aushadhi"],
         "status": "online",
     }
 
@@ -450,7 +453,11 @@ def confirm_report(
 
 
 @app.get("/api/reports", response_model=list[ReportOut])
-def list_reports(patient: Patient = Depends(current_patient), db: Session = Depends(get_db)):
+def list_reports(
+    include_prices: bool = Query(False),
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
     rows = (
         db.query(Report)
         .options(selectinload(Report.medicines))  # avoid N+1 on medicines
@@ -458,11 +465,15 @@ def list_reports(patient: Patient = Depends(current_patient), db: Session = Depe
         .order_by(Report.created_at.desc())
         .all()
     )
-    return [_report_out(r) for r in rows]
+    return [_report_out(r, include_prices=include_prices) for r in rows]
 
 
 @app.get("/api/medicines", response_model=list[MedicineOut])
-def list_medicines(patient: Patient = Depends(current_patient), db: Session = Depends(get_db)):
+def list_medicines(
+    include_prices: bool = Query(True),
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
     rows = (
         db.query(Medicine)
         .outerjoin(Report, Medicine.report_id == Report.id)
@@ -473,7 +484,7 @@ def list_medicines(patient: Patient = Depends(current_patient), db: Session = De
         )
         .all()
     )
-    return [_med_out(m) for m in rows]
+    return [_med_out(m, include_prices=include_prices) for m in rows]
 
 
 @app.get("/api/interactions")

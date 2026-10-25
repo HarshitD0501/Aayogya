@@ -121,13 +121,14 @@ def build(db: Session, patient) -> dict:
             "last_call_at": upcoming.last_call_at.isoformat() if upcoming.last_call_at else None,
         }
 
-    # Reminder tracking (kitne WhatsApp messages gaye, last kab).
+    # Reminder tracking: count verified 'sent' deliveries only (exclude failed/queued/simulated attempts)
     base = db.query(ReminderLog).filter(ReminderLog.patient_id == patient.id)
-    reminders_sent = base.count()
-    whatsapp_sent = base.filter(ReminderLog.channel == "whatsapp").count()
+    sent_logs = base.filter(ReminderLog.status == "sent")
+    reminders_sent = sent_logs.count()
+    whatsapp_sent = sent_logs.filter(ReminderLog.channel == "whatsapp").count()
     last_sent = (
         db.query(func.max(ReminderLog.sent_at))
-        .filter(ReminderLog.patient_id == patient.id)
+        .filter(ReminderLog.patient_id == patient.id, ReminderLog.status == "sent")
         .scalar()
     )
     taken_today = sum(1 for a in today_adherences if a.status == "taken")

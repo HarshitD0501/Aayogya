@@ -27,6 +27,7 @@ DISCLAIMER = (
 # 24-hour in-memory cache for live market queries: {query_key: (data, timestamp)}
 _CACHE: dict[str, tuple[dict[str, Any], float]] = {}
 _CACHE_TTL_SEC = 86400  # 24 hours
+_NEGATIVE_CACHE_TTL_SEC = 3600  # 1 hour negative cache for misses/errors
 
 # Reference price data is maintained in the versioned backend dataset. The dataset's
 # PharmEasy estimates are intentionally not consumed by this live pricing service.
@@ -82,13 +83,14 @@ def get_catalog_counts() -> dict[str, int]:
 def _fetch_pharmeasy_live(query: str) -> dict[str, Any] | None:
     """Query PharmEasy's public catalog endpoint for live MRP, sale price and discounts.
 
-    Cached for 24 hours in memory to ensure maximum speed and respect rate limits.
+    Cached for 24 hours in memory (or 1 hour for misses) to ensure maximum speed and respect rate limits.
     """
     cache_key = _norm_key(query)
     now = time.time()
     if cache_key in _CACHE:
         val, ts = _CACHE[cache_key]
-        if now - ts < _CACHE_TTL_SEC:
+        ttl = _CACHE_TTL_SEC if val is not None else _NEGATIVE_CACHE_TTL_SEC
+        if now - ts < ttl:
             return val
 
     try:
@@ -121,6 +123,7 @@ def _fetch_pharmeasy_live(query: str) -> dict[str, Any] | None:
     except Exception as exc:
         logger.debug(f"PharmEasy live lookup error for '{query}': {exc}")
 
+    _CACHE[cache_key] = (None, now)
     return None
 
 

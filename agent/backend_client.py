@@ -38,17 +38,19 @@ class BackendClient:
         """Patient's name, subscription plan (free/pro), and preferred language."""
         return await self._get("/api/auth/me")
 
-    async def get_medicines(self) -> list[dict]:
+    async def get_medicines(self, include_prices: bool = False) -> list[dict]:
         """Active medicines with dosage timing, duration, and indicative prices."""
-        return await self._get("/api/medicines")
+        path = "/api/medicines" if include_prices else "/api/medicines?include_prices=false"
+        return await self._get(path)
 
     async def check_interactions(self) -> dict:
         """Drug-interaction check across ALL active medicines."""
         return await self._get("/api/interactions")
 
-    async def list_reports(self) -> list[dict]:
+    async def list_reports(self, include_prices: bool = False) -> list[dict]:
         """Prescription/report history, newest first."""
-        return await self._get("/api/reports")
+        path = "/api/reports" if include_prices else "/api/reports?include_prices=false"
+        return await self._get(path)
 
     async def request_reschedule(
         self, report_id: int, preferred_date_or_time: str, reason: str = ""
