@@ -15,6 +15,11 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+from pathlib import Path
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 os.environ.setdefault("DATABASE_URL", "")  # ensure sqlite default before imports
 os.environ["ENVIRONMENT"] = "test"

@@ -1,9 +1,15 @@
 """Test suite for Twilio Telephony, LiveKit SIP dispatch, and the Reschedule workflow."""
 import asyncio
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 from app.config import settings
 from app.db import Base, get_db

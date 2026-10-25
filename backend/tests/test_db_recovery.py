@@ -8,6 +8,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
 from recover_sqlite import recover_indexes
 
 
@@ -80,7 +84,7 @@ class IndexRecoveryTests(unittest.TestCase):
         env = dict(os.environ, DATABASE_URL="sqlite:///" + (database or self.source).as_posix(),
                    ENVIRONMENT="test", ENABLE_DEMO_ACCOUNTS="false")
         return subprocess.run([sys.executable, "-c", code], env=env,
-                              cwd=Path(__file__).parent, capture_output=True, text=True, timeout=60)
+                              cwd=backend_dir, capture_output=True, text=True, timeout=60)
 
     def test_startup_explains_corruption_without_modifying_database(self):
         self.corrupt()

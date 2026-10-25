@@ -9,9 +9,15 @@ Tests all 4 agents and safety edge cases:
 """
 import base64
 import io
+import sys
 from datetime import date
+from pathlib import Path
 from unittest.mock import patch
 from PIL import Image
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 from app import catalog, confidence
 from app.dosage import parse_dosage

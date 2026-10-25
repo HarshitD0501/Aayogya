@@ -1,6 +1,13 @@
 """Safety-critical: dosage notation must map to the right slots (design §7.3).
 Run: py test_dosage.py
 """
+import sys
+from pathlib import Path
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
 from app.dosage import parse_dosage
 
 

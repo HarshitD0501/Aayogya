@@ -9,9 +9,15 @@ Validates:
 7. Summary endpoint aggregation (real-time adherence badges & metrics).
 """
 import asyncio
+import sys
 from datetime import date
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 from app.db import Base
 from app.config import settings

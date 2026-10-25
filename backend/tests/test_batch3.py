@@ -12,6 +12,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
@@ -23,7 +27,7 @@ import app.models
 class TestBatch3ReproducibleRuntimeAndMigrations(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.backend_dir = Path(__file__).resolve().parent
+        self.backend_dir = Path(__file__).resolve().parent.parent
         self.root_dir = self.backend_dir.parent
 
     def tearDown(self):

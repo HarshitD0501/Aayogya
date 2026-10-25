@@ -2,10 +2,15 @@
 from __future__ import annotations
 
 import os
+import sys
 import tempfile
 import unittest
 import zlib
 from pathlib import Path
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 os.environ["ENABLE_DEMO_ACCOUNTS"] = "false"
 os.environ["GOOGLE_CLIENT_ID"] = "registration-test-client"

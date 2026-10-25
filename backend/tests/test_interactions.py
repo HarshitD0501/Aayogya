@@ -1,11 +1,20 @@
 """Checks that interaction results never imply complete safety coverage."""
 
+import sys
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 class _Query:
     def __init__(self, rows):
         self.rows = rows
+
+    def outerjoin(self, *_args, **_kwargs):
+        return self
 
     def filter(self, *_conditions):
         return self

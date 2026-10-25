@@ -1,8 +1,14 @@
 """Security checks for environment-specific session signing keys."""
 
-import unittest
 import os
+import sys
+import unittest
+from pathlib import Path
 from unittest.mock import patch
+
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
 
 from pydantic import ValidationError
 
