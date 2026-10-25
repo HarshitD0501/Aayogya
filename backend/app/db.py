@@ -70,9 +70,7 @@ def init_db():
             "Database migrations failed; startup aborted. "
             "Resolve the Alembic error and retry."
         ) from exc
-    Base.metadata.create_all(bind=engine)
-
-    # Safe column auto-addition for SQLite dev environment
+    # Ensure WAL journal mode for SQLite single-worker reliability
     if not settings.is_postgres:
         with engine.connect() as conn:
             from sqlalchemy import text
@@ -81,20 +79,3 @@ def init_db():
                 conn.commit()
             except Exception:
                 pass
-            col_specs = [
-                ("patients", "auto_reminders_enabled", "BOOLEAN DEFAULT 1"),
-                ("patients", "whatsapp_reminders_enabled", "BOOLEAN DEFAULT 1"),
-                ("patients", "call_reminders_enabled", "BOOLEAN DEFAULT 0"),
-                ("patients", "reminder_time_morning", "VARCHAR DEFAULT '08:00 AM'"),
-                ("patients", "reminder_time_afternoon", "VARCHAR DEFAULT '01:00 PM'"),
-                ("patients", "reminder_time_night", "VARCHAR DEFAULT '08:00 PM'"),
-                ("medicines", "reminders_enabled", "BOOLEAN DEFAULT 1"),
-                ("medicines", "stopped_at", "DATETIME"),
-                ("medicines", "stopped_reason", "VARCHAR"),
-            ]
-            for table, col, col_type in col_specs:
-                try:
-                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
-                    conn.commit()
-                except Exception:
-                    pass  # column already exists

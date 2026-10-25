@@ -1,0 +1,3 @@
+[submodule "agent/.reference-aushadh"]
+	path = agent/.reference-aushadh
+	url = https://github.com/HarshitD0501/Aushadh-AI.git

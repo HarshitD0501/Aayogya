@@ -565,9 +565,15 @@ def voice_token(
     Signing is local (no LiveKit server call); needs LIVEKIT_* configured."""
     if not (settings.livekit_url and settings.livekit_api_key and settings.livekit_api_secret):
         raise HTTPException(501, "Voice not configured: set LIVEKIT_URL / LIVEKIT_API_KEY / LIVEKIT_API_SECRET.")
-    from livekit import api  # local import: voice is optional, keep it off the hot path
-    from livekit.protocol.agent_dispatch import RoomAgentDispatch
-    from livekit.protocol.room import RoomConfiguration
+    try:
+        from livekit import api  # local import: voice is optional, keep it off the hot path
+        from livekit.protocol.agent_dispatch import RoomAgentDispatch
+        from livekit.protocol.room import RoomConfiguration
+    except ImportError:
+        raise HTTPException(
+            501,
+            "Voice runtime dependencies missing: install livekit-api and livekit-protocol."
+        )
 
     actor, patient = resolve_actor(authorization, x_patient_id, db)
     backend_token = (

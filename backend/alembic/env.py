@@ -28,12 +28,31 @@ _opts = dict(
 
 
 def run_migrations_offline() -> None:
-    context.configure(url=str(engine.url), literal_binds=True, **_opts)
+    url = context.config.get_main_option("sqlalchemy.url") or str(engine.url)
+    context.configure(url=url, literal_binds=True, **_opts)
     with context.begin_transaction():
         context.run_migrations()
 
 
 def run_migrations_online() -> None:
+    connection = context.config.attributes.get("connection", None)
+    if connection is not None:
+        context.configure(connection=connection, **_opts)
+        with context.begin_transaction():
+            context.run_migrations()
+        return
+
+    url = context.config.get_main_option("sqlalchemy.url")
+    if url and url != str(engine.url):
+        from sqlalchemy import create_engine
+        connectable = create_engine(url)
+        with connectable.connect() as conn:
+            context.configure(connection=conn, **_opts)
+            with context.begin_transaction():
+                context.run_migrations()
+        connectable.dispose()
+        return
+
     with engine.connect() as connection:
         context.configure(connection=connection, **_opts)
         with context.begin_transaction():
