@@ -36,16 +36,18 @@ from . import summary as summary_svc  # noqa: E402
 from . import telephony as telephony_svc  # noqa: E402
 from . import whatsapp as wa_svc  # noqa: E402
 from . import caregiver as caregiver_svc  # noqa: E402
+from . import scheduler as scheduler_svc  # noqa: E402
 from .auth import authenticate, current_patient, hash_password, make_token, resolve_actor  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
 from .dosage import parse_dosage  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
-from .models import DoseAdherence, Interaction, Medicine, Patient, ReminderLog, Report  # noqa: E402
+from .models import Appointment, DoseAdherence, Interaction, Medicine, Patient, ReminderLog, ReminderTask, Report  # noqa: E402
 from .schemas import (  # noqa: E402
+    AppointmentCreateIn, AppointmentOut, AppointmentRescheduleIn,
     GoogleAuthIn, LoginIn, LoginOut, MedicineOut, PatientOut, RegisterIn, ReminderPrefsIn,
-    ReminderPrefsOut, ReportOut, RescheduleIn, StopMedicineIn,
+    ReminderPrefsOut, ReminderTaskOut, ReportOut, RescheduleIn, StopMedicineIn,
     TelephonyDispatchIn,
 )
 from .seed import seed, seed_interactions  # noqa: E402
@@ -440,6 +442,8 @@ def confirm_report(
                 med.status = _status(med.start_date or today, med.duration_days)
 
     report.confirmed = True
+    if report.follow_up_date:
+        scheduler_svc.sync_appointment_from_report(db, patient, report)
     db.commit()
     db.refresh(report)
     return _report_out(report)
@@ -997,6 +1001,109 @@ def get_telephony_status_endpoint(
             for l in logs
         ],
     }
+
+
+@app.get("/api/appointments", response_model=list[AppointmentOut])
+def list_appointments(
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """List all appointments for the authenticated patient with per-patient isolation (ERR-016)."""
+    return (
+        db.query(Appointment)
+        .filter(Appointment.patient_id == patient.id)
+        .order_by(Appointment.appointment_at_utc.desc())
+        .all()
+    )
+
+
+@app.post("/api/appointments", response_model=AppointmentOut)
+def create_appointment_endpoint(
+    payload: AppointmentCreateIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Schedule or confirm an appointment with exact timezone and instant (ERR-016)."""
+    tz = payload.timezone or patient.timezone or "Asia/Kolkata"
+    appt_utc, is_date_only = scheduler_svc.parse_iso_or_local_datetime(payload.appointment_at, tz_name=tz)
+    confirmed_source = "date_only_pending_time" if is_date_only else "manual"
+
+    appt, _ = scheduler_svc.schedule_appointment(
+        db=db,
+        patient_id=patient.id,
+        appointment_at_utc=appt_utc,
+        timezone_str=tz,
+        report_id=payload.report_id,
+        doctor_name=payload.doctor_name,
+        doctor_specialty=payload.doctor_specialty,
+        offset_minutes=payload.offset_minutes or 2880,
+        confirmed_source=confirmed_source,
+    )
+    return appt
+
+
+@app.post("/api/appointments/{appointment_id}/reschedule", response_model=AppointmentOut)
+def reschedule_appointment_by_id(
+    appointment_id: int,
+    payload: AppointmentRescheduleIn,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Reschedule an appointment by ID with version increment and task invalidation (ERR-016)."""
+    appt = db.get(Appointment, appointment_id)
+    if not appt or appt.patient_id != patient.id:
+        raise HTTPException(404, "Appointment not found.")
+
+    tz = payload.timezone or appt.timezone or patient.timezone or "Asia/Kolkata"
+    new_utc, _ = scheduler_svc.parse_iso_or_local_datetime(payload.new_appointment_at, tz_name=tz)
+
+    updated_appt, _ = scheduler_svc.reschedule_appointment(
+        db=db,
+        appointment_id=appointment_id,
+        new_appointment_at_utc=new_utc,
+        timezone_str=tz,
+        reason=payload.reason,
+        preferred_date_str=payload.preferred_date_str,
+    )
+    return updated_appt
+
+
+@app.post("/api/appointments/{appointment_id}/cancel", response_model=AppointmentOut)
+def cancel_appointment_by_id(
+    appointment_id: int,
+    reason: Optional[str] = Query(None),
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Cancel an appointment by ID and invalidate all pending reminder tasks (ERR-016)."""
+    appt = db.get(Appointment, appointment_id)
+    if not appt or appt.patient_id != patient.id:
+        raise HTTPException(404, "Appointment not found.")
+
+    return scheduler_svc.cancel_appointment(db=db, appointment_id=appointment_id, reason=reason)
+
+
+@app.get("/api/appointments/tasks", response_model=list[ReminderTaskOut])
+def list_reminder_tasks(
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """List reminder outbox tasks for the authenticated patient with per-patient isolation (ERR-017)."""
+    return (
+        db.query(ReminderTask)
+        .filter(ReminderTask.patient_id == patient.id)
+        .order_by(ReminderTask.reminder_at_utc.desc())
+        .all()
+    )
+
+
+@app.post("/api/appointments/tick")
+async def trigger_scheduler_tick(
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+):
+    """Trigger an immediate durable outbox scheduler tick scoped safely (ERR-017)."""
+    return await scheduler_svc.tick_reminder_tasks(db=db)
 
 
 @app.get("/")

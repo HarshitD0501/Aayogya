@@ -107,6 +107,70 @@ class Patient(Base):
     reminder_time_afternoon = Column(String, default="01:00 PM")
     reminder_time_night = Column(String, default="08:00 PM")
 
+    # Channel consent source and withdrawal timestamps (ERR-018)
+    whatsapp_consent_source = Column(String, default="signup")
+    whatsapp_consent_withdrawn_at = Column(DateTime, nullable=True)
+    call_consent_source = Column(String, nullable=True)
+    call_consent_withdrawn_at = Column(DateTime, nullable=True)
+
+
+class Appointment(Base):
+    """Canonical appointment record with timezone-aware instant, status, and versioning (ERR-016)."""
+    __tablename__ = "appointments"
+    __table_args__ = (
+        Index("ix_appointments_patient_at", "patient_id", "appointment_at_utc"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(String, ForeignKey("patients.id"), index=True)
+    report_id = Column(Integer, ForeignKey("reports.id"), nullable=True, index=True)
+    doctor_name = Column(String, nullable=True)
+    doctor_specialty = Column(String, nullable=True)
+    appointment_at_utc = Column(DateTime, nullable=False)
+    timezone = Column(String, default="Asia/Kolkata")
+    state = Column(String, default="scheduled")  # scheduled | confirmed | reschedule_requested | cancelled | completed
+    version = Column(Integer, default=1)
+    confirmed_source = Column(String, default="prescription_reviewed")  # prescription_reviewed | manual | clinic_synced | date_only_pending_time
+    reschedule_preferred_date = Column(String, nullable=True)
+    reschedule_notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=_now)
+    updated_at = Column(DateTime, default=_now, onupdate=_now)
+
+    patient = relationship("Patient")
+    report = relationship("Report")
+
+
+class ReminderTask(Base):
+    """Durable outbox / scheduled reminder task with atomic claims and idempotency keys (ERR-017)."""
+    __tablename__ = "reminder_tasks"
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_reminder_task_idempotency_key"),
+        Index("ix_reminder_tasks_claim", "state", "reminder_at_utc", "lease_until"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(String, ForeignKey("patients.id"), index=True)
+    appointment_id = Column(Integer, ForeignKey("appointments.id"), nullable=True, index=True)
+    dose_adherence_id = Column(Integer, ForeignKey("dose_adherences.id"), nullable=True, index=True)
+    report_id = Column(Integer, nullable=True)
+    channel = Column(String, default="whatsapp")  # whatsapp | voice
+    kind = Column(String, default="followup")  # followup | dose
+    reminder_at_utc = Column(DateTime, nullable=False, index=True)
+    offset_minutes = Column(Integer, default=2880)  # e.g. 2880 mins = 48 hours
+    state = Column(String, default="pending")  # pending | claimed | dispatched | deferred | failed | cancelled
+    idempotency_key = Column(String, unique=True, nullable=False)
+    lease_until = Column(DateTime, nullable=True)
+    attempts = Column(Integer, default=0)
+    max_attempts = Column(Integer, default=3)
+    next_attempt_at = Column(DateTime, nullable=True)
+    last_error = Column(String, nullable=True)
+    created_at = Column(DateTime, default=_now)
+    updated_at = Column(DateTime, default=_now, onupdate=_now)
+
+    patient = relationship("Patient")
+    appointment = relationship("Appointment")
+    dose_adherence = relationship("DoseAdherence")
+
 
 class Interaction(Base):
     """Curated salt-pair interactions (design §7.4). salt_a/salt_b stored
@@ -151,6 +215,7 @@ class DoseAdherence(Base):
     __table_args__ = (
         Index("ix_dose_adherence_patient_date", "patient_id", "dose_date"),
         Index("ix_dose_adherence_patient_slot", "patient_id", "dose_date", "slot"),
+        UniqueConstraint("patient_id", "medicine_id", "dose_date", "slot", name="uq_dose_adherence_slot"),
     )
 
     id = Column(Integer, primary_key=True)

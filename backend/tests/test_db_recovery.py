@@ -102,7 +102,7 @@ class IndexRecoveryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         with closing(sqlite3.connect(fresh)) as c:
             self.assertEqual(c.execute("SELECT version_num FROM alembic_version").fetchone(),
-                             ("c83a1b4d2e5f",))
+                             ("8d716ab6add5",))
             patient_cols = [r[1] for r in c.execute("PRAGMA table_info(patients)")]
             self.assertIn("google_sub", patient_cols)
             self.assertIn("auto_reminders_enabled", patient_cols)

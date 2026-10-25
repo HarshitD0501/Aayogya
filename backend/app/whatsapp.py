@@ -1050,6 +1050,13 @@ async def run_automated_reminders_check(
                 })
 
         # 2. DOCTOR MEET / CHECKUP / TEST: Dispatched via CALL ONLY (2 days prior, daytime 09:00 - 20:00)
+        # Durable outbox worker handles scheduled tasks; force mode synchronizes directly.
+        from . import scheduler as scheduler_svc
+        durable_res = await scheduler_svc.tick_reminder_tasks(db)
+        for d_item in durable_res.get("results", []):
+            if d_item.get("status") == "dispatched" and d_item.get("result"):
+                doctor_calls.append(d_item["result"])
+
         reports = due_reports_by_patient.get(p.id, [])
         # Voice call window: 09:00 AM (540 mins) to 08:00 PM (1200 mins) IST
         is_call_window = (540 <= current_total_mins <= 1200)
@@ -1082,6 +1089,7 @@ async def run_automated_reminders_check(
             )
             if call_res.get("status") in ("dispatched", "simulated", "call_placed", "sent"):
                 doctor_calls.append(call_res)
+                scheduler_svc.sync_appointment_from_report(db, p, r)
 
     logger.info(
         "[SCHEDULER] Precision check completed at %s IST (%d mins). WhatsApp meds sent: %d. Doctor voice calls: %d",

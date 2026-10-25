@@ -266,6 +266,30 @@ def handle_reschedule_request(
     report.reschedule_preferred_date = preferred_date_or_time.strip()
     report.reschedule_notes = (reason or "").strip() or "Requested via Sahayak Voice Call"
 
+    # Sync Appointment record and invalidate pending tasks (ERR-016)
+    from .models import Appointment, ReminderTask
+    appt = (
+        db.query(Appointment)
+        .filter(Appointment.patient_id == patient_id, Appointment.report_id == report_id)
+        .first()
+    )
+    if appt:
+        appt.state = "reschedule_requested"
+        appt.reschedule_preferred_date = report.reschedule_preferred_date
+        appt.reschedule_notes = report.reschedule_notes
+        prior_tasks = (
+            db.query(ReminderTask)
+            .filter(
+                ReminderTask.appointment_id == appt.id,
+                ReminderTask.state.in_(["pending", "deferred", "claimed"]),
+            )
+            .all()
+        )
+        for t in prior_tasks:
+            t.state = "cancelled"
+            t.lease_until = None
+            t.last_error = f"Reschedule requested: {preferred_date_or_time}"
+
     db.add(
         ReminderLog(
             patient_id=patient_id,

@@ -23,7 +23,7 @@ Audit window: 2026-10-24/25. Status applies to the stated scope, not an entire p
 | NPPA data | Local reference catalog inspected; official freshness NOT VERIFIED | C/E | 119-row combined dataset, no complete document/effective-date provenance |
 | Jan Aushadhi data | Current official portal located; installed values NOT VERIFIED current | C/E | Old ProductList.aspx link renders 404; current product page has export controls |
 | Price prediction model | NOT PRESENT | E if advertised | No trained estimator or evaluation artifacts; estimates must remain separate if later added |
-| WhatsApp medication scheduler | Synthetic tests pass; persistence/eligibility gaps VERIFIED | E | 30-second poll, five-minute window, no distributed claims/catch-up |
+| WhatsApp medication scheduler | RESOLVED (Batch 5) | B | Durable ReminderTask outbox with atomic database claims, leases, idempotency keys, and catch-up execution (ERR-017) |
 | 48-hour appointment WhatsApp reminder | NOT IMPLEMENTED | E | Current WhatsApp path handles medication slots; follow-up uses calls |
 | Immediate WhatsApp button | Backend send path mocked; live delivery NOT TESTED | C/E | Requires scoped consent/allowlist/template policy; v1 UI can fake action success |
 | WhatsApp inbound buttons | Sender-scoping tests VERIFIED WORKING | B | Signature enforcement, replay, text negation and delivery status need fixes |
@@ -34,7 +34,7 @@ Audit window: 2026-10-24/25. Status applies to the stated scope, not an entire p
 | Murf/Deepgram streaming configuration | VERIFIED supported by installed signatures | B/C | 1.8.3 supports current parameters; actual credentials/voice/region/audio not tested |
 | Voice latency/audio quality | NOT TESTED live | C | No measured first-audio p50/p95, packet loss or reconnect rate; 300 ms claim unsupported |
 | Twilio/LiveKit SIP calling | Mocked dispatch tests VERIFIED WORKING | C | No real trunk/number/answer/audio validation performed |
-| Exact 48-hour calling | VERIFIED INCOMPLETE | E | Date-only plus-two-day query, no exact appointment timestamp |
+| Exact 48-hour calling | RESOLVED (Batch 5) | B | Canonical Appointment(utc, tz, version), quiet hours deferral (09:00-20:00), and durable ReminderTask outbox (ERR-016, ERR-017) |
 | Immediate demo call | RESOLVED mock lifecycle (Batch 1B) | B/C | Fixed timer lifecycle and fake completion removed (ERR-006); polls real status |
 | Reschedule preference | VERIFIED WORKING in synthetic backend tests | B | Records a request only; clinic-notified claim is false; confirmed booking absent |
 | OSM/Leaflet rendering | VERIFIED WORKING map/markers in browser | B | One map and four fixture markers; not verified live facility data |

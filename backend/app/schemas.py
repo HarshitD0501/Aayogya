@@ -189,3 +189,63 @@ class RescheduleIn(BaseModel):
 class TelephonyDispatchIn(BaseModel):
     report_id: int
     force: bool = False
+
+
+class AppointmentOut(BaseModel):
+    id: int
+    patient_id: str
+    report_id: Optional[int] = None
+    doctor_name: Optional[str] = None
+    doctor_specialty: Optional[str] = None
+    appointment_at_utc: datetime
+    timezone: str = "Asia/Kolkata"
+    state: str = "scheduled"
+    version: int = 1
+    confirmed_source: str = "prescription_reviewed"
+    reschedule_preferred_date: Optional[str] = None
+    reschedule_notes: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AppointmentCreateIn(BaseModel):
+    report_id: Optional[int] = None
+    appointment_at: str  # ISO string or date
+    timezone: Optional[str] = "Asia/Kolkata"
+    doctor_name: Optional[str] = None
+    doctor_specialty: Optional[str] = None
+    offset_minutes: Optional[int] = 2880
+
+
+class AppointmentRescheduleIn(BaseModel):
+    new_appointment_at: str  # ISO string or date
+    timezone: Optional[str] = None
+    reason: Optional[str] = None
+    preferred_date_str: Optional[str] = None
+
+
+class ReminderTaskOut(BaseModel):
+    id: int
+    patient_id: str
+    appointment_id: Optional[int] = None
+    dose_adherence_id: Optional[int] = None
+    report_id: Optional[int] = None
+    channel: str = "voice"
+    kind: str = "followup"
+    reminder_at_utc: datetime
+    offset_minutes: int = 2880
+    state: str = "pending"
+    idempotency_key: str
+    attempts: int = 0
+    max_attempts: int = 3
+    next_attempt_at: Optional[datetime] = None
+    last_error: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
