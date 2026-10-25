@@ -29,7 +29,7 @@ from .models import Patient
 _SECRET = settings.secret_key.encode()
 _TTL = 60 * 60 * 24 * 7  # 7 days
 _ITER = 200_000
-_DEMO_ACCOUNT_IDS = frozenset({"aarav", "shanti", "ramesh", "sunita", "meera"})
+_DEMO_ACCOUNT_IDS = frozenset({"aarav", "shanti", "ramesh", "sunita", "meera", "ram", "ramesh-caregiver"})
 
 
 def _demo_account_blocked(patient_id: str) -> bool:
@@ -122,10 +122,14 @@ def authenticate(db: Session, identifier: str, password: str) -> Patient | None:
         )
         .first()
     )
-    if patient and not _demo_account_blocked(patient.id) and verify_password(
-        password, patient.password_hash or ""
-    ):
-        return patient
+    if patient:
+        if _demo_account_blocked(patient.id):
+            raise HTTPException(
+                403,
+                "Demo accounts are disabled in this environment. Set ENABLE_DEMO_ACCOUNTS=true in backend/.env to enable them.",
+            )
+        if verify_password(password, patient.password_hash or ""):
+            return patient
     return None
 
 

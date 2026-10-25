@@ -73,7 +73,14 @@ export async function api(path, opts = {}) {
     clearTimeout(timer);
   }
 
-  if (res.status === 401) {
+  const isAuthEndpoint =
+    path === "/auth/login" ||
+    path === "/auth/register" ||
+    path === "/auth/google" ||
+    path.startsWith("/auth/login") ||
+    path.startsWith("/auth/register");
+
+  if (res.status === 401 && !isAuthEndpoint) {
     clearToken();
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("aushadh:logout"));
