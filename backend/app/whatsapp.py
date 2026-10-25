@@ -16,6 +16,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 from uuid import uuid4
@@ -32,6 +33,9 @@ from .models import DoseAdherence, Medicine, Patient, ReminderLog, Report
 from . import telephony as telephony_svc
 
 logger = logging.getLogger("aayogya.whatsapp")
+
+# In-memory deduplication set for incoming Meta webhook message IDs (ERR-008)
+_PROCESSED_WEBHOOK_MSG_IDS: set[str] = set()
 
 GRAPH_API_BASE = "https://graph.facebook.com/v23.0"
 # Version note: Meta deprecates Graph versions ~2 years after release; v21.0
@@ -202,10 +206,12 @@ def _clean_phone(phone: str | None) -> str:
 
 def verify_signature(payload_bytes: bytes, signature_header: Optional[str]) -> bool:
     """Validate Meta's X-Hub-Signature-256 header using the app secret.
-    If no app secret is configured, passes validation in development mode.
+    In production: strictly enforces valid HMAC signature using whatsapp_app_secret;
+    if whatsapp_app_secret is absent or signature is invalid, returns False (ERR-009).
+    In development: passes only if whatsapp_app_secret is not configured AND settings.is_development.
     """
     if not settings.whatsapp_app_secret:
-        return True
+        return bool(settings.is_development)
     if not signature_header or not signature_header.startswith("sha256="):
         return False
     expected = hmac.new(
@@ -215,6 +221,18 @@ def verify_signature(payload_bytes: bytes, signature_header: Optional[str]) -> b
     ).hexdigest()
     actual = signature_header.split("sha256=", 1)[1]
     return hmac.compare_digest(expected, actual)
+
+
+def _is_outbound_allowed(phone: str) -> tuple[bool, str]:
+    """Check server-side kill switch and destination phone allowlist (ERR-019)."""
+    if not settings.outbound_dispatch_enabled:
+        return False, "outbound_dispatch_disabled_by_killswitch"
+    if settings.outbound_phone_allowlist:
+        allowed = [p.strip() for p in settings.outbound_phone_allowlist.split(",") if p.strip()]
+        clean = _clean_phone(phone)
+        if not any(clean.endswith(a.lstrip("+")) or a.lstrip("+").endswith(clean) for a in allowed):
+            return False, "destination_phone_not_in_allowlist"
+    return True, "allowed"
 
 
 def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
@@ -321,6 +339,11 @@ def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
 async def send_text_message(to_phone: str, text: str) -> dict[str, Any]:
     """Send a plain text message via Meta Cloud API or mock simulator."""
     clean_to = _clean_phone(to_phone)
+    allowed, reason = _is_outbound_allowed(clean_to)
+    if not allowed:
+        logger.warning("[WHATSAPP] Outbound message to %s blocked: %s", clean_to, reason)
+        return {"status": "blocked", "reason": reason, "to": clean_to}
+
     if not (settings.whatsapp_api_token and settings.whatsapp_phone_number_id):
         logger.info("[MOCK WHATSAPP] Outbound text to %s: %s", clean_to, text)
         return {"status": "simulated", "to": clean_to, "message_id": f"mock_txt_{uuid4().hex[:10]}"}
@@ -366,6 +389,11 @@ async def send_interactive_slot_reminder(
         return {"status": "skipped", "reason": "no_adherences"}
 
     clean_to = _clean_phone(patient.phone)
+    allowed, reason = _is_outbound_allowed(clean_to)
+    if not allowed:
+        logger.warning("[WHATSAPP] Outbound reminder to %s blocked: %s", clean_to, reason)
+        return {"status": "blocked", "reason": reason, "recipient": clean_to}
+
     slot_label = _SLOT_HINDI.get(slot, slot)
     timing_str = adherences[0].scheduled_time or get_patient_slot_time(patient, slot)
 
@@ -554,9 +582,45 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
         changes = entry.get("changes", [])
         for change in changes:
             value = change.get("value", {})
+
+            # ERR-020: Handle Meta delivery status receipts
+            statuses = value.get("statuses", [])
+            for st in statuses:
+                wamid = st.get("id")
+                meta_status = st.get("status")  # "sent" | "delivered" | "read" | "failed"
+                recipient_id = st.get("recipient_id")
+                logger.info(
+                    "[WHATSAPP WEBHOOK] Status update: msg=%s status=%s recipient=%s",
+                    wamid,
+                    meta_status,
+                    recipient_id,
+                )
+                if wamid and meta_status:
+                    matching_adhs = (
+                        db.query(DoseAdherence)
+                        .filter(DoseAdherence.whatsapp_message_id == wamid)
+                        .all()
+                    )
+                    for adh in matching_adhs:
+                        adh.notes = f"{adh.notes or ''} [Meta:{meta_status}]".strip()
+                    db.commit()
+                    results.append({"status_update": meta_status, "message_id": wamid})
+
             messages = value.get("messages", [])
 
             for msg in messages:
+                msg_id = msg.get("id")
+                if msg_id:
+                    if msg_id in _PROCESSED_WEBHOOK_MSG_IDS:
+                        logger.info(
+                            "[WHATSAPP WEBHOOK] Duplicate message ID %s received; skipping (ERR-008).",
+                            msg_id,
+                        )
+                        continue
+                    _PROCESSED_WEBHOOK_MSG_IDS.add(msg_id)
+                    if len(_PROCESSED_WEBHOOK_MSG_IDS) > 5000:
+                        _PROCESSED_WEBHOOK_MSG_IDS.clear()
+
                 from_number = msg.get("from", "")
                 msg_type = msg.get("type", "")
 
@@ -654,11 +718,9 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
 
                 # 2. Text Message Reply (Natural Language)
                 elif msg_type == "text":
-                    body = msg.get("text", {}).get("body", "").strip().lower()
+                    body = msg.get("text", {}).get("body", "").strip()
+                    body_lower = body.lower()
                     logger.info("WhatsApp Text Message received: '%s' from %s", body, from_number)
-
-                    positive_terms = ["yes", "taken", "haa", "haan", "le li", "kha li", "done", "li", "1", "sab", "all"]
-                    negative_terms = ["no", "nahi", "missed", "forgot", "bhool", "nahi li", "skip", "2"]
 
                     clean = _clean_phone(from_number)
                     patient = (
@@ -668,6 +730,66 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                         )
                         .first()
                     )
+
+                    # ERR-018: Explicit STOP / Opt-Out Protocol
+                    if re.search(
+                        r"^\s*(stop|unsubscribe|cancel|quit|roko|band\s*karo|mat\s*bhejo)\b",
+                        body_lower,
+                        re.IGNORECASE,
+                    ):
+                        if patient:
+                            patient.whatsapp_reminders_enabled = False
+                            patient.auto_reminders_enabled = False
+                            db.commit()
+                            logger.info("[WHATSAPP] Patient %s opted out of WhatsApp reminders via '%s'", patient.id, body)
+                            await send_text_message(
+                                from_number,
+                                f"नमस्ते {patient.name}! आपने Aayogya WhatsApp रिमाइंडर सेवा बंद (Opt-Out) कर दी है। अब आपको रिमाइंडर नहीं भेजे जाएंगे। यदि आप इसे पुनः चालू करना चाहते हैं तो 'START' या 'SHURU' लिखकर भेजें।",
+                            )
+                            results.append({"action": "opted_out", "patient_id": patient.id})
+                        else:
+                            await send_text_message(
+                                from_number,
+                                "Aayogya: You have opted out of WhatsApp reminders. Reply START anytime to resume.",
+                            )
+                            results.append({"action": "opted_out", "phone": from_number})
+                        continue
+
+                    # ERR-018: Explicit START / Opt-In Protocol
+                    if re.search(
+                        r"^\s*(start|subscribe|unstop|shuru|chalu\s*karo)\b",
+                        body_lower,
+                        re.IGNORECASE,
+                    ):
+                        if patient:
+                            patient.whatsapp_reminders_enabled = True
+                            patient.auto_reminders_enabled = True
+                            db.commit()
+                            logger.info("[WHATSAPP] Patient %s opted in to WhatsApp reminders via '%s'", patient.id, body)
+                            await send_text_message(
+                                from_number,
+                                f"नमस्ते {patient.name}! आपकी Aayogya WhatsApp रिमाइंडर सेवा पुनः चालू (Opt-In) कर दी गई है। आपको समय पर दवा के रिमाइंडर प्राप्त होंगे। रोकने के लिए 'STOP' लिखें।",
+                            )
+                            results.append({"action": "opted_in", "patient_id": patient.id})
+                        else:
+                            await send_text_message(
+                                from_number,
+                                "Aayogya: You have resubscribed to WhatsApp reminders. Reply STOP anytime to opt out.",
+                            )
+                            results.append({"action": "opted_in", "phone": from_number})
+                        continue
+
+                    # ERR-008: Word-boundary regex with NEGATION checked BEFORE POSITIVE
+                    is_negative = bool(re.search(
+                        r"\b(nahi\s+li|not\s+taken|missed|forgot|bhool|nahi\s+khayi|chhoot\s+gayi|skip|no|nahi|nahin|na|2)\b",
+                        body_lower,
+                        re.IGNORECASE,
+                    ))
+                    is_positive = bool(re.search(
+                        r"\b(yes|taken|le\s+li|kha\s+li|khayi|haa|haan|done|all\s+taken|sab\s+le\s+li|all|sab|1)\b",
+                        body_lower,
+                        re.IGNORECASE,
+                    ))
 
                     if patient:
                         today_str = _ist_today()
@@ -687,7 +809,18 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                             first_slot = pending_list[0].slot
                             slot_doses = [a for a in pending_list if a.slot == first_slot]
 
-                            if any(p in body for p in positive_terms):
+                            if is_negative:
+                                for a in slot_doses:
+                                    a.status = "missed"
+                                    a.confirmed_at = datetime.now(timezone.utc)
+                                    a.notes = f"Marked missed via text reply: '{body}'"
+                                db.commit()
+                                await send_text_message(
+                                    from_number,
+                                    f"नोट कर लिया गया है कि आपकी खुराक छूट गई है। कृपया अगली खुराक सामान्य समय पर लें।",
+                                )
+                                results.append({"action": "marked_missed_via_text", "adherence_ids": [a.id for a in slot_doses]})
+                            elif is_positive:
                                 med_names = []
                                 for a in slot_doses:
                                     a.status = "taken"
@@ -702,22 +835,12 @@ async def process_webhook_payload(payload: dict[str, Any], db: Session) -> dict[
                                     f"नमस्ते {patient.name}! आपकी *{_SLOT_HINDI.get(first_slot, first_slot)}* की दवाएं ({names_str}) दर्ज कर ली गई हैं। 🌟",
                                 )
                                 results.append({"action": "marked_taken_via_text", "adherence_ids": [a.id for a in slot_doses]})
-                            elif any(n in body for n in negative_terms):
-                                for a in slot_doses:
-                                    a.status = "missed"
-                                    a.confirmed_at = datetime.now(timezone.utc)
-                                    a.notes = f"Marked missed via text reply: '{body}'"
-                                db.commit()
-                                await send_text_message(
-                                    from_number,
-                                    f"नोट कर लिया गया है कि आपकी खुराक छूट गई है। कृपया अगली खुराक सामान्य समय पर लें।",
-                                )
-                                results.append({"action": "marked_missed_via_text", "adherence_ids": [a.id for a in slot_doses]})
                             else:
                                 await send_text_message(
                                     from_number,
                                     f"नमस्ते! दवा की स्थिति दर्ज करने के लिए कृपया 'Yes' (ले ली) या 'No' (छूट गई) लिखें, या ऊपर दिए गए बटन दबाएँ।",
                                 )
+                                results.append({"action": "clarification_requested", "body": body})
 
     return {"processed": len(results), "results": results}
 
@@ -825,9 +948,10 @@ def toggle_medicine_reminders(
 
 
 async def run_automated_reminders_check(
-    db: Session, force: bool = False
+    db: Session, force: bool = False, target_patient_id: Optional[str] = None
 ) -> dict[str, Any]:
     """Automated precision scheduler worker. Checks all patients with active auto-reminders
+    (or a specific target patient when target_patient_id is supplied, preventing cross-patient exposure per ERR-002)
     and dispatches:
     1. Daily Medicines: Dispatched via WHATSAPP ONLY when the current IST minute matches
        the patient's scheduled dose time (within a 5-minute precision window).
@@ -849,11 +973,12 @@ async def run_automated_reminders_check(
     elif 1020 <= current_total_mins < 1410:  # 05:00 PM - 11:30 PM
         current_slot = "night"
 
-    patients = (
-        db.query(Patient)
-        .filter(Patient.auto_reminders_enabled.isnot(False))
-        .all()
-    )
+    patient_query = db.query(Patient)
+    if target_patient_id:
+        patient_query = patient_query.filter(Patient.id == target_patient_id)
+    else:
+        patient_query = patient_query.filter(Patient.auto_reminders_enabled.isnot(False))
+    patients = patient_query.all()
 
     dispatched = []
     doctor_calls = []
@@ -861,19 +986,15 @@ async def run_automated_reminders_check(
     two_days_later = (_ist_date() + timedelta(days=2)).isoformat()
     today_str = _ist_today()
 
-    # One batched query for ALL due follow-ups this tick (was: one query per patient).
+    # One batched query for due follow-ups, strictly scoped by target_patient_id if set (ERR-002)
+    report_query = db.query(Report).filter(Report.follow_up_date.isnot(None))
+    if target_patient_id:
+        report_query = report_query.filter(Report.patient_id == target_patient_id)
     if force:
-        due_reports = (
-            db.query(Report)
-            .filter(Report.follow_up_date.isnot(None), Report.follow_up_date >= today_str)
-            .all()
-        )
+        due_reports = report_query.filter(Report.follow_up_date >= today_str).all()
     else:
-        due_reports = (
-            db.query(Report)
-            .filter(Report.follow_up_date == two_days_later)
-            .all()
-        )
+        due_reports = report_query.filter(Report.follow_up_date == two_days_later).all()
+
     due_reports_by_patient: dict[str, list[Report]] = {}
     for r in due_reports:
         due_reports_by_patient.setdefault(r.patient_id, []).append(r)
@@ -959,7 +1080,7 @@ async def run_automated_reminders_check(
             call_res = await telephony_svc.dispatch_doctor_followup_call(
                 db, p, r, force=force
             )
-            if call_res.get("status") in ("call_placed", "sent"):
+            if call_res.get("status") in ("dispatched", "simulated", "call_placed", "sent"):
                 doctor_calls.append(call_res)
 
     logger.info(

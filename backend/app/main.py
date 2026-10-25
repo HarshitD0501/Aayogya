@@ -623,7 +623,7 @@ def whatsapp_webhook_verify(
     if hub_mode == "subscribe" and hub_verify_token == settings.whatsapp_verify_token:
         logger.info("Meta WhatsApp Webhook successfully verified with challenge: %s", hub_challenge)
         return Response(content=hub_challenge or "", media_type="text/plain")
-    logger.warning("WhatsApp Webhook verify mismatch: received token %s", hub_verify_token)
+    logger.warning("WhatsApp Webhook verify mismatch: invalid or missing verification token")
     raise HTTPException(403, "Verification token mismatch")
 
 
@@ -660,6 +660,9 @@ async def send_dose_reminder(
     ).first()
     if not adh:
         raise HTTPException(404, "Scheduled dose adherence record not found")
+
+    if patient.whatsapp_reminders_enabled is False:
+        raise HTTPException(400, "WhatsApp reminders are disabled in patient preferences")
 
     # Group all pending medicines for this patient in this same slot so a single message is sent
     slot_doses = (
@@ -865,8 +868,8 @@ async def trigger_automated_reminders(
     patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
 ):
-    """Manually test or trigger the automated reminder scheduler immediately."""
-    res = await wa_svc.run_automated_reminders_check(db, force=True)
+    """Manually test or trigger the automated reminder scheduler immediately for the authenticated patient (ERR-002)."""
+    res = await wa_svc.run_automated_reminders_check(db, force=True, target_patient_id=patient.id)
     return {"status": "triggered", "details": res}
 
 
@@ -965,16 +968,21 @@ def get_telephony_status_endpoint(
             ReminderLog.patient_id == patient.id,
             ReminderLog.channel == "voice",
             ReminderLog.kind == "followup",
+            ReminderLog.body.like(f"%(report #{report.id},%"),
         )
         .order_by(ReminderLog.sent_at.desc())
         .limit(5)
         .all()
     )
 
+    latest_call = logs[0] if logs else None
+    current_status = latest_call.call_status if latest_call else (report.follow_up_status or "scheduled")
+
     return {
         "report_id": report.id,
         "follow_up_date": report.follow_up_date,
         "follow_up_status": report.follow_up_status or "scheduled",
+        "status": current_status,
         "reschedule_preferred_date": report.reschedule_preferred_date,
         "reschedule_notes": report.reschedule_notes,
         "last_call_at": report.last_call_at.isoformat() if report.last_call_at else None,

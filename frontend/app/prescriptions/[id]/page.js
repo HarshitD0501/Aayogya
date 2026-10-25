@@ -576,9 +576,23 @@ export default function PrescriptionDetailPage() {
           <div className="flex items-center gap-4 flex-wrap">
             <button
               onClick={handleTriggerCall}
-              disabled={!checkupConfirmed || callState !== "idle"}
+              disabled={
+                !checkupConfirmed ||
+                (callState !== "idle" &&
+                  callState !== "failed" &&
+                  callState !== "simulated" &&
+                  callState !== "rate_limited" &&
+                  callState !== "blocked" &&
+                  callState !== "skipped")
+              }
               className={`px-6 py-3 font-serif font-black text-xs uppercase tracking-wider border-2 border-brand-navy sketchy-btn shadow-sketch transition-all flex items-center gap-2 ${
-                !checkupConfirmed || callState !== "idle"
+                !checkupConfirmed ||
+                (callState !== "idle" &&
+                  callState !== "failed" &&
+                  callState !== "simulated" &&
+                  callState !== "rate_limited" &&
+                  callState !== "blocked" &&
+                  callState !== "skipped")
                   ? "bg-brand-gray/20 text-brand-gray cursor-not-allowed border-brand-gray/40"
                   : "bg-brand-orange text-brand-navy hover:shadow-sketch-hover"
               }`}
@@ -587,9 +601,14 @@ export default function PrescriptionDetailPage() {
               <span>
                 {callState === "idle" && "Call Patient Now"}
                 {callState === "requested" && "Call Requested…"}
+                {callState === "dispatched" && "Call Dispatched to Network…"}
+                {callState === "simulated" && "Call Simulated (Dev Mode)"}
                 {callState === "ringing" && "Handset Ringing…"}
                 {callState === "answered" && "Patient Answered (Speaking)"}
                 {callState === "completed" && "Call Completed Successfully"}
+                {callState === "rate_limited" && "Call Cooldown Active (Wait 60s)"}
+                {callState === "blocked" && "Call Blocked by Safety Policy"}
+                {callState === "skipped" && "Call Skipped (Consent Disabled)"}
                 {callState === "failed" && "Call Failed — Retry"}
               </span>
             </button>

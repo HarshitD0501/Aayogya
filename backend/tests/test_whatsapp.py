@@ -264,6 +264,7 @@ def test_scheduler_due_reminders():
     wa_svc.sync_today_adherence(db, patient.id)
 
     # Seed a report with follow-up exactly 2 days from today
+    patient.call_reminders_enabled = True
     follow_date = (date.today() + timedelta(days=2)).isoformat()
     report = Report(
         id=901,
@@ -290,7 +291,7 @@ def test_scheduler_due_reminders():
         assert call["channel"] == "voice"
         assert "Dr. Alok Verma" in call["doctor"]
         assert call["follow_up_date"] == follow_date
-        assert call["status"] == "call_placed"
+        assert call["status"] in ("simulated", "dispatched", "call_placed")
         print("  [PASS] run_automated_reminders_check: medicines via WhatsApp ONLY, doctor meet 2-days before via CALL ONLY.")
     finally:
         settings.whatsapp_api_token = orig_token

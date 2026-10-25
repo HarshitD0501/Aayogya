@@ -87,6 +87,10 @@ class Settings(BaseSettings):
     # gets the job. Must match agent_name in WorkerOptions (voice.py).
     livekit_agent_name: str = "aayogya-telephony"
 
+    # Outbound Safety, Kill Switch & Allowlist (Batch 4: ERR-002, ERR-019)
+    outbound_dispatch_enabled: bool = True
+    outbound_phone_allowlist: str = ""  # Comma-separated E.164 numbers; blank => all allowed
+
     # Postgres connection pool (ignored for sqlite).
     db_pool_size: int = 5
     db_max_overflow: int = 10
@@ -106,11 +110,17 @@ class Settings(BaseSettings):
                 raise ValueError("ENABLE_DEMO_ACCOUNTS cannot be enabled in production")
             if self.enable_mock_extraction:
                 raise ValueError("ENABLE_MOCK_EXTRACTION cannot be enabled in production")
+            if self.whatsapp_api_token and not self.whatsapp_app_secret:
+                raise ValueError("Production with active WhatsApp integration requires WHATSAPP_APP_SECRET")
         elif not self.secret_key:
             # Keep local setup usable without shipping a forgeable shared key.
             # Tokens expire on restart, which is acceptable for a dev-only key.
             self.secret_key = secrets.token_urlsafe(48)
         return self
+
+    @property
+    def is_development(self) -> bool:
+        return self.environment == "development"
 
     @property
     def is_postgres(self) -> bool:

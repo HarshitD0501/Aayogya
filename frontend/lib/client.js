@@ -549,12 +549,23 @@ class Client {
     }
 
     try {
-      const res = await this.fetchWithTimeout(`/api/v1/calls`, {
+      const res = await this.fetchWithTimeout(`/api/telephony/dispatch`, {
         method: "POST",
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          report_id: Number(payload.report_id),
+          force: true
+        })
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          ...data,
+          call_id: data.call_id || data.room_name || `call-${payload.report_id}`,
+          management_token: data.call_id || data.room_name || `call-${payload.report_id}`,
+          status: data.status === "simulated" ? "simulated" : (data.mode === "live" ? "dispatched" : data.status)
+        };
+      }
       let errDetail = "Call request failed";
       try {
         const errJson = await res.json();
@@ -568,14 +579,18 @@ class Client {
   }
 
   async getCallStatus(callId, managementToken) {
-    const headers = {};
-    if (managementToken) {
-      headers["Authorization"] = `Bearer ${managementToken}`;
-    }
-
+    const reportId = String(callId).replace(/^call-|^sim-/, "").split("-")[0];
     try {
-      const res = await this.fetchWithTimeout(`/api/v1/calls/${encodeURIComponent(callId)}`, { headers });
-      if (res.ok) return await res.json();
+      const res = await this.fetchWithTimeout(`/api/telephony/status/${encodeURIComponent(reportId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const latestCall = data.recent_calls && data.recent_calls[0];
+        const status = latestCall ? (latestCall.call_status || latestCall.status) : (data.status || "idle");
+        return {
+          ...data,
+          status
+        };
+      }
       let errDetail = "Failed to fetch call status";
       try {
         const errJson = await res.json();

@@ -149,7 +149,10 @@ class DoctorFollowupAssistant(Agent):
         res = await safe(self._client.request_reschedule(self._report_id, preferred_date_or_time, reason))
         if isinstance(res, dict) and "error" in res:
             return "Unable to save reschedule preference at this moment."
-        return f"Successfully recorded preferred reschedule time: {preferred_date_or_time}. The clinic has been notified."
+        return (
+            f"Preference recorded for {preferred_date_or_time}. "
+            f"Please note that the appointment is not yet confirmed with the clinic."
+        )
 
     @function_tool
     async def get_my_medicines(self, context: RunContext) -> str:

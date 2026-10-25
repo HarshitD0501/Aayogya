@@ -78,12 +78,34 @@ async def dispatch_doctor_followup_call(
     if not patient.phone:
         raise ValueError(f"Patient {patient.name} ({patient.id}) has no phone number recorded.")
 
-    if not patient.call_reminders_enabled and not force:
-        logger.info("[TELEPHONY] Voice call reminders disabled by patient %s; skipping.", patient.id)
+    if not settings.outbound_dispatch_enabled:
+        logger.warning("[TELEPHONY] Outbound dispatch disabled by server kill switch (ERR-019).")
+        return {
+            "status": "blocked",
+            "reason": "outbound_dispatch_disabled_by_killswitch",
+            "patient_id": patient.id,
+            "report_id": report.id,
+        }
+
+    if settings.outbound_phone_allowlist:
+        allowed = [p.strip() for p in settings.outbound_phone_allowlist.split(",") if p.strip()]
+        clean_phone = patient.phone.replace(" ", "").replace("-", "")
+        if not any(clean_phone.endswith(a.lstrip("+")) or a.lstrip("+").endswith(clean_phone) for a in allowed):
+            logger.warning("[TELEPHONY] Destination phone %s not in allowlist (ERR-019).", patient.phone)
+            return {
+                "status": "blocked",
+                "reason": "destination_phone_not_in_allowlist",
+                "patient_id": patient.id,
+                "report_id": report.id,
+            }
+
+    if patient.call_reminders_enabled is False:
+        logger.info("[TELEPHONY] Voice call reminders disabled by patient %s; skipping (ERR-019).", patient.id)
         return {
             "status": "skipped",
             "reason": "call_reminders_disabled_by_patient",
             "patient_id": patient.id,
+            "report_id": report.id,
         }
 
     if not is_call_time_window(force):
@@ -93,6 +115,24 @@ async def dispatch_doctor_followup_call(
             "reason": "outside_calling_hours_window",
             "window": "09:00-20:00 IST",
         }
+
+    if report.last_call_at:
+        last_dt = report.last_call_at
+        if last_dt.tzinfo is None:
+            last_dt = last_dt.replace(tzinfo=timezone.utc)
+        elapsed = (datetime.now(timezone.utc) - last_dt).total_seconds()
+        if elapsed < 60:
+            logger.warning(
+                "[TELEPHONY] Rate limit: call cooldown active for report #%s (%d seconds remaining).",
+                report.id,
+                int(60 - elapsed),
+            )
+            return {
+                "status": "rate_limited",
+                "reason": "call_cooldown_active_60s",
+                "elapsed_seconds": int(elapsed),
+                "report_id": report.id,
+            }
 
     # The agent calls the backend as this patient — a fresh token is minted here
     # so scheduled calls (no HTTP request in flight) carry valid credentials.
@@ -187,9 +227,10 @@ async def dispatch_doctor_followup_call(
     db.commit()
 
     return {
-        "status": "call_placed",
+        "status": "dispatched" if mode == "live" else "simulated",
         "channel": "voice",
         "mode": mode,
+        "call_id": room_name or f"sim-{report.id}-{int(datetime.now(timezone.utc).timestamp())}",
         "room_name": room_name if mode == "live" else None,
         "agent_name": settings.livekit_agent_name if mode == "live" else None,
         "patient_id": patient.id,
