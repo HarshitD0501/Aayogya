@@ -139,11 +139,15 @@ def _extract_raw(image_bytes: bytes, mime: str) -> tuple[dict, bool]:
     
     Agent 1 (Preprocessor) runs first to enhance image quality before vision models.
     """
-    # Agent 1: Vision Preprocessor
+    if not image_bytes:
+        raise ValueError("Empty image bytes provided for extraction.")
+
+    # Agent 1: Vision Preprocessor with strict format validation
     try:
-        image_bytes, mime = preprocess_prescription_image(image_bytes, mime or "image/jpeg")
+        image_bytes, mime = preprocess_prescription_image(image_bytes, mime or "image/jpeg", strict=True)
     except Exception as e:
-        logger.warning("Image preprocessor failed (%s): %s. Using original bytes.", type(e).__name__, e)
+        logger.warning("Image preprocessor rejected payload (%s): %s", type(e).__name__, e)
+        raise ValueError(f"Invalid or unreadable prescription image: {e}") from e
 
     # Agent 2: VLM Deciphering with Multi-Provider Fallback Chain
     last_error: Exception | None = None

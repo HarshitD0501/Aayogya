@@ -27,9 +27,19 @@ def test():
     assert h.doses == {"morning": 0.5, "night": 0.5}, h.doses
     assert parse_dosage("½-0-1").doses["morning"] == 0.5
 
-    # 4-part folds noon+evening into afternoon
+    # 4-part preserves 4 distinct administrations without folding (ERR-025)
     q = parse_dosage("1-1-1-1")
-    assert q.doses["afternoon"] == 2.0, q.doses
+    assert q.timings == ["morning", "afternoon", "evening", "night"], q.timings
+    assert q.doses == {"morning": 1.0, "afternoon": 1.0, "evening": 1.0, "night": 1.0}, q.doses
+    assert q.per_day == 4.0, q.per_day
+
+    # QID and Q6H preserve 4 slots
+    qid = parse_dosage("QID")
+    assert qid.timings == ["morning", "afternoon", "evening", "night"]
+    assert qid.per_day == 4.0
+    q6h = parse_dosage("Q6H")
+    assert q6h.timings == ["morning", "afternoon", "evening", "night"]
+    assert q6h.per_day == 4.0
 
     # garbage / empty -> no schedule, no crash (caller flags manual entry)
     assert parse_dosage("").timings == [] and parse_dosage("xyz").timings == []

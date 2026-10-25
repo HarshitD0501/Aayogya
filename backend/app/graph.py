@@ -80,23 +80,44 @@ def _extract_meds(state: PipelineState) -> dict:
 def _validate_catalog(state: PipelineState) -> dict:
     """Agent 3 (Knowledge Graph & Fuzzy Matcher) + Agent 4 (Clinical Validation).
     Resolves salts from brand names, handles suffix reasoning (-D, -H, -GP, -SP),
-    flags cursive fuzzy matches for Human-in-the-Loop review, parses dosage,
-    and calculates grounded confidence."""
+    flags cursive fuzzy matches and suffix inference for Human-in-the-Loop review,
+    parses dosage, and calculates grounded confidence."""
     pdate = state.get("prescription_date") or date.today().isoformat()
     out = []
     for m in state["meds"]:
         m = dict(m)
+        m["needs_salt_confirmation"] = m.get("needs_salt_confirmation", False)
         raw_conf = m.get("confidence")  # model self-report
         hit = catalog.lookup(m.get("brand", ""))
+        match_type = hit.get("match_type") if hit else None
+        model_salt = (m.get("salt") or "").strip().lower()
+        catalog_salt = (hit.get("salt") or "").strip().lower() if hit else ""
+
+        salt_conflict = False
+        if model_salt and catalog_salt and model_salt != catalog_salt:
+            if model_salt not in catalog_salt and catalog_salt not in model_salt:
+                salt_conflict = True
+
         if hit:
             if not m.get("salt"):
                 m["salt"] = hit["salt"]
             m["form"] = m.get("form") or hit.get("form")
-            if hit.get("match_type") == "fuzzy":
-                # Flag cursive/approximate matches for Human-in-the-Loop review
+
+            # ERR-011: Suffix inference, fuzzy matches, prefix fallback, and salt conflicts require explicit review
+            if match_type in ("fuzzy", "suffix_inferred", "prefix_head") or salt_conflict:
                 m["needs_salt_confirmation"] = True
-                if not m.get("notes"):
-                    m["notes"] = f"Suggested match from '{m.get('brand')}' to '{hit['canonical_brand'].title()}'"
+                notes = []
+                if m.get("notes"):
+                    notes.append(m["notes"])
+                if match_type == "suffix_inferred":
+                    notes.append(f"Suffix inference suggested '{hit['canonical_brand'].title()}' with salt '{hit['salt']}'. Please verify.")
+                elif match_type == "fuzzy":
+                    notes.append(f"Suggested match from '{m.get('brand')}' to '{hit['canonical_brand'].title()}'")
+                elif match_type == "prefix_head":
+                    notes.append(f"Prefix fallback match from '{m.get('brand')}' to '{hit['canonical_brand'].title()}'")
+                if salt_conflict:
+                    notes.append(f"Extracted salt ('{m.get('salt')}') differs from catalog salt ('{hit['salt']}')")
+                m["notes"] = "; ".join(notes)
         else:
             if not m.get("salt"):
                 m["needs_salt_confirmation"] = True
@@ -104,8 +125,13 @@ def _validate_catalog(state: PipelineState) -> dict:
         d = parse_dosage(m.get("dosage_notation") or "")
         m["timing"], m["per_day"], m["prn"] = d.timings, d.per_day, d.prn
         m["start_date"] = m.get("start_date") or pdate
-        m["status"] = _status(m["start_date"], m.get("duration_days"))
-        is_catalog_grounded = bool(hit and hit.get("match_type") != "fuzzy" and not m.get("needs_salt_confirmation"))
+        # ERR-001: Keep status as pending_review until human confirms
+        m["status"] = "pending_review" if not state.get("confirmed") else _status(m["start_date"], m.get("duration_days"))
+        is_catalog_grounded = bool(
+            hit
+            and hit.get("match_type") in ("exact", "stem_exact")
+            and not m.get("needs_salt_confirmation")
+        )
         m["confidence"] = confidence.score(
             model_conf=raw_conf,
             catalog_hit=is_catalog_grounded,

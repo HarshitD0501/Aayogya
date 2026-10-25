@@ -1,8 +1,9 @@
 """Pydantic shapes for extraction output and API responses (Pydantic v2)."""
 from __future__ import annotations
 
+from datetime import datetime
 import re
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
@@ -46,17 +47,22 @@ class MedicineOut(BaseModel):
     strength: Optional[str]
     form: Optional[str]
     dosage_notation: Optional[str]
-    timing: list[str] = []
+    timing: Optional[list[str]] = Field(default_factory=list)
     per_day: Optional[float] = 0.0
     prn: bool = False
     duration_days: Optional[int]
     start_date: Optional[str]
     status: str
-    confidence: Optional[float]
-    needs_salt_confirmation: bool
-    prescriber_name: Optional[str]
+    confidence: Optional[float] = None
+    needs_salt_confirmation: bool = False
+    prescriber_name: Optional[str] = None
     reminders_enabled: bool = True
-    stopped_at: Optional[str] = None
+
+    @field_validator("timing", mode="before")
+    @classmethod
+    def _normalize_timing(cls, v):
+        return v if v is not None else []
+    stopped_at: Optional[Union[datetime, str]] = None
     stopped_reason: Optional[str] = None
     prices: Optional[dict] = None
 
@@ -80,10 +86,10 @@ class ReportOut(BaseModel):
     follow_up_status: Optional[str] = "scheduled"
     reschedule_preferred_date: Optional[str] = None
     reschedule_notes: Optional[str] = None
-    last_call_at: Optional[str] = None
+    last_call_at: Optional[Union[datetime, str]] = None
     ocr_confidence: Optional[float]
     confirmed: bool
-    created_at: Optional[str] = None
+    created_at: Optional[Union[datetime, str]] = None
     mock: bool = False
     medicines: list[MedicineOut] = []
 

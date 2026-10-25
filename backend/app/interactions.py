@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from itertools import combinations
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from .models import Interaction, Medicine
+from .models import Interaction, Medicine, Report
 
 
 def _norm(salt: str) -> str:
@@ -24,10 +25,12 @@ def _pair(a: str, b: str) -> tuple[str, str]:
 def check(db: Session, patient_id: str) -> dict:
     meds = (
         db.query(Medicine)
+        .outerjoin(Report, Medicine.report_id == Report.id)
         .filter(
             Medicine.patient_id == patient_id,
             Medicine.status == "active",
             Medicine.salt.isnot(None),
+            or_(Medicine.report_id.is_(None), Report.confirmed.is_(True)),
         )
         .all()
     )

@@ -22,8 +22,17 @@ MAX_DIMENSION = 2048
 MIN_DIMENSION = 256
 
 
-def preprocess_prescription_image(image_bytes: bytes, mime_type: str = "image/jpeg") -> Tuple[bytes, str]:
+def preprocess_prescription_image(
+    image_bytes: bytes,
+    mime_type: str = "image/jpeg",
+    strict: bool = False,
+) -> Tuple[bytes, str]:
     """Enhance and normalize prescription image bytes.
+
+    Args:
+        image_bytes: Raw image file payload.
+        mime_type: MIME type string.
+        strict: If True, raises ValueError on invalid/corrupted image instead of fallback.
 
     Returns:
         (enhanced_image_bytes, output_mime_type)
@@ -72,6 +81,9 @@ def preprocess_prescription_image(image_bytes: bytes, mime_type: str = "image/jp
             return enhanced_bytes, "image/jpeg"
 
     except Exception as exc:
+        if strict:
+            logger.warning("Agent 1 (Preprocessor) strict validation failed: %s", exc)
+            raise ValueError(f"Unprocessable or corrupt image bytes: {exc}") from exc
         logger.warning(
             f"Agent 1 (Preprocessor) encountered non-fatal error: {exc}. Proceeding with original bytes."
         )

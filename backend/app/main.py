@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import io
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -19,7 +20,9 @@ from uuid import uuid4
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, Response, UploadFile
 from langgraph.types import Command
+from PIL import Image
 from pydantic import BaseModel
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 from starlette.concurrency import run_in_threadpool
@@ -36,6 +39,7 @@ from . import caregiver as caregiver_svc  # noqa: E402
 from .auth import authenticate, current_patient, hash_password, make_token, resolve_actor  # noqa: E402
 from .config import settings  # noqa: E402
 from .db import SessionLocal, get_db, init_db  # noqa: E402
+from .dosage import parse_dosage  # noqa: E402
 from .extraction import _status  # noqa: E402
 from .graph import build_pipeline  # noqa: E402
 from .models import DoseAdherence, Interaction, Medicine, Patient, ReminderLog, Report  # noqa: E402
@@ -142,14 +146,20 @@ def _report_out(r: Report) -> ReportOut:
 
 
 def _persist_meds(report: Report, meds: list[dict], patient_id: str, prescriber: str | None) -> None:
+    # ERR-001: Unconfirmed prescriptions persist as pending_review until explicit confirmation
+    initial_status = "active" if report.confirmed else "pending_review"
     for m in meds:
+        d = parse_dosage(m.get("dosage_notation") or "")
+        timing = m.get("timing") if m.get("timing") is not None else d.timings
+        per_day = m.get("per_day") if m.get("per_day") is not None else d.per_day
+        prn = m.get("prn", d.prn)
         report.medicines.append(Medicine(
             patient_id=patient_id, brand=m["brand"], salt=m.get("salt"),
             strength=m.get("strength"), form=m.get("form"),
-            dosage_notation=m.get("dosage_notation"), timing=m.get("timing") or [],
-            per_day=m.get("per_day") or 0.0, prn=m.get("prn", False),
+            dosage_notation=m.get("dosage_notation"), timing=timing or [],
+            per_day=per_day or 0.0, prn=prn,
             duration_days=m.get("duration_days"), start_date=m.get("start_date"),
-            status=m.get("status", "active"), confidence=m.get("confidence"),
+            status=initial_status, confidence=m.get("confidence"),
             needs_salt_confirmation=m.get("needs_salt_confirmation", False),
             prescriber_name=prescriber,
         ))
@@ -315,17 +325,46 @@ def me(
     return PatientOut.model_validate(actor)
 
 
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB limit
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
+ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP"}
+
+
 @app.post("/api/reports/upload", response_model=ReportOut)
 async def upload_report(
     file: UploadFile = File(...),
     patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
 ):
-    if not (file.content_type or "").startswith("image/"):
-        raise HTTPException(400, "Upload an image of the prescription.")
-    image = await file.read()
+    if not file.content_type or file.content_type.lower() not in ALLOWED_MIME_TYPES:
+        raise HTTPException(400, "Upload an image of the prescription in JPEG, PNG, or WebP format.")
+    image = await file.read(MAX_UPLOAD_BYTES + 1)
     if not image:
         raise HTTPException(400, "Empty file.")
+    if len(image) > MAX_UPLOAD_BYTES:
+        raise HTTPException(400, "File exceeds maximum permitted size of 10 MB.")
+
+    # ERR-023: Verify image format, dimension bounds, and protect against decompression bombs
+    Image.MAX_IMAGE_PIXELS = 25_000_000
+    try:
+        with Image.open(io.BytesIO(image)) as img:
+            img.verify()
+            fmt = (img.format or "").upper()
+            if fmt not in ALLOWED_FORMATS:
+                raise HTTPException(400, f"Unsupported image format ({fmt}). Allowed: JPEG, PNG, WebP.")
+        with Image.open(io.BytesIO(image)) as img:
+            w, h = img.size
+            if w < 10 or h < 10:
+                raise HTTPException(400, "Image dimensions are too small to be a legible prescription.")
+            if w > 10000 or h > 10000:
+                raise HTTPException(400, "Image dimensions exceed maximum safe limit (10000x10000).")
+    except HTTPException:
+        raise
+    except Image.DecompressionBombError:
+        raise HTTPException(400, "Image exceeds maximum safe pixel dimensions (decompression bomb protection).")
+    except Exception as exc:
+        logger.warning("Invalid or corrupt image uploaded (patient=%s): %s", patient.id, exc)
+        raise HTTPException(400, "The uploaded file is not a valid or readable image.")
 
     # Run the pipeline to the human-confirm interrupt; offloaded to a worker thread
     # so the async event loop stays responsive during the ~15s VLM extraction.
@@ -379,6 +418,7 @@ def confirm_report(
     if not report or report.patient_id != patient.id:  # isolation: no cross-patient access
         raise HTTPException(404, "Report not found.")
 
+    today = date.today().isoformat()
     if not report.confirmed and report.thread_id:
         # Resume the paused graph run: human_confirm -> reconcile_active.
         config = {"configurable": {"thread_id": report.thread_id}}
@@ -388,12 +428,15 @@ def confirm_report(
             final = pipe.get_state(config).values.get("meds", [])
             # rows were persisted in graph-med order; ids ascend in that order.
             for med, fm in zip(sorted(report.medicines, key=lambda x: x.id), final):
-                med.status = fm.get("status", med.status)
+                med.status = fm.get("status") or _status(med.start_date or today, med.duration_days)
         except Exception:
             # Checkpoint gone (server restarted; sqlite MemorySaver is volatile) ->
             # reconcile straight from the persisted rows. Same result as the graph node.
-            today = date.today().isoformat()
             for med in report.medicines:
+                med.status = _status(med.start_date or today, med.duration_days)
+    else:
+        for med in report.medicines:
+            if med.status == "pending_review":
                 med.status = _status(med.start_date or today, med.duration_days)
 
     report.confirmed = True
@@ -418,7 +461,12 @@ def list_reports(patient: Patient = Depends(current_patient), db: Session = Depe
 def list_medicines(patient: Patient = Depends(current_patient), db: Session = Depends(get_db)):
     rows = (
         db.query(Medicine)
-        .filter(Medicine.patient_id == patient.id, Medicine.status == "active")
+        .outerjoin(Report, Medicine.report_id == Report.id)
+        .filter(
+            Medicine.patient_id == patient.id,
+            Medicine.status == "active",
+            or_(Medicine.report_id.is_(None), Report.confirmed.is_(True)),
+        )
         .all()
     )
     return [_med_out(m) for m in rows]

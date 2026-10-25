@@ -24,6 +24,14 @@ async function handleRequest(request, params, method) {
   const url = new URL(request.url);
   const targetUrl = `${BACKEND_URL}/api${path}${url.search}`;
 
+  const contentLength = parseInt(request.headers.get("content-length") || "0", 10);
+  if (contentLength > 10 * 1024 * 1024) {
+    return NextResponse.json(
+      { detail: "Payload exceeds maximum permitted size of 10 MB." },
+      { status: 413 }
+    );
+  }
+
   // Forward to real FastAPI backend
   try {
     const isHeavyEndpoint =

@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 SLOTS_3 = ["morning", "afternoon", "night"]
+SLOTS_4 = ["morning", "afternoon", "evening", "night"]
 
 # Abbreviation -> which slots fire (dose 1 each). SOS/PRN handled separately.
 _ABBREV = {
@@ -23,7 +24,10 @@ _ABBREV = {
     "TDS": ["morning", "afternoon", "night"],
     "TID": ["morning", "afternoon", "night"],
     "THRICE DAILY": ["morning", "afternoon", "night"],
-    "QID": ["morning", "afternoon", "night"],  # 4x collapses to 3 named slots
+    "QID": ["morning", "afternoon", "evening", "night"],  # 4x daily: preserves all 4 distinct administrations (ERR-025)
+    "FOUR TIMES DAILY": ["morning", "afternoon", "evening", "night"],
+    "Q6H": ["morning", "afternoon", "evening", "night"],  # every 6 hours = 4 times daily
+    "EVERY 6 HOURS": ["morning", "afternoon", "evening", "night"],
     "HS": ["night"],  # hora somni = bedtime
     "BEDTIME": ["night"],
     "ON": ["night"],
@@ -91,17 +95,13 @@ def parse_dosage(notation: str) -> Dosage:
             vals = [_num(p) for p in parts]
         except (ValueError, ZeroDivisionError):
             return Dosage(raw=raw)  # unparseable -> caller flags for manual entry
-        # Map to named slots. 3-part = M/A/N; 2-part = M/N; 4-part folds noon+eve.
+        # Map to named slots. 3-part = M/A/N; 2-part = M/N; 4-part = M/A/E/N.
         if len(vals) == 2:
             mapping = list(zip(["morning", "night"], vals))
         elif len(vals) == 3:
             mapping = list(zip(SLOTS_3, vals))
         elif len(vals) == 4:
-            mapping = [
-                ("morning", vals[0]),
-                ("afternoon", vals[1] + vals[2]),
-                ("night", vals[3]),
-            ]
+            mapping = list(zip(SLOTS_4, vals))
         else:
             return Dosage(raw=raw)
         doses = {slot: q for slot, q in mapping if q > 0}

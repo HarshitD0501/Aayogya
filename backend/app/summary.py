@@ -6,20 +6,24 @@ from __future__ import annotations
 
 from datetime import date
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from . import conditions as cond_svc
 from . import whatsapp as wa_svc
 from .models import Medicine, Report, ReminderLog, DoseAdherence
 
-_SLOTS = ("morning", "afternoon", "night")
+_SLOTS = ("morning", "afternoon", "evening", "night")
 
 
 def build(db: Session, patient) -> dict:
     all_meds = (
         db.query(Medicine)
-        .filter(Medicine.patient_id == patient.id)
+        .outerjoin(Report, Medicine.report_id == Report.id)
+        .filter(
+            Medicine.patient_id == patient.id,
+            or_(Medicine.report_id.is_(None), Report.confirmed.is_(True)),
+        )
         .all()
     )
     active_meds = [m for m in all_meds if m.status == "active"]
@@ -78,8 +82,8 @@ def build(db: Session, patient) -> dict:
     today = today_dt.isoformat()
     upcoming = (
         db.query(Report)
-        .filter(Report.patient_id == patient.id, Report.follow_up_date.isnot(None),
-                Report.follow_up_date >= today)
+        .filter(Report.patient_id == patient.id, Report.confirmed.is_(True),
+                Report.follow_up_date.isnot(None), Report.follow_up_date >= today)
         .order_by(Report.follow_up_date.asc())
         .first()
     )

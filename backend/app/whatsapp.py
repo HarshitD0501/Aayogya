@@ -16,7 +16,7 @@ import hashlib
 import hmac
 import json
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 from uuid import uuid4
 from zoneinfo import ZoneInfo
@@ -24,6 +24,7 @@ from zoneinfo import ZoneInfo
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 import httpx
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from .config import settings
@@ -103,6 +104,7 @@ async def _send_to_meta(payload: dict[str, Any]) -> dict[str, Any]:
 _SLOT_TIMES = {
     "morning": "08:00 AM",
     "afternoon": "01:00 PM",
+    "evening": "05:00 PM",
     "night": "08:30 PM",
     "sos": "As needed (SOS)",
 }
@@ -110,6 +112,7 @@ _SLOT_TIMES = {
 _SLOT_HINDI = {
     "morning": "सुबह",
     "afternoon": "दोपहर",
+    "evening": "शाम",
     "night": "रात",
     "sos": "ज़रूरत पड़ने पर",
 }
@@ -134,7 +137,7 @@ def _ist_date() -> date:
 
 def parse_time_to_minutes(time_str: str | None, default_slot: str = "morning") -> int:
     """Parse time strings like '08:00 AM', '13:30', '8:00 pm', '08:00' to minutes from midnight (0..1439)."""
-    default_map = {"morning": 480, "afternoon": 780, "night": 1200, "sos": 720}
+    default_map = {"morning": 480, "afternoon": 780, "evening": 1020, "night": 1200, "sos": 720}
     if not time_str or not isinstance(time_str, str):
         return default_map.get(default_slot, 480)
 
@@ -218,16 +221,44 @@ def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
     """Ensure today's dose adherence records exist for all active medicines.
     Idempotent: will not duplicate if records already exist for today.
     """
-    today_str = _ist_today()
+    today_dt = _ist_date()
+    today_str = today_dt.isoformat()
+    dirty = False
+
+    # ERR-001: Only medicines from confirmed reports (or manual entry) are eligible
     active_meds = (
         db.query(Medicine)
+        .outerjoin(Report, Medicine.report_id == Report.id)
         .filter(
             Medicine.patient_id == patient_id,
             Medicine.status == "active",
             Medicine.reminders_enabled.isnot(False),
+            or_(Medicine.report_id.is_(None), Report.confirmed.is_(True)),
         )
         .all()
     )
+
+    # ERR-010: Exclude PRN medicines, expired courses, and unknown frequencies
+    valid_active_meds = []
+    for m in active_meds:
+        # Check course duration expiry
+        is_expired = False
+        if m.start_date and m.duration_days is not None and m.duration_days > 0:
+            try:
+                start_dt = date.fromisoformat(m.start_date)
+                end_dt = start_dt + timedelta(days=m.duration_days)
+                if today_dt > end_dt:
+                    is_expired = True
+                    m.status = "expired"
+                    dirty = True
+            except (ValueError, TypeError):
+                pass
+
+        if not is_expired and not m.prn:
+            # PRN medicines are SOS/as-needed and never auto-scheduled for reminders.
+            # Medicines without explicit timings are unreviewed and must not default to morning.
+            if m.timing and isinstance(m.timing, list) and len(m.timing) > 0:
+                valid_active_meds.append(m)
 
     existing = (
         db.query(DoseAdherence)
@@ -239,21 +270,19 @@ def sync_today_adherence(db: Session, patient_id: str) -> list[DoseAdherence]:
     )
     existing_map = {(d.medicine_id, d.slot): d for d in existing}
 
-    # Cancel pending doses for stopped/paused medicines
-    active_med_ids = {m.id for m in active_meds}
-    dirty = False
+    # Cancel pending doses for stopped, paused, expired, or non-active medicines
+    valid_active_med_ids = {m.id for m in valid_active_meds}
     for d in existing:
-        if d.medicine_id not in active_med_ids and d.status == "pending":
+        if d.medicine_id not in valid_active_med_ids and d.status == "pending":
             d.status = "stopped"
-            d.notes = "Medicine stopped or reminders paused by patient"
+            d.notes = "Medicine stopped, expired, or reminders paused by patient"
             dirty = True
 
     patient = db.get(Patient, patient_id)
 
     created = []
-    for m in active_meds:
-        slots = m.timing if (m.timing and not m.prn) else (["sos"] if m.prn else ["morning"])
-        for slot in slots:
+    for m in valid_active_meds:
+        for slot in m.timing:
             if (m.id, slot) not in existing_map:
                 slot_time = get_patient_slot_time(patient, slot)
                 rec = DoseAdherence(
