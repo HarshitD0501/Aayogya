@@ -370,10 +370,11 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
   const Comp = current.Comp;
 
   // Med list for the WhatsApp prefilled text (and for the Medicines tab reuse).
+  // Fix F09: Use ?include_prices=false to avoid expensive price provider lookup on text prefetch
   useEffect(() => {
     let alive = true;
     setMedsList(null);
-    api("/medicines")
+    api("/medicines?include_prices=false")
       .then((meds) => alive && setMedsList(meds))
       .catch(() => {}); // offline: WhatsApp text falls back to a generic nudge
     return () => {
@@ -435,8 +436,9 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
         })}
       </div>
 
-      <div ref={mainRef} key={`${active}-${sectionVersion}`}>
-        <Comp patient={patientCard} goto={setActive} />
+      {/* Fix F07 & F08: Key by actor/patient identity and active tab only. Never include sectionVersion in key to prevent destroying active chat/forms/voice */}
+      <div ref={mainRef} key={`${patientCard.id}-${active}`}>
+        <Comp patient={patientCard} goto={setActive} pollVersion={sectionVersion} />
       </div>
     </div>
   );
@@ -454,7 +456,21 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   useEffect(() => {
     let alive = true;
     getFamilyOverview()
-      .then((d) => alive && setCards(d.patients || []))
+      .then((d) => {
+        if (!alive) return;
+        const pts = d.patients || [];
+        setCards(pts);
+
+        // Check if URL has ?patient= param that matches an authorized linked patient
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const urlPid = params.get("patient");
+          if (urlPid && pts.some((p) => p.id === urlPid)) {
+            setActivePatientId(urlPid);
+            setOpenId(urlPid);
+          }
+        }
+      })
       .catch((e) => alive && setGridErr(e.message));
     return () => {
       alive = false;
@@ -470,12 +486,22 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   const handleOpen = (pid) => {
     setActivePatientId(pid);
     setOpenId(pid);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("patient", pid);
+      window.history.replaceState({}, "", url.toString());
+    }
   };
 
   const handleBack = () => {
     setActivePatientId(null);
     setOpenId(null);
     setVersion((v) => v + 1); // refresh cards when returning to the grid
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("patient");
+      window.history.replaceState({}, "", url.toString());
+    }
   };
 
   const handleContactSaved = (pid, phone) => {
