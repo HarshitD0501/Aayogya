@@ -127,13 +127,223 @@ def _fetch_pharmeasy_live(query: str) -> dict[str, Any] | None:
     return None
 
 
+def parse_pack_units(pack_str: str | None) -> tuple[int, str]:
+    """Parse pack string into (quantity, unit_name)."""
+    if not pack_str:
+        return (10, "tablet")
+    s = pack_str.lower().strip()
+    m_vol = re.search(r"(\d+(?:\.\d+)?)\s*ml\b", s)
+    if m_vol:
+        return (int(float(m_vol.group(1))), "ml")
+    m_count = re.search(r"(\d+)\s*(tablet|tab|capsule|cap|vial|injection|inj|pill)", s)
+    if m_count:
+        qty = int(m_count.group(1))
+        u = m_count.group(2)
+        if u.startswith("tab") or u == "pill":
+            unit = "tablet"
+        elif u.startswith("cap"):
+            unit = "capsule"
+        elif u.startswith("inj"):
+            unit = "injection"
+        else:
+            unit = u
+        return (qty, unit)
+    m_num = re.search(r"^(\d+)", s)
+    if m_num:
+        return (int(m_num.group(1)), "tablet")
+    return (10, "tablet")
+
+
+def extract_form(composition: str) -> str:
+    c = composition.lower()
+    if any(k in c for k in ["syrup", "suspension", "liquid", "oral solution", "ml"]):
+        return "Syrup"
+    if "capsule" in c or "cap" in c:
+        return "Capsule"
+    if any(k in c for k in ["injection", "inj", "vial", "ampoule"]):
+        return "Injection"
+    return "Tablet"
+
+
+def extract_release_type(composition: str) -> str:
+    c = composition.lower()
+    if any(r in c for r in ["sustained release", "extended release", "controlled release", "sr", "er", "cr", "pr", "xr"]):
+        return "Sustained Release"
+    return "Immediate Release"
+
+
+def parse_ingredients(composition: str) -> list[tuple[str, str]]:
+    cleaned = re.sub(r"\b(tablets?|capsules?|syrups?|injections?|ip|bp|usp)\b", "", composition, flags=re.IGNORECASE).strip()
+    parts = [p.strip() for p in cleaned.split("+") if p.strip()]
+    results = []
+    for part in parts:
+        m = re.search(r"^(.*?)\s*(\d+(?:\.\d+)?\s*(?:mg|mcg|ml|g|gm|iu|units?))(?:\b|$)", part, re.IGNORECASE)
+        if m:
+            name = m.group(1).strip().lower()
+            strength = m.group(2).strip().lower().replace(" ", "")
+            results.append((name, strength))
+        else:
+            name = part.strip().lower()
+            results.append((name, "standard"))
+    return results
+
+
+def is_formulation_equivalent(
+    comp_a: str,
+    comp_b: str,
+    form_a: str | None = None,
+    form_b: str | None = None,
+    release_a: str | None = None,
+    release_b: str | None = None,
+) -> tuple[bool, str | None]:
+    fa = form_a or extract_form(comp_a)
+    fb = form_b or extract_form(comp_b)
+    if fa != fb:
+        return False, f"Incomparable dosage forms: {fa} cannot be compared with {fb}"
+
+    ra = release_a or extract_release_type(comp_a)
+    rb = release_b or extract_release_type(comp_b)
+    if ra != rb:
+        return False, f"Release profile mismatch: {ra} cannot be substituted with {rb}"
+
+    ing_a = parse_ingredients(comp_a)
+    ing_b = parse_ingredients(comp_b)
+
+    if len(ing_a) != len(ing_b):
+        return False, f"Active ingredient count mismatch: {len(ing_a)} vs {len(ing_b)} components"
+
+    names_a = sorted(a[0] for a in ing_a)
+    names_b = sorted(b[0] for b in ing_b)
+    for na, nb in zip(names_a, names_b):
+        if not (na in nb or nb in na):
+            return False, f"Molecule mismatch: '{na}' does not match '{nb}'"
+
+    return True, None
+
+
+def compute_unit_safe_comparison(
+    market_price_inr: float | None,
+    market_pack_str: str | None,
+    pmbjp_price_inr: float | None,
+    pmbjp_pack_str: str | None,
+    nppa_ceiling_inr: float | None = None,
+    nppa_pack_str: str | None = None,
+    requested_packs: int = 1,
+    is_equivalent: bool = True,
+    equivalence_reason: str | None = None,
+) -> dict[str, Any]:
+    """Compute unit-normalized price comparison between market, Jan Aushadhi, and NPPA cap."""
+    requested_packs = max(1, requested_packs)
+    market_qty, market_unit = parse_pack_units(market_pack_str)
+    pmbjp_qty, pmbjp_unit = parse_pack_units(pmbjp_pack_str)
+
+    if not is_equivalent:
+        return {
+            "comparable": False,
+            "reason": equivalence_reason or "Formulation mismatch: cannot safely compare",
+            "unit_type": pmbjp_unit,
+            "market_price": None,
+            "pmbjp_price": None,
+            "nppa_ceiling_price": None,
+            "saving_paise": None,
+            "saving_percent": None,
+            "unit_saving_paise": None,
+        }
+
+    if market_unit != pmbjp_unit:
+        return {
+            "comparable": False,
+            "reason": f"Unit mismatch: market is {market_unit} vs Jan Aushadhi is {pmbjp_unit}",
+            "unit_type": pmbjp_unit,
+            "market_price": None,
+            "pmbjp_price": None,
+            "nppa_ceiling_price": None,
+            "saving_paise": None,
+            "saving_percent": None,
+            "unit_saving_paise": None,
+        }
+
+    # Normalized unit prices in INR and Paise
+    total_requested_units = requested_packs * pmbjp_qty
+
+    market_data = None
+    market_unit_price = None
+    if market_price_inr is not None and market_qty > 0:
+        market_unit_price = market_price_inr / market_qty
+        market_cost_inr = round(total_requested_units * market_unit_price, 2)
+        market_data = {
+            "amount_paise": round(market_cost_inr * 100),
+            "amount_inr": market_cost_inr,
+            "unit_price_inr": round(market_unit_price, 4),
+            "unit_price_paise": round(market_unit_price * 100, 2),
+            "unit": f"{total_requested_units} {pmbjp_unit}s ({requested_packs} pack)" if requested_packs == 1 else f"{total_requested_units} {pmbjp_unit}s ({requested_packs} packs)",
+            "source_url": "https://pharmeasy.in",
+            "checked_on": "2026-10-26",
+        }
+
+    pmbjp_data = None
+    pmbjp_unit_price = None
+    if pmbjp_price_inr is not None and pmbjp_qty > 0:
+        pmbjp_unit_price = pmbjp_price_inr / pmbjp_qty
+        pmbjp_cost_inr = round(total_requested_units * pmbjp_unit_price, 2)
+        pmbjp_data = {
+            "amount_paise": round(pmbjp_cost_inr * 100),
+            "amount_inr": pmbjp_cost_inr,
+            "unit_price_inr": round(pmbjp_unit_price, 4),
+            "unit_price_paise": round(pmbjp_unit_price * 100, 2),
+            "unit": f"{total_requested_units} {pmbjp_unit}s ({requested_packs} pack)" if requested_packs == 1 else f"{total_requested_units} {pmbjp_unit}s ({requested_packs} packs)",
+            "source_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+            "checked_on": "2026-10-26",
+        }
+
+    nppa_data = None
+    if nppa_ceiling_inr is not None:
+        n_qty, _ = parse_pack_units(nppa_pack_str or pmbjp_pack_str)
+        n_unit_price = nppa_ceiling_inr / n_qty
+        nppa_cost_inr = round(total_requested_units * n_unit_price, 2)
+        nppa_data = {
+            "amount_paise": round(nppa_cost_inr * 100),
+            "amount_inr": nppa_cost_inr,
+            "unit_price_inr": round(n_unit_price, 4),
+            "unit_price_paise": round(n_unit_price * 100, 2),
+            "unit": f"{total_requested_units} {pmbjp_unit}s",
+            "regulation": "DPCO 2013 Statutory Ceiling",
+            "source_url": "https://nppa.gov.in/en/view_more?id=4",
+            "checked_on": "2026-10-26",
+        }
+
+    # Savings calculation strictly requires BOTH market and Jan Aushadhi
+    saving_paise = None
+    saving_percent = None
+    unit_saving_paise = None
+    is_comparable = bool(market_data and pmbjp_data)
+
+    if is_comparable and market_unit_price and pmbjp_unit_price:
+        if market_unit_price > pmbjp_unit_price:
+            saving_inr = round((market_unit_price - pmbjp_unit_price) * total_requested_units, 2)
+            saving_paise = round(saving_inr * 100)
+            saving_percent = round(((market_unit_price - pmbjp_unit_price) / market_unit_price) * 100)
+            unit_saving_paise = round((market_unit_price - pmbjp_unit_price) * 100, 2)
+
+    return {
+        "comparable": is_comparable,
+        "reason": None if is_comparable else ("Market retail price unavailable from verified source" if not market_data else "Jan Aushadhi generic price not available"),
+        "unit_type": pmbjp_unit,
+        "market_price": market_data,
+        "pmbjp_price": pmbjp_data,
+        "nppa_ceiling_price": nppa_data,
+        "saving_paise": saving_paise,
+        "saving_percent": saving_percent,
+        "unit_saving_paise": unit_saving_paise,
+    }
+
+
 def get_prices(
     salt: str | None,
     strength: str | None,
     brand: str | None = None,
 ) -> dict:
-    """Return only live market prices and explicitly listed reference catalog values.
-    """
+    """Return live market prices and explicitly listed reference catalog values with unit safety."""
     if not salt and not brand:
         return {
             "matched": False,
@@ -145,7 +355,6 @@ def get_prices(
         }
 
     strength_str = strength or ""
-    # Match only an exact salt/strength composition from the versioned dataset.
     catalog_keys = (
         _norm_composition(f"{salt or ''} {strength_str}"),
         _norm_composition(salt or ""),
@@ -212,7 +421,7 @@ def get_prices(
             "badge": "Reference catalog",
             "generic_title": ja_generic_title,
             "pack_size": pack_size,
-            "url": "https://janaushadhi.gov.in/ProductList.aspx",
+            "url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
         })
     if nppa_cap is not None:
         offers.append({
@@ -222,10 +431,9 @@ def get_prices(
             "currency": "INR",
             "badge": "Reference catalog",
             "pack_size": pack_size,
-            "url": "https://nppa.gov.in",
+            "url": "https://nppa.gov.in/en/view_more?id=4",
         })
 
-    # Keep only prices backed by a live listing or explicit catalog entry.
     offers.sort(key=lambda o: o["price"])
 
     return {
@@ -238,6 +446,13 @@ def get_prices(
         "market_price": market_sale_price,
         "market_mrp": market_mrp,
         "nppa_ceiling_price": nppa_cap,
+        "nppa_details": {
+            "ceiling_price_inr": nppa_cap,
+            "currency": "INR",
+            "regulation": "DPCO 2013 Ceiling Order",
+            "source_url": "https://nppa.gov.in/en/view_more?id=4",
+            "checked_on": "2026-10-26",
+        } if nppa_cap is not None else None,
         "jan_aushadhi_price": jan_aushadhi_price,
         "max_savings_percent": savings_pct,
         "max_savings_amount": savings_amt,

@@ -168,19 +168,40 @@ def search_medicines(
 
 @router.post("/compare")
 def compare_prices(req: CompareRequestIn):
-    """Compare market prices against PMBJP Jan Aushadhi and NPPA ceiling prices."""
+    """Compare market prices against PMBJP Jan Aushadhi and NPPA ceiling prices with unit safety."""
     items = []
     for req_item in req.items:
         med_id = req_item.medicine_id
         entry = _ID_MAP.get(med_id)
         if not entry:
-            # Fallback to fuzzy match on composition key
+            # Match by prefix or identifier
             entry = next(
-                (e for e in _CATALOGUE if e["_med_id"].startswith(med_id) or med_id.startswith(e["_med_id"])),
-                _CATALOGUE[0] if _CATALOGUE else None,
+                (e for e in _CATALOGUE if e["_med_id"] == med_id or e["_med_id"].startswith(med_id) or med_id.startswith(e["_med_id"])),
+                None,
             )
 
         if not entry:
+            items.append({
+                "medicine_id": med_id,
+                "pmbjp_product_code": "UNKNOWN",
+                "matched_text": med_id,
+                "molecule_label": med_id,
+                "strength_label": "Unknown",
+                "form": "Unknown",
+                "release_type": "Unknown",
+                "pack_label": "Unknown",
+                "brand_name": None,
+                "unit_type": "unit",
+                "market_price": None,
+                "nppa_ceiling_price": None,
+                "pmbjp_price": None,
+                "comparable": False,
+                "saving_paise": None,
+                "saving_percent": None,
+                "unit_saving_paise": None,
+                "comparison_basis": "Unmatched catalog record",
+                "excluded_reason": f"Medicine '{med_id}' not found in catalog",
+            })
             continue
 
         salt = entry.get("salt_composition", "")
@@ -200,60 +221,31 @@ def compare_prices(req: CompareRequestIn):
         if not brand_name:
             brand_name = salt.split()[0]
 
-        # Call pricing engine
+        # Call pricing engine (strictly without fake estimated market MRP fallback)
         prices = price_svc.get_prices(salt=salt, strength=strength, brand=brand_name)
-
         market_sale_inr = prices.get("market_price")
-        if market_sale_inr is None:
-            market_sale_inr = entry.get("pharmeasy_estimated_mrp_inr")
+        pmbjp_inr = prices.get("jan_aushadhi_price") or entry.get("jan_aushadhi_price_inr")
+        nppa_inr = prices.get("nppa_ceiling_price") or entry.get("nppa_ceiling_price_inr")
 
-        pmbjp_inr = prices.get("jan_aushadhi_price")
-        if pmbjp_inr is None:
-            pmbjp_inr = entry.get("jan_aushadhi_price_inr")
-
-        nppa_inr = prices.get("nppa_ceiling_price")
-        if nppa_inr is None:
-            nppa_inr = entry.get("nppa_ceiling_price_inr")
-
-        # Convert to paise with pack_count applied
-        market_price = None
-        if market_sale_inr is not None:
-            market_price = {
-                "amount_paise": round(market_sale_inr * 100 * count),
-                "currency": "INR",
-                "unit": entry.get("pack_size") or "10 tablets",
-                "source_url": "https://pharmeasy.in",
-                "checked_on": "2026-10-25",
-            }
-
-        pmbjp_price = None
-        if pmbjp_inr is not None:
-            pmbjp_price = {
-                "amount_paise": round(pmbjp_inr * 100 * count),
-                "currency": "INR",
-                "unit": entry.get("pack_size") or "10 tablets",
-                "source_url": "https://janaushadhi.gov.in/ProductList.aspx",
-                "checked_on": "2026-10-25",
-            }
-
-        nppa_ceiling_price = None
-        if nppa_inr is not None:
-            nppa_ceiling_price = {
-                "amount_paise": round(nppa_inr * 100 * count),
-                "currency": "INR",
-                "unit": entry.get("pack_size") or "10 tablets",
-                "source_url": "https://nppa.gov.in",
-                "checked_on": "2026-10-25",
-            }
-
-        saving_paise = None
-        saving_percent = None
-        if market_price and pmbjp_price and market_price["amount_paise"] > pmbjp_price["amount_paise"]:
-            saving_paise = market_price["amount_paise"] - pmbjp_price["amount_paise"]
-            saving_percent = round((saving_paise / market_price["amount_paise"]) * 100)
-
+        pack_size_str = entry.get("pack_size") or "10 Tablets"
         form = _extract_form(salt)
-        release_type = "Sustained Release" if "sr" in salt.lower() else "Immediate Release"
+        release_type = price_svc.extract_release_type(salt) if hasattr(price_svc, "extract_release_type") else ("Sustained Release" if "sr" in salt.lower() else "Immediate Release")
+
+        # Compute unit-safe comparison
+        unit_comp = price_svc.compute_unit_safe_comparison(
+            market_price_inr=market_sale_inr,
+            market_pack_str=pack_size_str,
+            pmbjp_price_inr=pmbjp_inr,
+            pmbjp_pack_str=pack_size_str,
+            nppa_ceiling_inr=nppa_inr,
+            nppa_pack_str=pack_size_str,
+            requested_packs=count,
+            is_equivalent=True,
+        )
+
+        excluded_reason = None
+        if not unit_comp["comparable"]:
+            excluded_reason = unit_comp.get("reason") or "Price not available in verified public sources"
 
         items.append({
             "medicine_id": entry["_med_id"],
@@ -263,18 +255,21 @@ def compare_prices(req: CompareRequestIn):
             "strength_label": strength,
             "form": form,
             "release_type": release_type,
-            "pack_label": entry.get("pack_size") or "Standard Strip",
+            "pack_label": pack_size_str,
             "brand_name": brand_name,
-            "market_price": market_price,
-            "nppa_ceiling_price": nppa_ceiling_price,
-            "pmbjp_price": pmbjp_price,
-            "saving_paise": saving_paise,
-            "saving_percent": saving_percent,
-            "comparison_basis": "Exact molecule, form & strength equivalent",
-            "excluded_reason": None if (market_price or pmbjp_price) else "Price not available in public sources",
+            "unit_type": unit_comp.get("unit_type", "tablet"),
+            "market_price": unit_comp.get("market_price"),
+            "nppa_ceiling_price": unit_comp.get("nppa_ceiling_price"),
+            "pmbjp_price": unit_comp.get("pmbjp_price"),
+            "comparable": unit_comp["comparable"],
+            "saving_paise": unit_comp.get("saving_paise"),
+            "saving_percent": unit_comp.get("saving_percent"),
+            "unit_saving_paise": unit_comp.get("unit_saving_paise"),
+            "comparison_basis": f"Normalized per-{unit_comp.get('unit_type', 'unit')} equivalence",
+            "excluded_reason": excluded_reason,
         })
 
-    comparable = [i for i in items if i.get("market_price") and i.get("pmbjp_price")]
+    comparable = [i for i in items if i.get("comparable") and i.get("market_price") and i.get("pmbjp_price")]
     m_total = sum(i["market_price"]["amount_paise"] for i in comparable) if comparable else None
     p_total = sum(i["pmbjp_price"]["amount_paise"] for i in comparable) if comparable else None
     s_total = (m_total - p_total) if (m_total and p_total and m_total > p_total) else None

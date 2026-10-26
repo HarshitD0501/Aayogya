@@ -82,7 +82,7 @@ const DEV_CATALOGUE = [
       amount_paise: 1120,
       currency: "INR",
       unit: "10 tablets",
-      source_url: "http://janaushadhi.gov.in",
+      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
       checked_on: "2026-03-01"
     },
     nppa_ceiling_price: {
@@ -119,7 +119,7 @@ const DEV_CATALOGUE = [
       amount_paise: 1840,
       currency: "INR",
       unit: "10 tablets",
-      source_url: "http://janaushadhi.gov.in",
+      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
       checked_on: "2026-03-01"
     },
     nppa_ceiling_price: {
@@ -156,7 +156,7 @@ const DEV_CATALOGUE = [
       amount_paise: 750,
       currency: "INR",
       unit: "10 tablets",
-      source_url: "http://janaushadhi.gov.in",
+      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
       checked_on: "2026-03-01"
     },
     nppa_ceiling_price: {

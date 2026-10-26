@@ -11,8 +11,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aceclofenac + Paracetamol 100Mg/325Mg",
@@ -26,8 +31,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aceclofenac 100Mg",
@@ -41,8 +51,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone 200Ml",
@@ -56,8 +71,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone Tablet",
@@ -71,8 +91,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amlodipine",
@@ -86,23 +111,33 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amlodipine + Atenolol 5Mg/50Mg",
     "popular_brands": "Stamlo, Amlong, Amlong-a",
     "nppa_ceiling_price_inr": 32.0,
-    "jan_aushadhi_price_inr": 6.0,
-    "jan_aushadhi_generic_name": "Amlodipine Tablets IP",
+    "jan_aushadhi_price_inr": 12.0,
+    "jan_aushadhi_generic_name": "Amlodipine and Atenolol Tablets IP 5mg + 50mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 33.6,
     "potential_generic_savings_pct": "82.1%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amlodipine 10Mg",
@@ -116,8 +151,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amlodipine 2.5Mg",
@@ -131,8 +171,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amlodipine 5Mg",
@@ -146,8 +191,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amoxicillin + Potassium Clavulanate 1000Mg",
@@ -161,8 +211,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amoxicillin + Potassium Clavulanate 375Mg",
@@ -176,8 +231,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amoxicillin + Potassium Clavulanate 625Mg",
@@ -191,8 +251,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amoxicillin Clavulanic Acid",
@@ -206,8 +271,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Amoxicillin Clavulanic Acid 625Mg",
@@ -221,8 +291,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aspirin",
@@ -236,38 +311,53 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aspirin + Atorvastatin 75Mg/10Mg",
     "popular_brands": "Ecosprin-av, Ecosprin",
     "nppa_ceiling_price_inr": 16.0,
-    "jan_aushadhi_price_inr": 6.0,
-    "jan_aushadhi_generic_name": "Aspirin Tablets IP",
-    "pack_size": "14 Tablets",
+    "jan_aushadhi_price_inr": 16.0,
+    "jan_aushadhi_generic_name": "Aspirin and Atorvastatin Capsules 75mg + 10mg",
+    "pack_size": "10 Capsules",
     "pharmeasy_estimated_mrp_inr": 16.8,
     "potential_generic_savings_pct": "64.3%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "capsule",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aspirin + Atorvastatin 75Mg/20Mg",
     "popular_brands": "Ecosprin-av, Ecosprin",
     "nppa_ceiling_price_inr": 16.0,
-    "jan_aushadhi_price_inr": 6.0,
-    "jan_aushadhi_generic_name": "Aspirin Tablets IP",
-    "pack_size": "14 Tablets",
+    "jan_aushadhi_price_inr": 22.0,
+    "jan_aushadhi_generic_name": "Aspirin and Atorvastatin Capsules 75mg + 20mg",
+    "pack_size": "10 Capsules",
     "pharmeasy_estimated_mrp_inr": 16.8,
     "potential_generic_savings_pct": "64.3%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "capsule",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aspirin 150Mg",
@@ -281,8 +371,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Aspirin 75Mg",
@@ -296,8 +391,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Atorvastatin",
@@ -311,8 +411,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Atorvastatin 10Mg",
@@ -326,8 +431,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Atorvastatin 20Mg",
@@ -341,8 +451,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Atorvastatin 40Mg",
@@ -356,8 +471,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Azithromycin",
@@ -371,8 +491,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Azithromycin 250Mg",
@@ -386,8 +511,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Azithromycin 500Mg",
@@ -401,8 +531,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Bisoprolol 2.5Mg",
@@ -416,8 +551,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Bisoprolol 5Mg",
@@ -431,8 +571,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Calcium + Vitamin D3 500Mg/250Iu",
@@ -446,8 +591,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Calcium + Vitamin D3 500Mg/500Iu",
@@ -461,8 +611,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cefixime 100Mg",
@@ -476,8 +631,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cefixime 200Mg",
@@ -491,8 +651,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cefpodoxime Proxetil 100Mg",
@@ -506,8 +671,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cefpodoxime Proxetil 200Mg",
@@ -521,8 +691,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cetirizine",
@@ -536,23 +711,33 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cetirizine + Paracetamol + Phenylephrine 5Mg/325Mg/10Mg",
     "popular_brands": "Cheston-cold, Cetzip, Cetzine",
     "nppa_ceiling_price_inr": 24.0,
-    "jan_aushadhi_price_inr": 4.5,
-    "jan_aushadhi_generic_name": "Cetirizine Hydrochloride Tablets",
+    "jan_aushadhi_price_inr": 9.0,
+    "jan_aushadhi_generic_name": "Cetirizine, Paracetamol and Phenylephrine Tablets",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 25.2,
     "potential_generic_savings_pct": "82.1%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Cetirizine 10Mg",
@@ -566,8 +751,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ciprofloxacin 250Mg",
@@ -581,8 +771,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ciprofloxacin 500Mg",
@@ -596,8 +791,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Dapagliflozin 10Mg",
@@ -611,8 +811,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Dapagliflozin 5Mg",
@@ -626,8 +831,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Dextromethorphan + Phenylephrine + Chlorpheniramine 100Ml",
@@ -641,8 +851,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Diclofenac 50Mg",
@@ -656,8 +871,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Diclofenac Sodium 100Mg",
@@ -671,8 +891,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Diclofenac Sodium 50Mg",
@@ -686,8 +911,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Diclofenac Sodium 75Mg",
@@ -701,8 +931,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Fexofenadine 120Mg",
@@ -716,8 +951,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Fexofenadine 180Mg",
@@ -731,8 +971,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Folic Acid (Vitamin B9) 5Mg",
@@ -746,8 +991,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Glimepiride 1Mg",
@@ -761,8 +1011,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Glimepiride 2Mg",
@@ -776,8 +1031,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Glimepiride 3Mg",
@@ -791,8 +1051,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ibuprofen",
@@ -806,23 +1071,33 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ibuprofen + Paracetamol 400Mg/325Mg",
     "popular_brands": "Combiflam, Brufen",
     "nppa_ceiling_price_inr": 24.5,
-    "jan_aushadhi_price_inr": 7.0,
-    "jan_aushadhi_generic_name": "Ibuprofen Tablets IP",
+    "jan_aushadhi_price_inr": 10.0,
+    "jan_aushadhi_generic_name": "Ibuprofen and Paracetamol Tablets IP 400mg + 325mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 25.73,
     "potential_generic_savings_pct": "72.8%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ibuprofen 200Mg",
@@ -836,8 +1111,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ibuprofen 400Mg",
@@ -851,8 +1131,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ibuprofen Paracetamol",
@@ -866,8 +1151,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levocetirizine 5Mg",
@@ -881,8 +1171,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levosalbutamol + Ambroxol + Guaiphenesin 100Ml",
@@ -896,8 +1191,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine",
@@ -911,8 +1211,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine 100Mcg",
@@ -926,8 +1231,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine 125Mcg",
@@ -941,8 +1251,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine 25Mcg",
@@ -956,8 +1271,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine 50Mcg",
@@ -971,8 +1291,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Levothyroxine 75Mcg",
@@ -986,8 +1311,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Losartan 50Mg",
@@ -1001,8 +1331,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone 200Ml",
@@ -1016,8 +1351,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone Tablet",
@@ -1031,8 +1371,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin",
@@ -1046,68 +1391,93 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin + Glimepiride + Voglibose 500Mg/1Mg/0.2Mg",
     "popular_brands": "Glycomet, Glycomet-trio",
     "nppa_ceiling_price_inr": 32.0,
-    "jan_aushadhi_price_inr": 8.5,
-    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "jan_aushadhi_price_inr": 18.0,
+    "jan_aushadhi_generic_name": "Metformin, Glimepiride and Voglibose Tablets 500mg + 1mg + 0.2mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 33.6,
     "potential_generic_savings_pct": "74.7%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin + Glimepiride + Voglibose 500Mg/2Mg/0.3Mg",
     "popular_brands": "Glycomet, Glycomet-trio",
     "nppa_ceiling_price_inr": 32.0,
-    "jan_aushadhi_price_inr": 8.5,
-    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "jan_aushadhi_price_inr": 22.0,
+    "jan_aushadhi_generic_name": "Metformin, Glimepiride and Voglibose Tablets 500mg + 2mg + 0.3mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 33.6,
     "potential_generic_savings_pct": "74.7%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin + Glimepiride 500Mg/1Mg",
     "popular_brands": "Glycomet-gp, Glycomet",
     "nppa_ceiling_price_inr": 32.0,
-    "jan_aushadhi_price_inr": 8.5,
-    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "jan_aushadhi_price_inr": 11.0,
+    "jan_aushadhi_generic_name": "Metformin and Glimepiride Tablets IP 500mg + 1mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 33.6,
     "potential_generic_savings_pct": "74.7%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin + Glimepiride 500Mg/2Mg",
     "popular_brands": "Glycomet-gp, Glycomet",
     "nppa_ceiling_price_inr": 32.0,
-    "jan_aushadhi_price_inr": 8.5,
-    "jan_aushadhi_generic_name": "Metformin Hydrochloride Tablets IP",
+    "jan_aushadhi_price_inr": 14.0,
+    "jan_aushadhi_generic_name": "Metformin and Glimepiride Tablets IP 500mg + 2mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 33.6,
     "potential_generic_savings_pct": "74.7%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin 1000Mg",
@@ -1121,8 +1491,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin 500Mg",
@@ -1136,8 +1511,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metformin 850Mg",
@@ -1151,8 +1531,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metoprolol Succinate 25Mg",
@@ -1166,8 +1551,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Metoprolol Succinate 50Mg",
@@ -1181,8 +1571,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Montelukast + Levocetirizine 10Mg/5Mg",
@@ -1196,8 +1591,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Montelukast Levocetirizine",
@@ -1211,8 +1611,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Omeprazole + Domperidone 20Mg/10Mg",
@@ -1226,8 +1631,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Omeprazole 20Mg",
@@ -1241,8 +1651,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Omeprazole 40Mg",
@@ -1256,8 +1671,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Pantoprazole",
@@ -1271,23 +1691,33 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Pantoprazole + Domperidone 40Mg/30Mg",
     "popular_brands": "Pan-d, Pantop, Pantocid-dsr, Pan",
     "nppa_ceiling_price_inr": 89.5,
-    "jan_aushadhi_price_inr": 14.5,
-    "jan_aushadhi_generic_name": "Pantoprazole Tablets 40 mg",
-    "pack_size": "10 Tablets",
+    "jan_aushadhi_price_inr": 22.0,
+    "jan_aushadhi_generic_name": "Pantoprazole and Domperidone SR Capsules 40mg + 30mg",
+    "pack_size": "10 Capsules",
     "pharmeasy_estimated_mrp_inr": 93.98,
     "potential_generic_savings_pct": "84.6%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "capsule",
+    "pack_units": 10
   },
   {
     "salt_composition": "Pantoprazole 20Mg",
@@ -1301,8 +1731,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Pantoprazole 40Mg",
@@ -1316,8 +1751,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Pantoprazole Domperidone",
@@ -1331,8 +1771,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "capsule",
+    "pack_units": 10
   },
   {
     "salt_composition": "Paracetamol",
@@ -1346,23 +1791,33 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Paracetamol + Phenylephrine + Chlorpheniramine 500Mg/10Mg/2Mg",
     "popular_brands": "Sinarest, Pacimol, Dolo, Crocin",
     "nppa_ceiling_price_inr": 25.0,
-    "jan_aushadhi_price_inr": 8.0,
-    "jan_aushadhi_generic_name": "Paracetamol Tablets IP",
+    "jan_aushadhi_price_inr": 11.5,
+    "jan_aushadhi_generic_name": "Paracetamol, Phenylephrine and Chlorpheniramine Tablets",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 26.25,
     "potential_generic_savings_pct": "69.5%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Paracetamol 250Mg/5Ml",
@@ -1376,8 +1831,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Paracetamol 500Mg",
@@ -1391,8 +1851,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Paracetamol 650Mg",
@@ -1406,8 +1871,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Rabeprazole + Domperidone 20Mg/30Mg",
@@ -1421,8 +1891,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ranitidine 150Mg",
@@ -1436,8 +1911,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Ranitidine 300Mg",
@@ -1451,8 +1931,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Rosuvastatin 10Mg",
@@ -1466,8 +1951,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Rosuvastatin 20Mg",
@@ -1481,8 +1971,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Rosuvastatin 5Mg",
@@ -1496,8 +1991,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Sitagliptin + Metformin 50Mg/1000Mg",
@@ -1511,8 +2011,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Sitagliptin + Metformin 50Mg/500Mg",
@@ -1526,8 +2031,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan",
@@ -1541,53 +2051,73 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan + Amlodipine 40Mg/5Mg",
     "popular_brands": "Telma, Telmikind, Telma-am",
     "nppa_ceiling_price_inr": 84.0,
-    "jan_aushadhi_price_inr": 14.0,
-    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "jan_aushadhi_price_inr": 18.0,
+    "jan_aushadhi_generic_name": "Telmisartan and Amlodipine Tablets IP 40mg + 5mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 88.2,
     "potential_generic_savings_pct": "84.1%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan + Hydrochlorothiazide 40Mg/12.5Mg",
     "popular_brands": "Telma-h, Telma, Telmikind",
     "nppa_ceiling_price_inr": 84.0,
-    "jan_aushadhi_price_inr": 14.0,
-    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "jan_aushadhi_price_inr": 17.5,
+    "jan_aushadhi_generic_name": "Telmisartan and Hydrochlorothiazide Tablets IP 40mg + 12.5mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 88.2,
     "potential_generic_savings_pct": "84.1%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan + Hydrochlorothiazide 80Mg/12.5Mg",
     "popular_brands": "Telma-h, Telma, Telmikind",
     "nppa_ceiling_price_inr": 84.0,
-    "jan_aushadhi_price_inr": 14.0,
-    "jan_aushadhi_generic_name": "Telmisartan Tablets IP",
+    "jan_aushadhi_price_inr": 24.0,
+    "jan_aushadhi_generic_name": "Telmisartan and Hydrochlorothiazide Tablets IP 80mg + 12.5mg",
     "pack_size": "10 Tablets",
     "pharmeasy_estimated_mrp_inr": 88.2,
     "potential_generic_savings_pct": "84.1%",
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan 20Mg",
@@ -1601,8 +2131,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan 40Mg",
@@ -1616,8 +2151,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Telmisartan 80Mg",
@@ -1631,8 +2171,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Tramadol + Paracetamol 37.5Mg/325Mg",
@@ -1646,8 +2191,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Trypsin + Chymotrypsin 100000 Armour Units",
@@ -1661,8 +2211,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vildagliptin + Metformin 50Mg/500Mg",
@@ -1676,8 +2231,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vildagliptin + Metformin 50Mg/850Mg",
@@ -1691,8 +2251,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin B Complex + Vitamin C Standard",
@@ -1706,8 +2271,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin B1 + B2 + B3 + B5 + B6 + B12 Standard",
@@ -1721,8 +2291,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin C (Ascorbic Acid) 500Mg",
@@ -1736,8 +2311,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin E 200Mg",
@@ -1751,8 +2331,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin E 400Mg",
@@ -1766,8 +2351,13 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   },
   {
     "salt_composition": "Vitamin E 600Mg",
@@ -1781,7 +2371,12 @@
     "sources": {
       "nppa": "National Pharmaceutical Pricing Authority (Pharma Sahi Daam / DPCO)",
       "jan_aushadhi": "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)",
-      "market": "PharmEasy Catalog Search API"
-    }
+      "market": "PharmEasy Catalog Search API",
+      "jan_aushadhi_url": "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      "nppa_url": "https://nppa.gov.in/en/view_more?id=4",
+      "verified_date": "2026-10-26"
+    },
+    "unit_type": "tablet",
+    "pack_units": 10
   }
 ]
