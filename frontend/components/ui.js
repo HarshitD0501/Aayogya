@@ -50,8 +50,15 @@ export function Card({
   );
 }
 
-export function Stat({ icon, label, value, animate = true }) {
-  const ref = useCountUp(animate ? value : 0);
+export function Stat({ icon, label, value, animate = true, format }) {
+  const isStringWithUnit = typeof value === "string" && /[%a-zA-Z]/.test(value);
+  const numericPart = typeof value === "number" ? value : parseFloat(value);
+  const isValidNumber = !isNaN(numericPart) && isFinite(numericPart);
+  
+  // If value has non-numeric characters (like "%"), disable countUp or use static formatting
+  const shouldAnimate = animate && isValidNumber && !isStringWithUnit;
+  const ref = useCountUp(shouldAnimate ? numericPart : 0);
+
   return (
     <SpotlightCard
       className="stat"
@@ -62,8 +69,8 @@ export function Stat({ icon, label, value, animate = true }) {
         {icon && <span className="ic">{icon}</span>}
         <span className="lbl">{label}</span>
       </div>
-      <span className="val" ref={animate ? ref : undefined}>
-        {animate ? "0" : value}
+      <span className="val" ref={shouldAnimate ? ref : undefined}>
+        {shouldAnimate ? "0" : (format ? format(value) : value)}
       </span>
     </SpotlightCard>
   );
@@ -237,3 +244,255 @@ export function PriceVisual({ prices }) {
     </div>
   );
 }
+
+/* ==========================================================================
+   UI Design System v2 Primitives (Phase 1 / Milestone 1)
+   Accessible, responsive, high-contrast primitives conforming to section 6.3.
+   ========================================================================== */
+
+export function UIButton({
+  children,
+  variant = "primary", // 'primary' | 'secondary' | 'tertiary' | 'danger'
+  size = "md", // 'sm' | 'md' | 'lg'
+  isLoading = false,
+  disabled = false,
+  className = "",
+  type = "button",
+  onClick,
+  ...props
+}) {
+  const base = "inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
+  
+  const variants = {
+    primary: "bg-ui-blue text-white hover:bg-ui-blue-hover active:bg-[#15366A] shadow-sm",
+    secondary: "bg-ui-surface text-ui-text border border-ui-border-decorative hover:bg-ui-surface-subtle hover:border-ui-control-border active:bg-[#E5DEC9]",
+    tertiary: "bg-transparent text-ui-blue hover:bg-ui-surface-subtle active:bg-[#E5DEC9]",
+    danger: "bg-ui-danger text-white hover:bg-[#911C13] active:bg-[#70150E] shadow-sm",
+  };
+
+  const sizes = {
+    sm: "min-h-[36px] px-3 py-1.5 text-xs gap-1.5",
+    md: "min-h-[44px] px-4 py-2.5 text-sm gap-2",
+    lg: "min-h-[48px] px-6 py-3 text-base gap-2.5",
+  };
+
+  return (
+    <button
+      type={type}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading ? "true" : undefined}
+      onClick={onClick}
+      className={`${base} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`.trim()}
+      {...props}
+    >
+      {isLoading ? (
+        <>
+          <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5" aria-hidden="true" />
+          <span>{children}</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
+  );
+}
+
+export function UIInput({
+  label,
+  id,
+  error,
+  hint,
+  className = "",
+  type = "text",
+  required = false,
+  ...props
+}) {
+  const inputId = id || (label ? `input-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : undefined);
+  const errorId = error && inputId ? `${inputId}-error` : undefined;
+  const hintId = hint && inputId ? `${inputId}-hint` : undefined;
+  const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+
+  return (
+    <div className="w-full flex flex-col gap-1.5">
+      {label && (
+        <label htmlFor={inputId} className="text-xs font-semibold text-ui-text tracking-wide">
+          {label} {required && <span className="text-ui-danger" aria-hidden="true">*</span>}
+        </label>
+      )}
+      <input
+        id={inputId}
+        type={type}
+        required={required}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={describedBy}
+        className={`w-full min-h-[44px] px-3.5 py-2.5 text-base bg-ui-surface text-ui-text border rounded-lg transition-colors placeholder:text-ui-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-ui-blue focus:ring-offset-1 disabled:bg-ui-surface-subtle disabled:cursor-not-allowed ${
+          error ? "border-ui-danger focus:ring-ui-danger" : "border-ui-control-border focus:border-ui-blue"
+        } ${className}`.trim()}
+        {...props}
+      />
+      {hint && !error && (
+        <p id={hintId} className="text-xs text-ui-text-secondary">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} className="text-xs font-medium text-ui-danger flex items-center gap-1" role="alert">
+          <AlertTriangle size={13} aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function UISelect({
+  label,
+  id,
+  error,
+  hint,
+  options = [],
+  children,
+  className = "",
+  required = false,
+  ...props
+}) {
+  const selectId = id || (label ? `select-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : undefined);
+  const errorId = error && selectId ? `${selectId}-error` : undefined;
+  const hintId = hint && selectId ? `${selectId}-hint` : undefined;
+  const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+
+  return (
+    <div className="w-full flex flex-col gap-1.5">
+      {label && (
+        <label htmlFor={selectId} className="text-xs font-semibold text-ui-text tracking-wide">
+          {label} {required && <span className="text-ui-danger" aria-hidden="true">*</span>}
+        </label>
+      )}
+      <select
+        id={selectId}
+        required={required}
+        aria-invalid={error ? "true" : undefined}
+        aria-describedby={describedBy}
+        className={`w-full min-h-[44px] px-3.5 py-2.5 text-base bg-ui-surface text-ui-text border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ui-blue focus:ring-offset-1 disabled:bg-ui-surface-subtle disabled:cursor-not-allowed ${
+          error ? "border-ui-danger focus:ring-ui-danger" : "border-ui-control-border focus:border-ui-blue"
+        } ${className}`.trim()}
+        {...props}
+      >
+        {options.length > 0
+          ? options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))
+          : children}
+      </select>
+      {hint && !error && (
+        <p id={hintId} className="text-xs text-ui-text-secondary">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} className="text-xs font-medium text-ui-danger flex items-center gap-1" role="alert">
+          <AlertTriangle size={13} aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function UICard({
+  title,
+  sub,
+  actions,
+  children,
+  className = "",
+  ...props
+}) {
+  return (
+    <div
+      className={`bg-ui-surface border border-ui-border-decorative rounded-xl p-5 sm:p-6 shadow-ui-card transition-all ${className}`.trim()}
+      {...props}
+    >
+      {(title || actions || sub) && (
+        <div className="flex items-start justify-between gap-4 mb-4 pb-3 border-b border-ui-border-decorative/60">
+          <div>
+            {title && <h3 className="text-base font-semibold text-ui-text tracking-tight">{title}</h3>}
+            {sub && <p className="text-xs text-ui-text-secondary mt-0.5">{sub}</p>}
+          </div>
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+export function UIBadge({
+  tone = "neutral", // 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+  icon,
+  children,
+  className = "",
+}) {
+  const tones = {
+    success: "bg-[#EAF5EC] text-ui-success border-[#BDDDC2]",
+    warning: "bg-[#FFF8E6] text-ui-warning border-[#F1D699]",
+    danger: "bg-[#FDF0EE] text-ui-danger border-[#F5B5AE]",
+    info: "bg-[#EBF3FC] text-ui-blue border-[#B3D3F7]",
+    neutral: "bg-ui-surface-subtle text-ui-text-secondary border-ui-border-decorative",
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border rounded-full ${
+        tones[tone] || tones.neutral
+      } ${className}`.trim()}
+    >
+      {icon && <span className="shrink-0 text-current">{icon}</span>}
+      <span>{children}</span>
+    </span>
+  );
+}
+
+export function UISkeleton({
+  className = "",
+  width,
+  height,
+  rounded = "rounded-md",
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`bg-ui-surface-subtle animate-pulse ${rounded} ${className}`.trim()}
+      style={{ width, height }}
+    />
+  );
+}
+
+export function UIError({
+  title = "Something went wrong",
+  message,
+  onRetry,
+  className = "",
+}) {
+  return (
+    <div
+      role="alert"
+      className={`p-4 sm:p-5 bg-[#FDF0EE] border border-[#F5B5AE] rounded-xl text-ui-text flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${className}`.trim()}
+    >
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle size={18} className="text-ui-danger shrink-0 mt-0.5" aria-hidden="true" />
+        <div>
+          <h4 className="text-sm font-semibold text-ui-danger">{title}</h4>
+          {message && <p className="text-xs text-ui-text-secondary mt-0.5">{message}</p>}
+        </div>
+      </div>
+      {onRetry && (
+        <UIButton variant="secondary" size="sm" onClick={onRetry} className="shrink-0 self-start sm:self-auto">
+          Retry
+        </UIButton>
+      )}
+    </div>
+  );
+}
+

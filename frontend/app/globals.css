@@ -5,8 +5,24 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --font-sans: var(--font-sans), "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: var(--font-serif), "Playfair Display", Georgia, serif;
+  --font-body-stack: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+  --font-display-stack: "Playfair Display", Georgia, "Noto Serif Devanagari", serif;
+  --font-sans: var(--font-body-stack);
+  --font-serif: var(--font-display-stack);
+
+  /* UI Design System Tokens (Phase 1 / M1) */
+  --ui-canvas: #F8F5EE;
+  --ui-surface: #FFFFFF;
+  --ui-surface-subtle: #F1EBDF;
+  --ui-border-decorative: #E8DFD0;
+  --ui-text: #172B4D;
+  --ui-text-secondary: #526174;
+  --ui-blue: #2457A7;
+  --ui-blue-hover: #1D478A;
+  --ui-control-border: #7A8796;
+  --ui-success: #25633E;
+  --ui-warning: #855800;
+  --ui-danger: #B42318;
 
   /* Deciding Health Tokens */
   --brand-navy: #1a2234;
@@ -3403,3 +3419,54 @@ body {
   border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
   box-shadow: 4px 4px 0px 0px #1a2234 !important;
 }
+
+/* ==========================================================================
+   Scoped Design System Foundations (.landing-v2, .workspace-v2, .ui-modal-root)
+   Phase 1 / Milestone 1: Strictly scoped to prevent bleeding into legacy UI or SahayakPlayerCard.
+   ========================================================================== */
+.landing-v2,
+.workspace-v2 {
+  background-color: var(--ui-canvas);
+  color: var(--ui-text);
+  font-family: var(--font-body-stack);
+}
+
+.landing-v2 :focus-visible,
+.workspace-v2 :focus-visible,
+.ui-modal-root :focus-visible {
+  outline: 2px solid var(--ui-blue);
+  outline-offset: 2px;
+}
+
+/* Accessible skip-link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--ui-surface);
+  color: var(--ui-blue);
+  border: 2px solid var(--ui-blue);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(23, 43, 77, 0.15);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Reduced motion preference gate for v2 components */
+@media (prefers-reduced-motion: reduce) {
+  .landing-v2 *,
+  .workspace-v2 *,
+  .ui-modal-root * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
