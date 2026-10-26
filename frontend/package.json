@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/test-dependencies.mjs && node scripts/test-history-basket.mjs"
+    "test": "node scripts/test-dependencies.mjs && node scripts/test-history-basket.mjs && node scripts/test-resource-cache.mjs"
   },
   "dependencies": {
     "gsap": "3.12.5",
