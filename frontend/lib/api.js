@@ -1,5 +1,7 @@
 "use client";
 
+import { clearResourceCache, invalidateResource } from "./resourceCache";
+
 // Thin fetch wrapper: attaches the Bearer token, unwraps FastAPI's {detail},
 // and broadcasts a logout on 401 so the app can drop back to the login screen.
 const TOKEN_KEY = "aushadh_token";
@@ -17,6 +19,7 @@ export function clearToken() {
     window.localStorage.removeItem(TOKEN_KEY);
     window.localStorage.removeItem("aushadh_token");
     window.localStorage.removeItem(PATIENT_KEY); // stale patient header = wrong dashboard
+    clearResourceCache();
     try {
       import("./indexedDb")
         .then((m) => {
@@ -38,8 +41,13 @@ export function getActivePatientId() {
 }
 export function setActivePatientId(id) {
   if (typeof window === "undefined") return;
+  const prev = window.localStorage.getItem(PATIENT_KEY);
   if (id) window.localStorage.setItem(PATIENT_KEY, id);
   else window.localStorage.removeItem(PATIENT_KEY);
+  if (prev !== id) {
+    clearResourceCache();
+    window.dispatchEvent(new CustomEvent("aushadh:patient_switched", { detail: { patientId: id } }));
+  }
 }
 
 export async function api(path, opts = {}) {
@@ -61,6 +69,13 @@ export async function api(path, opts = {}) {
   // actionable message so a dropped/hung request isn't a mystery.
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), opts.timeoutMs ?? 90000);
+  if (opts.signal) {
+    if (opts.signal.aborted) {
+      ac.abort();
+    } else {
+      opts.signal.addEventListener("abort", () => ac.abort(), { once: true });
+    }
+  }
   let res;
   try {
     res = await fetch(`${API_BASE}/api${path}`, { ...init, signal: ac.signal });
@@ -82,6 +97,7 @@ export async function api(path, opts = {}) {
 
   if (res.status === 401 && !isAuthEndpoint) {
     clearToken();
+    clearResourceCache();
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("aushadh:logout"));
     }
@@ -103,6 +119,13 @@ export async function api(path, opts = {}) {
     }
     throw new Error(detail);
   }
+
+  // Invalidate in-memory resource cache on mutations (POST, PUT, DELETE, PATCH)
+  const isMutation = (opts.method && opts.method.toUpperCase() !== "GET") || opts.json !== undefined;
+  if (isMutation) {
+    invalidateResource();
+  }
+
   if (res.status === 204) return null;
   return res.json();
 }

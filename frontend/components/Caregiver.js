@@ -27,6 +27,7 @@ import {
   setActivePatientId,
   getActivePatientId,
 } from "@/lib/api";
+import { fetchWithResourceCache } from "@/lib/resourceCache";
 import {
   Activity,
   UploadCloud,
@@ -374,11 +375,17 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
   useEffect(() => {
     let alive = true;
     setMedsList(null);
-    api("/medicines?include_prices=false")
+    const ac = new AbortController();
+    fetchWithResourceCache(
+      "/medicines?include_prices=false",
+      (signal) => api("/medicines?include_prices=false", { signal }),
+      { signal: ac.signal }
+    )
       .then((meds) => alive && setMedsList(meds))
       .catch(() => {}); // offline: WhatsApp text falls back to a generic nudge
     return () => {
       alive = false;
+      ac.abort();
     };
   }, [patientCard.id]);
 
