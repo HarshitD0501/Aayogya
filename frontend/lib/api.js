@@ -67,8 +67,13 @@ export async function api(path, opts = {}) {
   // Extraction runs a real Gemini vision call (~30s). Give it a generous
   // ceiling and turn the opaque network "TypeError: Failed to fetch" into an
   // actionable message so a dropped/hung request isn't a mystery.
+  let isTimeout = false;
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), opts.timeoutMs ?? 90000);
+  const timer = setTimeout(() => {
+    isTimeout = true;
+    ac.abort();
+  }, opts.timeoutMs ?? 90000);
+
   if (opts.signal) {
     if (opts.signal.aborted) {
       ac.abort();
@@ -81,8 +86,12 @@ export async function api(path, opts = {}) {
     res = await fetch(`${API_BASE}/api${path}`, { ...init, signal: ac.signal });
   } catch (e) {
     clearTimeout(timer);
-    if (e.name === "AbortError")
-      throw new Error("The server took too long to respond — please try again.");
+    if (e.name === "AbortError") {
+      if (isTimeout) {
+        throw new Error("The server took too long to respond — please try again.");
+      }
+      throw e; // Client cancellation (e.g. unmount or navigation), re-throw as AbortError
+    }
     throw new Error("Couldn't reach the server. Make sure the backend is running, then try again.");
   } finally {
     clearTimeout(timer);

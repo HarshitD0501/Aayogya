@@ -375,17 +375,14 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
   useEffect(() => {
     let alive = true;
     setMedsList(null);
-    const ac = new AbortController();
     fetchWithResourceCache(
       "/medicines?include_prices=false",
-      (signal) => api("/medicines?include_prices=false", { signal }),
-      { signal: ac.signal }
+      () => api("/medicines?include_prices=false")
     )
       .then((meds) => alive && setMedsList(meds))
       .catch(() => {}); // offline: WhatsApp text falls back to a generic nudge
     return () => {
       alive = false;
-      ac.abort();
     };
   }, [patientCard.id]);
 

@@ -47,14 +47,13 @@ function useData(path, deps = []) {
     let alive = true;
     setState((prev) => ({ ...prev, loading: true, error: "" }));
 
-    const ac = new AbortController();
-
-    fetchWithResourceCache(path, (signal) => api(path, { signal }), { signal: ac.signal })
+    fetchWithResourceCache(path, () => api(path))
       .then((d) => {
         if (alive) setState({ loading: false, error: "", data: d });
       })
       .catch((e) => {
         if (alive) {
+          if (e?.name === "AbortError") return;
           setState({
             loading: false,
             error: e.message || "Failed to load.",
@@ -65,7 +64,6 @@ function useData(path, deps = []) {
 
     return () => {
       alive = false;
-      ac.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, ...deps]);

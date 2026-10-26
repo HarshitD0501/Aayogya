@@ -38,7 +38,7 @@ async function handleRequest(request, params, method) {
       path.includes("/upload") ||
       path.includes("/chat") ||
       path.includes("/trigger");
-    const timeoutMs = isHeavyEndpoint ? 90000 : 20000;
+    const timeoutMs = isHeavyEndpoint ? 90000 : 45000;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
