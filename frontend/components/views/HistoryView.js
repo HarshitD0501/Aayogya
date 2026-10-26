@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getAllPrescriptionReports,
   deletePrescriptionReport,
+  computeReportTotals,
 } from "@/lib/indexedDb";
 import { getActivePatientId } from "@/lib/api";
 import { formatPaise, formatPercent } from "@/lib/currency";
@@ -23,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
+export default function HistoryView({ hideNavbar = false, onNavigateTab, patient }) {
   const { t } = useLanguage();
 
   const [reports, setReports] = useState([]);
@@ -36,7 +37,7 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
   const loadReports = useCallback(async () => {
     setLoading(true);
     try {
-      const pid = getActivePatientId();
+      const pid = patient?.id || getActivePatientId();
       const stored = await getAllPrescriptionReports(pid);
       setReports(stored || []);
     } catch (err) {
@@ -44,10 +45,15 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [patient?.id]);
 
   useEffect(() => {
     loadReports();
+    const handleReportUpdate = () => loadReports();
+    if (typeof window !== "undefined") {
+      window.addEventListener("aushadh:report_updated", handleReportUpdate);
+      return () => window.removeEventListener("aushadh:report_updated", handleReportUpdate);
+    }
   }, [loadReports]);
 
   const handleConfirmDelete = async () => {
@@ -65,7 +71,8 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
   };
 
   const totalSavingsPaise = reports.reduce((acc, r) => {
-    const s = r.totals?.saving_total_paise || 0;
+    const totals = r.totals || r.totals_snapshot || computeReportTotals(r.items || []);
+    const s = totals.saving_total_paise || 0;
     return acc + s;
   }, 0);
 
@@ -179,8 +186,9 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
             {reports
               .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
               .map((rep) => {
-                const saving = rep.totals?.saving_total_paise;
-                const pmbjpTotal = rep.totals?.pmbjp_total_paise;
+                const totals = rep.totals || rep.totals_snapshot || computeReportTotals(rep.items || []);
+                const saving = totals.saving_total_paise;
+                const pmbjpTotal = totals.pmbjp_total_paise;
                 return (
                   <div
                     key={rep.report_id}

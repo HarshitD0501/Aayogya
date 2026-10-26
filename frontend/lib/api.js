@@ -113,6 +113,9 @@ export async function login(identifier, password, role) {
     json: { identifier, password, role },
   });
   setToken(data.token);
+  if (data.patient?.id) {
+    setActivePatientId(data.patient.id);
+  }
   return data.patient;
 }
 
@@ -122,6 +125,9 @@ export async function register({ name, email, phone, password, role }) {
     json: { name, email, phone, password, role },
   });
   setToken(data.token);
+  if (data.patient?.id) {
+    setActivePatientId(data.patient.id);
+  }
   return data.patient;
 }
 
@@ -131,6 +137,9 @@ export async function googleAuth({ credential, mode, role }) {
     json: { credential, mode, role },
   });
   setToken(data.token);
+  if (data.patient?.id) {
+    setActivePatientId(data.patient.id);
+  }
   return data.patient;
 }
 

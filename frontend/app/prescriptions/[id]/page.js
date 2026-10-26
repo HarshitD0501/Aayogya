@@ -278,7 +278,7 @@ export default function PrescriptionDetailPage() {
     );
   }
 
-  const totals = report.totals || computeReportTotals(report.items || []);
+  const totals = report.totals || report.totals_snapshot || computeReportTotals(report.items || []);
 
   return (
     <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col">
@@ -379,33 +379,38 @@ export default function PrescriptionDetailPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-navy/10 font-sans">
-                {(report.items || []).map((item, idx) => (
-                  <tr key={item.medicine_id || idx} className="hover:bg-brand-cream/40">
-                    <td className="p-3 font-bold">
-                      <div className="text-brand-navy text-sm">
-                        {item.molecule_label || item.matched_text}
-                      </div>
-                      <div className="text-[11px] text-brand-gray font-normal">
-                        {item.strength_label} • {item.form} • {item.pack_label}
-                      </div>
-                    </td>
-                    <td className="p-3 font-mono font-bold text-brand-navy">
-                      {item.pmbjp_product_code || "Not verified"}
-                    </td>
-                    <td className="p-3 text-center font-bold text-brand-navy">
-                      {item.pack_count || 1}
-                    </td>
-                    <td className="p-3 font-serif font-bold text-brand-navy">
-                      {item.pmbjp_price ? formatPaise(item.pmbjp_price.amount_paise) : "₹--"}
-                    </td>
-                    <td className="p-3 font-serif line-through text-brand-gray">
-                      {item.market_price ? formatPaise(item.market_price.amount_paise) : "₹--"}
-                    </td>
-                    <td className="p-3 text-right font-serif font-black text-emerald-800">
-                      {item.saving_paise ? `Save ${formatPaise(item.saving_paise)}` : "No saving"}
-                    </td>
-                  </tr>
-                ))}
+                {(report.items || []).map((item, idx) => {
+                  const pPrice = item.pmbjp_price || item.comparison_snapshot?.pmbjp_price;
+                  const mPrice = item.market_price || item.comparison_snapshot?.market_price;
+                  const savingPaise = item.saving_paise ?? item.comparison_snapshot?.saving_paise;
+                  return (
+                    <tr key={item.medicine_id || idx} className="hover:bg-brand-cream/40">
+                      <td className="p-3 font-bold">
+                        <div className="text-brand-navy text-sm">
+                          {item.molecule_label || item.matched_text}
+                        </div>
+                        <div className="text-[11px] text-brand-gray font-normal">
+                          {item.strength_label} • {item.form} • {item.pack_label || "10 tablets"}
+                        </div>
+                      </td>
+                      <td className="p-3 font-mono font-bold text-brand-navy">
+                        {item.pmbjp_product_code || "Not verified"}
+                      </td>
+                      <td className="p-3 text-center font-bold text-brand-navy">
+                        {item.pack_count || 1}
+                      </td>
+                      <td className="p-3 font-serif font-bold text-brand-navy">
+                        {pPrice ? formatPaise(pPrice.amount_paise) : "₹--"}
+                      </td>
+                      <td className="p-3 font-serif line-through text-brand-gray">
+                        {mPrice ? formatPaise(mPrice.amount_paise) : "₹--"}
+                      </td>
+                      <td className="p-3 text-right font-serif font-black text-emerald-800">
+                        {savingPaise ? `Save ${formatPaise(savingPaise)}` : "No saving"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

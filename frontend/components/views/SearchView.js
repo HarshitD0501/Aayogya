@@ -16,7 +16,7 @@ import {
 import { Search as SearchIcon, ArrowRight, RotateCcw, AlertCircle, Sparkles, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
-export default function SearchView({ hideNavbar = false, onNavigateTab }) {
+export default function SearchView({ hideNavbar = false, onNavigateTab, patient }) {
   const { t } = useLanguage();
 
   const [query, setQuery] = useState("");
@@ -34,6 +34,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab }) {
 
   const [addedSuccess, setAddedSuccess] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [activeReportId, setActiveReportId] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -182,7 +183,11 @@ export default function SearchView({ hideNavbar = false, onNavigateTab }) {
   const handleAddToReport = async (item, count) => {
     setIsAdding(true);
     try {
-      await addOrUpdateReportWithItem(item, count);
+      const pid = patient?.id || (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
+      const repId = await addOrUpdateReportWithItem(item, count, activeReportId, null, pid);
+      if (repId) {
+        setActiveReportId(repId);
+      }
       setAddedSuccess(true);
       setTimeout(() => setAddedSuccess(false), 3000);
     } catch (err) {

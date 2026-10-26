@@ -123,12 +123,9 @@ export async function getPrescriptionReport(reportId) {
 export async function getAllPrescriptionReports(patientId = null) {
   const resolvedPid =
     patientId ||
-    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
-
-  // Tenant isolation: unauthenticated sessions see zero stored reports
-  if (!resolvedPid) {
-    return [];
-  }
+    (typeof window !== "undefined"
+      ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+      : null);
 
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
@@ -137,11 +134,20 @@ export async function getAllPrescriptionReports(patientId = null) {
     const req = store.getAll();
     req.onsuccess = () => {
       const allReports = req.result || [];
-      // Filter reports strictly scoped to the active patient
-      const reports = allReports.filter((r) => r.patient_id === resolvedPid);
+      // Filter reports: if patient is active, show their reports or any unassigned device reports;
+      // if no patient is active, show all reports on this device
+      const reports = resolvedPid
+        ? allReports.filter((r) => {
+            if (!r.patient_id) return true;
+            if (r.patient_id === resolvedPid) return true;
+            const pidLower = String(resolvedPid).toLowerCase();
+            const rPidLower = String(r.patient_id).toLowerCase();
+            return pidLower.includes(rPidLower) || rPidLower.includes(pidLower);
+          })
+        : allReports;
       // Sort newest first
       reports.sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
       resolve(reports);
     };
@@ -164,26 +170,10 @@ export async function clearSensitiveStorage(patientId = null) {
   try {
     const db = await openDatabase();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(['prescriptions', 'action_tokens'], 'readwrite');
-      const prescStore = tx.objectStore('prescriptions');
+      // Clear transient action tokens on logout; never purge local device prescription dossiers
+      const tx = db.transaction(['action_tokens'], 'readwrite');
       const tokenStore = tx.objectStore('action_tokens');
-
-      if (!patientId) {
-        prescStore.clear();
-        tokenStore.clear();
-      } else {
-        const req = prescStore.getAll();
-        req.onsuccess = () => {
-          const list = req.result || [];
-          for (const item of list) {
-            if (item.patient_id === patientId || !item.patient_id) {
-              prescStore.delete(item.report_id);
-            }
-          }
-        };
-        tokenStore.clear();
-      }
-
+      tokenStore.clear();
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
@@ -192,27 +182,37 @@ export async function clearSensitiveStorage(patientId = null) {
   }
 }
 
-export function computeReportTotals(items) {
-  const comparable = items.filter(
-    (item) => item.comparison_snapshot.saving_paise !== null && item.comparison_snapshot.saving_paise !== undefined
-  );
-  const incomplete = items.filter(
-    (item) => item.comparison_snapshot.saving_paise === null || item.comparison_snapshot.saving_paise === undefined
-  );
+export function computeReportTotals(items = []) {
+  const comparable = items.filter((item) => {
+    const saving =
+      item.saving_paise !== undefined && item.saving_paise !== null
+        ? item.saving_paise
+        : item.comparison_snapshot?.saving_paise;
+    return saving !== null && saving !== undefined;
+  });
+  const incomplete = items.filter((item) => {
+    const saving =
+      item.saving_paise !== undefined && item.saving_paise !== null
+        ? item.saving_paise
+        : item.comparison_snapshot?.saving_paise;
+    return saving === null || saving === undefined;
+  });
 
   let marketTotalPaise = 0;
   let pmbjpTotalPaise = 0;
 
   for (const item of comparable) {
-    if (item.comparison_snapshot.market_price) {
-      marketTotalPaise += item.comparison_snapshot.market_price.amount_paise * item.pack_count;
+    const mPrice = item.market_price || item.comparison_snapshot?.market_price;
+    const pPrice = item.pmbjp_price || item.comparison_snapshot?.pmbjp_price;
+    if (mPrice?.amount_paise) {
+      marketTotalPaise += mPrice.amount_paise;
     }
-    if (item.comparison_snapshot.pmbjp_price) {
-      pmbjpTotalPaise += item.comparison_snapshot.pmbjp_price.amount_paise * item.pack_count;
+    if (pPrice?.amount_paise) {
+      pmbjpTotalPaise += pPrice.amount_paise;
     }
   }
 
-  const savingTotalPaise = marketTotalPaise - pmbjpTotalPaise;
+  const savingTotalPaise = Math.max(0, marketTotalPaise - pmbjpTotalPaise);
   const savingPercent =
     marketTotalPaise > 0 ? Math.round((savingTotalPaise / marketTotalPaise) * 100) : null;
 
@@ -233,35 +233,51 @@ export async function addOrUpdateReportWithItem(
   checkup = null,
   patientId = null
 ) {
-  const reportId = existingReportId || `rep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
+  const resolvedPid =
+    patientId ||
+    (typeof window !== "undefined"
+      ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+      : null);
+
+  const reportId =
+    existingReportId ||
+    `rep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
   let existing = await getPrescriptionReport(reportId);
 
+  const marketPrice = item.market_price || item.comparison_snapshot?.market_price || null;
+  const pmbjpPrice = item.pmbjp_price || item.comparison_snapshot?.pmbjp_price || null;
+  const nppaCeilingPrice = item.nppa_ceiling_price || item.nppa_price || item.comparison_snapshot?.nppa_ceiling_price || null;
+  const savingPaise = item.saving_paise ?? item.comparison_snapshot?.saving_paise ?? null;
+  const savingPercent = item.saving_percent ?? item.comparison_snapshot?.saving_percent ?? null;
+
   const confirmedItem = {
-    medicine_id: item.medicine_id,
+    medicine_id: item.medicine_id || item.canonical_id || `med-${Date.now()}`,
     pmbjp_product_code: item.pmbjp_product_code || null,
     brand_id: item.brand_id || null,
     brand_name: item.brand_name || null,
-    matched_text: item.matched_text || item.brand_name || "Verified Medicine",
+    matched_text: item.matched_text || item.brand_name || item.molecule_label || "Verified Medicine",
     molecule_label: item.molecule_label,
     strength_label: item.strength_label,
     form: item.form,
     release_type: item.release_type || null,
     pack_label: item.pack_label || "10 tablets",
     pack_count: packCount,
+    market_price: marketPrice,
+    pmbjp_price: pmbjpPrice,
+    nppa_ceiling_price: nppaCeilingPrice,
+    saving_paise: savingPaise,
+    saving_percent: savingPercent,
     comparison_snapshot: {
-      market_price: item.market_price || null,
-      pmbjp_price: item.pmbjp_price || null,
-      nppa_ceiling_price: item.nppa_ceiling_price || null,
-      saving_paise: item.saving_paise || null,
-      saving_percent: item.saving_percent || null,
+      market_price: marketPrice,
+      pmbjp_price: pmbjpPrice,
+      nppa_ceiling_price: nppaCeilingPrice,
+      saving_paise: savingPaise,
+      saving_percent: savingPercent,
       comparison_basis: item.comparison_basis || null,
       excluded_reason: item.excluded_reason || null,
+      compared_at: new Date().toISOString(),
     },
   };
-
-  const resolvedPid =
-    patientId ||
-    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
 
   if (!existing) {
     const items = [confirmedItem];
@@ -269,24 +285,38 @@ export async function addOrUpdateReportWithItem(
     const newReport = {
       report_id: reportId,
       patient_id: resolvedPid,
+      patient_label: confirmedItem.brand_name || confirmedItem.matched_text || "Prescription Report",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       items,
+      totals,
       totals_snapshot: totals,
       checkup: checkup || null,
     };
     await savePrescriptionReport(newReport, resolvedPid);
   } else {
-    const idx = existing.items.findIndex((i) => i.medicine_id === item.medicine_id);
+    const idx = existing.items.findIndex((i) => i.medicine_id && i.medicine_id === confirmedItem.medicine_id);
     if (idx >= 0) {
-      existing.items[idx].pack_count += packCount;
+      existing.items[idx] = {
+        ...confirmedItem,
+        pack_count: (existing.items[idx].pack_count || 1) + packCount,
+      };
     } else {
       existing.items.push(confirmedItem);
     }
     existing.updated_at = new Date().toISOString();
-    existing.totals_snapshot = computeReportTotals(existing.items);
+    const totals = computeReportTotals(existing.items);
+    existing.totals = totals;
+    existing.totals_snapshot = totals;
+    if (existing.items.length > 1) {
+      existing.patient_label = `${existing.items[0]?.brand_name || existing.items[0]?.matched_text || "Prescription"} + ${existing.items.length - 1} more (${existing.items.length} items)`;
+    }
     if (checkup) existing.checkup = checkup;
-    await savePrescriptionReport(existing);
+    await savePrescriptionReport(existing, resolvedPid || existing.patient_id);
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("aushadh:report_updated", { detail: { reportId } }));
   }
 
   return reportId;

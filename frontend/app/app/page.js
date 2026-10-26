@@ -44,6 +44,7 @@ function AppContent() {
           const p = await loginAsDemo(patientParam);
           if (alive) {
             setPatient(p);
+            if (p?.id) setActivePatientId(p.id);
             setReady(true);
             return;
           }
@@ -58,6 +59,7 @@ function AppContent() {
           const me = await api("/auth/me");
           if (alive) {
             setPatient(me);
+            if (me?.id) setActivePatientId(me.id);
             setReady(true);
             return;
           }
@@ -92,6 +94,7 @@ function AppContent() {
     try {
       const p = await loginAsDemo(patientId);
       setPatient(p);
+      if (p?.id) setActivePatientId(p.id);
       const url = new URL(window.location.href);
       url.searchParams.set("patient", patientId);
       window.history.replaceState({}, "", url.toString());
@@ -117,7 +120,7 @@ function AppContent() {
   if (!patient) {
     return (
       <div className="min-h-screen bg-brand-cream flex flex-col justify-center py-10 sm:px-6 lg:px-8">
-        <Login onLogin={(p) => setPatient(p)} onBack={handleGoHome} />
+        <Login onLogin={(p) => { setPatient(p); if (p?.id) setActivePatientId(p.id); }} onBack={handleGoHome} />
       </div>
     );
   }

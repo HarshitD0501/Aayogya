@@ -24,7 +24,7 @@ import {
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export default function ScanView({ hideNavbar = false, onNavigateTab }) {
+export default function ScanView({ hideNavbar = false, onNavigateTab, patient }) {
   const { t } = useLanguage();
 
   // File selection
@@ -45,6 +45,9 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [packCount, setPackCount] = useState(1);
   const [comparisonItem, setComparisonItem] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [addedSuccess, setAddedSuccess] = useState(false);
+  const [activeReportId, setActiveReportId] = useState(null);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -146,11 +149,20 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
   };
 
   const handleAddToReport = async (item, count) => {
+    setIsAdding(true);
     try {
-      await addOrUpdateReportWithItem(item, count);
-      alert("Added to prescription basket! View in Saved History.");
+      const pid = patient?.id || (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
+      const repId = await addOrUpdateReportWithItem(item, count, activeReportId, null, pid);
+      if (repId) {
+        setActiveReportId(repId);
+      }
+      setAddedSuccess(true);
+      setTimeout(() => setAddedSuccess(false), 3000);
     } catch (err) {
-      alert("Failed to save item.");
+      console.error("Failed to add to report:", err);
+      alert("Could not save to local report.");
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -390,6 +402,8 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
             packCount={packCount}
             onPackCountChange={setPackCount}
             onAddToReport={handleAddToReport}
+            isAdding={isAdding}
+            addedSuccess={addedSuccess}
           />
         </div>
       )}

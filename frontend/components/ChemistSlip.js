@@ -76,30 +76,33 @@ export default function ChemistSlip({ report, onClose }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-navy/20 font-sans">
-              {(report.items || []).map((item, idx) => (
-                <tr key={item.medicine_id || idx} className="py-2">
-                  <td className="py-2.5 font-bold">
-                    <div>{item.molecule_label || item.matched_text}</div>
-                    {item.brand_name && (
-                      <div className="text-[10px] text-brand-gray font-normal">
-                        Prescribed as: {item.brand_name}
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-2.5">
-                    {item.strength_label} • {item.form}
-                  </td>
-                  <td className="py-2.5 font-mono font-bold">
-                    {item.pmbjp_product_code || "Not verified"}
-                  </td>
-                  <td className="py-2.5 text-center font-bold">
-                    {item.pack_count || 1}
-                  </td>
-                  <td className="py-2.5 text-right font-bold">
-                    {item.pmbjp_price ? formatPaise(item.pmbjp_price.amount_paise) : "₹--"}
-                  </td>
-                </tr>
-              ))}
+              {(report.items || []).map((item, idx) => {
+                const pPrice = item.pmbjp_price || item.comparison_snapshot?.pmbjp_price;
+                return (
+                  <tr key={item.medicine_id || idx} className="py-2">
+                    <td className="py-2.5 font-bold">
+                      <div>{item.molecule_label || item.matched_text}</div>
+                      {item.brand_name && (
+                        <div className="text-[10px] text-brand-gray font-normal">
+                          Prescribed as: {item.brand_name}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-2.5">
+                      {item.strength_label} • {item.form}
+                    </td>
+                    <td className="py-2.5 font-mono font-bold">
+                      {item.pmbjp_product_code || "Not verified"}
+                    </td>
+                    <td className="py-2.5 text-center font-bold">
+                      {item.pack_count || 1}
+                    </td>
+                    <td className="py-2.5 text-right font-bold">
+                      {pPrice ? formatPaise(pPrice.amount_paise) : "₹--"}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
@@ -109,7 +112,9 @@ export default function ChemistSlip({ report, onClose }) {
               Estimated Total Generic Cost:
             </span>
             <span className="font-serif font-black text-xl">
-              {report.totals?.pmbjp_total_paise ? formatPaise(report.totals.pmbjp_total_paise) : "₹--"}
+              {(report.totals?.pmbjp_total_paise || report.totals_snapshot?.pmbjp_total_paise)
+                ? formatPaise(report.totals?.pmbjp_total_paise || report.totals_snapshot?.pmbjp_total_paise)
+                : "₹--"}
             </span>
           </div>
 
