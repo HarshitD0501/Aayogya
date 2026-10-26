@@ -114,11 +114,17 @@ const LanguageContext = createContext({
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState("en");
 
+  // Fix F40: Synchronize document.documentElement.lang on initial restore from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("ayogya_lang") || localStorage.getItem("aushadh_lang");
       if (saved === "hi" || saved === "en") {
         setLanguageState(saved);
+        if (typeof document !== "undefined") {
+          document.documentElement.lang = saved;
+        }
+      } else if (typeof document !== "undefined") {
+        document.documentElement.lang = "en";
       }
     } catch {}
   }, []);

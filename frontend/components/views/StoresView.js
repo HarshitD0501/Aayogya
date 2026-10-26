@@ -60,25 +60,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
   const [gpsError, setGpsError] = useState(null);
   const [routeError, setRouteError] = useState(null);
 
-  // 1. Auto-detect browser GPS immediately on mount
-  useEffect(() => {
-    if (typeof window === "undefined" || !navigator.geolocation) return;
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setUserCoords({ lat: latitude, lng: longitude });
-        setIsLocating(false);
-      },
-      (err) => {
-        console.warn("Geolocation auto-detect was dismissed or denied:", err.message);
-        setIsLocating(false);
-      },
-      { timeout: 9000, enableHighAccuracy: true, maximumAge: 60000 }
-    );
-  }, []);
-
-  // 2. Fetch cities
+  // 1. Fetch cities (GPS is requested only on explicit user consent via handleUseLocation)
   useEffect(() => {
     let active = true;
     (async () => {
@@ -249,17 +231,26 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
     return true;
   });
 
+  const ContainerTag = hideNavbar ? "section" : "main";
+  const HeadingTag = hideNavbar ? "h2" : "h1";
+
   const content = (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8">
+    <ContainerTag
+      {...(hideNavbar ? { "aria-labelledby": "stores-heading" } : {})}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+    >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
           <Compass className="w-3.5 h-3.5 text-brand-orange" />
           <span>Verified Healthcare & Medicine Network</span>
         </div>
-        <h1 className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight">
+        <HeadingTag
+          {...(hideNavbar ? { id: "stores-heading" } : {})}
+          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+        >
           Nearby Medical Stores & Hospitals
-        </h1>
+        </HeadingTag>
         <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
           Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & 24x7 Commercial Pharmacies
         </p>
@@ -738,7 +729,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       </div>
 
       <Disclaimer />
-    </main>
+    </ContainerTag>
   );
 
   if (hideNavbar) {
