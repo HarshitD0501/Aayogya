@@ -3458,8 +3458,13 @@ body {
   top: 1rem;
 }
 
-/* Reduced motion preference gate for v2 components */
+/* Reduced motion preference gate */
 @media (prefers-reduced-motion: reduce) {
+  html,
+  html.scroll-smooth {
+    scroll-behavior: auto !important;
+  }
+
   .landing-v2 *,
   .workspace-v2 *,
   .ui-modal-root * {
@@ -3469,4 +3474,5 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
 

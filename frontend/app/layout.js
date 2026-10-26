@@ -1,6 +1,5 @@
 import "./globals.css";
 import Script from "next/script";
-import AuraBackground from "@/components/reactbits/AuraBackground";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata = {
@@ -34,7 +33,6 @@ export default function RootLayout({ children }) {
       <body className="font-sans antialiased selection:bg-brand-peach selection:text-brand-navy">
         {/* Global Paper Texture Overlay */}
         <div className="fixed inset-0 pointer-events-none z-50 bg-paper-texture mix-blend-multiply" />
-        <AuraBackground />
         <LanguageProvider>
           {children}
         </LanguageProvider>

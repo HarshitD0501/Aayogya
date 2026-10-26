@@ -16,6 +16,12 @@ function ensureScrollTrigger() {
   }
 }
 
+// Check if user prefers reduced motion
+export function prefersReducedMotion() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 // Per-element scroll-reveal. Each [data-reveal] animates once as it enters the
 // viewport; an optional data-anim="left|right|zoom|rotate|rise" picks a distinct
 // entrance so consecutive sections each feel different.
@@ -32,6 +38,13 @@ export function useScrollReveal(deps = []) {
   const scope = useRef(null);
   useIsoLayout(() => {
     if (!scope.current) return;
+    if (prefersReducedMotion()) {
+      scope.current.querySelectorAll("[data-reveal]").forEach((el) => {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      });
+      return;
+    }
     ensureScrollTrigger();
     const ctx = gsap.context(() => {
       gsap.utils.toArray("[data-reveal]").forEach((el) => {
@@ -59,9 +72,13 @@ export function useScrollCountUp(value, format) {
   useIsoLayout(() => {
     const el = ref.current;
     if (!el) return;
-    ensureScrollTrigger();
     const target = Number(value) || 0;
     const fmt = format || ((n) => String(Math.round(n)));
+    if (prefersReducedMotion()) {
+      el.textContent = fmt(target);
+      return;
+    }
+    ensureScrollTrigger();
     const obj = { n: 0 };
     el.textContent = fmt(0);
     const ctx = gsap.context(() => {
@@ -89,6 +106,13 @@ export function useReveal(deps = []) {
   const scope = useRef(null);
   useIsoLayout(() => {
     if (!scope.current) return;
+    if (prefersReducedMotion()) {
+      scope.current.querySelectorAll("[data-reveal]").forEach((el) => {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      });
+      return;
+    }
     const ctx = gsap.context(() => {
       const targets = gsap.utils.toArray("[data-reveal]");
       if (!targets.length) return;
@@ -114,8 +138,12 @@ export function useCountUp(value) {
     const el = ref.current;
     if (!el) return;
     const target = Number(value) || 0;
-    const obj = { n: 0 };
     const decimals = Number.isInteger(target) ? 0 : 1;
+    if (prefersReducedMotion()) {
+      el.textContent = target.toFixed(decimals);
+      return;
+    }
+    const obj = { n: 0 };
     const ctx = gsap.context(() => {
       gsap.to(obj, {
         n: target,
