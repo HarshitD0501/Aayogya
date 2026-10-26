@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api, getToken, clearToken, loginAsDemo, setActivePatientId } from "@/lib/api";
 import dynamic from "next/dynamic";
-import Login from "@/components/Login";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const Dashboard = dynamic(() => import("@/components/Dashboard"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
-      <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
-      <p className="font-serif font-black text-xl tracking-tight">Opening Ayogya Patient Dashboard…</p>
+    <div className="min-h-screen bg-ui-canvas flex flex-col items-center justify-center p-6 text-ui-text">
+      <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain animate-pulse mb-4" />
+      <p className="font-serif font-semibold text-lg tracking-tight">Opening Ayogya Patient Dashboard…</p>
     </div>
   ),
 });
@@ -19,9 +18,9 @@ const Dashboard = dynamic(() => import("@/components/Dashboard"), {
 const Caregiver = dynamic(() => import("@/components/Caregiver"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
-      <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
-      <p className="font-serif font-black text-xl tracking-tight">Opening Caregiver Hub…</p>
+    <div className="min-h-screen bg-ui-canvas flex flex-col items-center justify-center p-6 text-ui-text">
+      <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain animate-pulse mb-4" />
+      <p className="font-serif font-semibold text-lg tracking-tight">Opening Caregiver Hub…</p>
     </div>
   ),
 });
@@ -29,107 +28,73 @@ const Caregiver = dynamic(() => import("@/components/Caregiver"), {
 function AppContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const patientParam = searchParams?.get("patient");
   const tabParam = searchParams?.get("tab");
+  const { user, ready, openLogin, logout } = useAuth();
+  const promptShownRef = useRef(false);
 
-  const [patient, setPatient] = useState(null);
-  const [ready, setReady] = useState(false);
-
+  // If session check finished and user is not authenticated, prompt sign-in once
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      // 1. If explicit ?patient= query, login as that demo patient
-      if (patientParam) {
-        try {
-          const p = await loginAsDemo(patientParam);
-          if (alive) {
-            setPatient(p);
-            if (p?.id) setActivePatientId(p.id);
-            setReady(true);
-            return;
-          }
-        } catch (e) {
-          console.warn("Failed to load requested demo patient:", e);
-        }
-      }
-
-      // 2. If token exists in storage, verify session
-      if (getToken()) {
-        try {
-          const me = await api("/auth/me");
-          if (alive) {
-            setPatient(me);
-            if (me?.id) setActivePatientId(me.id);
-            setReady(true);
-            return;
-          }
-        } catch {
-          clearToken();
-        }
-      }
-
-      // 3. Unauthenticated session: prompt for sign-in or explicit demo selection
-      if (alive) {
-        setPatient(null);
-        setReady(true);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [patientParam]);
+    if (ready && !user && !promptShownRef.current) {
+      promptShownRef.current = true;
+      openLogin("/app");
+    }
+  }, [ready, user, openLogin]);
 
   const handleGoHome = () => {
     router.push("/");
   };
 
-  const handleLogout = () => {
-    clearToken();
-    setActivePatientId(null);
-    setPatient(null);
-  };
-
-  const handleSwitchPatient = async (patientId) => {
-    try {
-      const p = await loginAsDemo(patientId);
-      setPatient(p);
-      if (p?.id) setActivePatientId(p.id);
-      const url = new URL(window.location.href);
-      url.searchParams.set("patient", patientId);
-      window.history.replaceState({}, "", url.toString());
-    } catch (e) {
-      alert("Failed to switch patient: " + (e.message || "Unknown error"));
-    }
-  };
-
   if (!ready) {
     return (
-      <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
-        <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
-        <p className="font-serif font-black text-xl tracking-tight">
-          Opening Ayogya Patient Dashboard…
+      <div className="min-h-screen bg-ui-canvas flex flex-col items-center justify-center p-6 text-ui-text">
+        <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain animate-pulse mb-4" />
+        <p className="font-serif font-semibold text-lg tracking-tight">
+          Opening Ayogya Workspace…
         </p>
-        <p className="font-sans text-xs text-brand-gray mt-1">
-          Loading verified prescriptions and clinical modules
+        <p className="text-xs text-ui-text-secondary mt-1">
+          Verifying session credentials and clinical modules
         </p>
       </div>
     );
   }
 
-  if (!patient) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-brand-cream flex flex-col justify-center py-10 sm:px-6 lg:px-8">
-        <Login onLogin={(p) => { setPatient(p); if (p?.id) setActivePatientId(p.id); }} onBack={handleGoHome} />
+      <div className="min-h-screen bg-ui-canvas flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 text-center">
+        <div className="w-full max-w-md bg-ui-surface border border-ui-border-decorative rounded-2xl p-8 shadow-ui-card">
+          <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain mx-auto mb-4" />
+          <h2 className="font-serif text-2xl font-semibold text-ui-text tracking-tight mb-2">
+            Ayogya Workspace
+          </h2>
+          <p className="text-xs sm:text-sm text-ui-text-secondary mb-6 leading-relaxed">
+            Please sign in with your patient or caregiver credentials to access clinical summaries, prescriptions, and adherence telemetry.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              type="button"
+              onClick={() => openLogin("/app")}
+              className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white text-sm font-semibold rounded-lg transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={handleGoHome}
+              className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative text-sm font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+            >
+              Return Home
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (patient?.role === "caregiver") {
+  if (user?.role === "caregiver") {
     return (
       <Caregiver
-        caregiver={patient}
-        onLogout={handleLogout}
+        caregiver={user}
+        onLogout={logout}
         onGoHome={handleGoHome}
       />
     );
@@ -137,10 +102,9 @@ function AppContent() {
 
   return (
     <Dashboard
-      patient={patient}
-      onLogout={handleLogout}
+      patient={user}
+      onLogout={logout}
       onGoHome={handleGoHome}
-      onSwitchPatient={handleSwitchPatient}
       initialSection={tabParam || "summary"}
     />
   );
@@ -150,9 +114,9 @@ export default function AppShell() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
-          <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
-          <p className="font-serif font-black text-xl">Opening Ayogya Dashboard…</p>
+        <div className="min-h-screen bg-ui-canvas flex flex-col items-center justify-center p-6 text-ui-text">
+          <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain animate-pulse mb-4" />
+          <p className="font-serif font-semibold text-lg">Opening Ayogya Dashboard…</p>
         </div>
       }
     >

@@ -1,6 +1,7 @@
 import "./globals.css";
 import Script from "next/script";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export const metadata = {
   title: "Ayogya — Prescription Intelligence & Healthcare Adherence",
@@ -34,7 +35,9 @@ export default function RootLayout({ children }) {
         {/* Global Paper Texture Overlay */}
         <div className="fixed inset-0 pointer-events-none z-50 bg-paper-texture mix-blend-multiply" />
         <LanguageProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </LanguageProvider>
         <Script id="sw-register" strategy="afterInteractive">
           {`
