@@ -262,111 +262,25 @@ class Client {
 
   // 1. Search medicines
   async search(query, limit = 8, signal) {
-    const q = query.trim().toLowerCase();
-    try {
-      const res = await this.fetchWithTimeout(`/api/v1/search?q=${encodeURIComponent(query)}&limit=${limit}`, { signal });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {}
-
-    // Fixture fallback
-    const matched = DEV_CATALOGUE.filter(item => 
-      item.matched_text.toLowerCase().includes(q) ||
-      item.molecule_label.toLowerCase().includes(q) ||
-      item.brands.some(b => b.name.toLowerCase().includes(q))
-    ).map(item => ({
-      medicine_id: item.medicine_id,
-      matched_text: item.matched_text,
-      molecule_label: item.molecule_label,
-      strength_label: item.strength_label,
-      form: item.form,
-      release_type: item.release_type,
-      pack_label: item.pack_label,
-      brands: item.brands,
-      match_score: 92,
-      requires_confirmation: false
-    }));
-
-    return {
-      query,
-      candidates: matched,
-      isFixture: true
-    };
+    const res = await this.fetchWithTimeout(`/api/v1/search?q=${encodeURIComponent(query)}&limit=${limit}`, { signal });
+    if (!res.ok) {
+      throw new ApiClientError(res.status, `Medicine search failed (${res.status})`, "SEARCH_FAILED");
+    }
+    return await res.json();
   }
 
   // 2. Price comparison
   async compare(req, signal) {
-    try {
-      const res = await this.fetchWithTimeout(`/api/v1/compare`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(req),
-        signal
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {}
-
-    // Fixture fallback
-    const items = (req.items || []).map(reqItem => {
-      const found = DEV_CATALOGUE.find(c => c.medicine_id === reqItem.medicine_id) || DEV_CATALOGUE[0];
-      const count = reqItem.pack_count || 1;
-      const brandId = reqItem.brand_id || (found.brands[0] ? found.brands[0].brand_id : null);
-      const brandObj = found.brands.find(b => b.brand_id === brandId);
-      const brandName = brandObj ? brandObj.name : null;
-
-      const baseMarket = found.market_prices[brandId] || Object.values(found.market_prices)[0] || null;
-      const marketPrice = baseMarket ? { ...baseMarket, amount_paise: baseMarket.amount_paise * count } : null;
-      const pmbjpPrice = found.pmbjp_price ? { ...found.pmbjp_price, amount_paise: found.pmbjp_price.amount_paise * count } : null;
-      const nppaPrice = found.nppa_ceiling_price ? { ...found.nppa_ceiling_price, amount_paise: found.nppa_ceiling_price.amount_paise * count } : null;
-
-      let savingPaise = null;
-      let savingPercent = null;
-      if (marketPrice && pmbjpPrice && marketPrice.amount_paise > pmbjpPrice.amount_paise) {
-        savingPaise = marketPrice.amount_paise - pmbjpPrice.amount_paise;
-        savingPercent = Math.round((savingPaise / marketPrice.amount_paise) * 100);
-      }
-
-      return {
-        medicine_id: found.medicine_id,
-        pmbjp_product_code: found.pmbjp_product_code,
-        matched_text: found.matched_text,
-        molecule_label: found.molecule_label,
-        strength_label: found.strength_label,
-        form: found.form,
-        release_type: found.release_type,
-        pack_label: found.pack_label,
-        brand_name: brandName,
-        market_price: marketPrice,
-        nppa_ceiling_price: nppaPrice,
-        pmbjp_price: pmbjpPrice,
-        saving_paise: savingPaise,
-        saving_percent: savingPercent,
-        comparison_basis: "Exact molecule, form & strength equivalent",
-        excluded_reason: null
-      };
+    const res = await this.fetchWithTimeout(`/api/v1/compare`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+      signal
     });
-
-    const comparable = items.filter(i => i.market_price && i.pmbjp_price);
-    const mTotal = comparable.reduce((acc, i) => acc + (i.market_price ? i.market_price.amount_paise : 0), 0);
-    const pTotal = comparable.reduce((acc, i) => acc + (i.pmbjp_price ? i.pmbjp_price.amount_paise : 0), 0);
-    const sTotal = mTotal > pTotal ? mTotal - pTotal : 0;
-    const sPct = mTotal > 0 ? Math.round((sTotal / mTotal) * 100) : 0;
-
-    return {
-      items,
-      totals: {
-        comparable_item_count: comparable.length,
-        incomplete_item_count: items.length - comparable.length,
-        market_total_paise: mTotal || null,
-        pmbjp_total_paise: pTotal || null,
-        saving_total_paise: sTotal || null,
-        saving_percent: sPct || null
-      },
-      isFixture: true
-    };
+    if (!res.ok) {
+      throw new ApiClientError(res.status, `Price comparison failed (${res.status})`, "COMPARE_FAILED");
+    }
+    return await res.json();
   }
 
   // 3. OCR Prescription parse
@@ -553,24 +467,15 @@ class Client {
       headers["Idempotency-Key"] = idempotencyKey;
     }
 
-    try {
-      const res = await this.fetchWithTimeout(`/api/v1/reminders`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) return await res.json();
-    } catch {}
-
-    return {
-      reminder_id: "rem-" + Date.now().toString(36),
-      medicine_name: payload.medicine_name,
-      daily_time: payload.daily_time,
-      timezone: "Asia/Kolkata",
-      status: "scheduled",
-      management_token: "tok-rem-" + Math.random().toString(36).slice(2),
-      next_due_at: new Date(Date.now() + 86400000).toISOString()
-    };
+    const res = await this.fetchWithTimeout(`/api/v1/reminders`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      throw new ApiClientError(res.status, "The public reminder scheduling endpoint is currently unavailable on this server.", "SERVICE_UNAVAILABLE");
+    }
+    return await res.json();
   }
 
   async getReminderStatus(reminderId, managementToken) {
@@ -579,16 +484,11 @@ class Client {
       headers["Authorization"] = `Bearer ${managementToken}`;
     }
 
-    try {
-      const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, { headers });
-      if (res.ok) return await res.json();
-    } catch {}
-
-    return {
-      reminder_id: reminderId,
-      status: "scheduled",
-      last_attempt: new Date().toISOString()
-    };
+    const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, { headers });
+    if (!res.ok) {
+      throw new ApiClientError(res.status, "The reminder status service is currently unavailable.", "SERVICE_UNAVAILABLE");
+    }
+    return await res.json();
   }
 
   async cancelReminder(reminderId, managementToken) {
@@ -597,15 +497,14 @@ class Client {
       headers["Authorization"] = `Bearer ${managementToken}`;
     }
 
-    try {
-      const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, {
-        method: "DELETE",
-        headers
-      });
-      if (res.ok) return await res.json();
-    } catch {}
-
-    return { reminder_id: reminderId, status: "cancelled" };
+    const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, {
+      method: "DELETE",
+      headers
+    });
+    if (!res.ok) {
+      throw new ApiClientError(res.status, "The reminder cancellation service is currently unavailable.", "SERVICE_UNAVAILABLE");
+    }
+    return await res.json();
   }
 
   // 9. Calls

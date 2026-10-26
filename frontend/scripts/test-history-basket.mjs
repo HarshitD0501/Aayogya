@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { computeReportTotals } from "../lib/indexedDb.js";
+import { computeReportTotals, filterPrescriptionReports } from "../lib/indexedDb.js";
 
 console.log("Running prescription basket and history totals verification tests...");
 
@@ -79,34 +79,31 @@ assert.strictEqual(totals3.pmbjp_total_paise, 1200);
 assert.strictEqual(totals3.saving_total_paise, 3300);
 console.log("PASS: Test 3 - Backward compatible snapshot-only item totals match.");
 
-// Test 4: Tenant isolation matching logic
+// Test 4: Tenant isolation matching logic (Fixes F26 & F38)
 const testReports = [
   { report_id: "rep-1", patient_id: "ramesh" },
   { report_id: "rep-2", patient_id: "shanti" },
-  { report_id: "rep-3", patient_id: null }, // unassigned
+  { report_id: "rep-3", patient_id: null }, // unassigned guest report
+  { report_id: "rep-4", patient_id: "rameshkumar" }, // substring check
 ];
 
-function filterReports(allReports, resolvedPid) {
-  return resolvedPid
-    ? allReports.filter((r) => {
-        if (!r.patient_id) return true;
-        if (r.patient_id === resolvedPid) return true;
-        const pidLower = String(resolvedPid).toLowerCase();
-        const rPidLower = String(r.patient_id).toLowerCase();
-        return pidLower.includes(rPidLower) || rPidLower.includes(pidLower);
-      })
-    : allReports;
-}
-
-const rameshReports = filterReports(testReports, "ramesh");
-assert.strictEqual(rameshReports.length, 2); // ramesh + unassigned
+const rameshReports = filterPrescriptionReports(testReports, "ramesh");
+assert.strictEqual(rameshReports.length, 2); // ramesh + unassigned guest
 assert.ok(rameshReports.some((r) => r.report_id === "rep-1"));
 assert.ok(rameshReports.some((r) => r.report_id === "rep-3"));
 assert.ok(!rameshReports.some((r) => r.report_id === "rep-2"));
+assert.ok(!rameshReports.some((r) => r.report_id === "rep-4")); // no substring leakage!
 
-const unauthenticatedReports = filterReports(testReports, null);
-assert.strictEqual(unauthenticatedReports.length, 3); // shows all device reports
+// Substring check: querying "ram" must NOT leak "ramesh" or "rameshkumar"
+const ramReports = filterPrescriptionReports(testReports, "ram");
+assert.strictEqual(ramReports.length, 1); // only unassigned guest
+assert.strictEqual(ramReports[0].report_id, "rep-3");
 
-console.log("PASS: Test 4 - Tenant isolation and fallback visibility logic verified.");
+// Logged out / unauthenticated: must NEVER leak authenticated patient reports
+const unauthenticatedReports = filterPrescriptionReports(testReports, null);
+assert.strictEqual(unauthenticatedReports.length, 1); // only guest unassigned report
+assert.strictEqual(unauthenticatedReports[0].report_id, "rep-3");
+
+console.log("PASS: Test 4 - Strict tenant isolation and substring leakage prevention verified.");
 
 console.log("\nALL 4 PRESCRIPTION BASKET & HISTORY TESTS PASSED SUCCESSFULLY!");

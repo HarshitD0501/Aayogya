@@ -56,6 +56,18 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
     }
   }, [loadReports]);
 
+  // Escape key handler for delete modal (F36)
+  useEffect(() => {
+    if (!deleteTargetId) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setDeleteTargetId(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [deleteTargetId]);
+
   const handleConfirmDelete = async () => {
     if (!deleteTargetId) return;
     setIsDeleting(true);
@@ -80,17 +92,26 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
     return acc + (r.items?.length || 0);
   }, 0);
 
+  const ContainerTag = hideNavbar ? "section" : "main";
+  const HeadingTag = hideNavbar ? "h2" : "h1";
+
   const content = (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8">
+    <ContainerTag
+      {...(hideNavbar ? { "aria-labelledby": "history-heading" } : {})}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+    >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
           <History className="w-3.5 h-3.5 text-brand-orange" />
           <span>Zero-Cloud Device Vault</span>
         </div>
-        <h1 className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight">
+        <HeadingTag
+          {...(hideNavbar ? { id: "history-heading" } : {})}
+          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+        >
           {t.historyTitle}
-        </h1>
+        </HeadingTag>
         <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
           {t.historySubtitle}
         </p>
@@ -288,13 +309,23 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal (F36) */}
       {deleteTargetId && (
-        <div className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-report-title"
+          className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDeleteTargetId(null);
+          }}
+        >
           <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch max-w-md w-full p-6 space-y-4">
             <div className="flex items-center gap-2 text-red-700">
               <AlertTriangle className="w-6 h-6 flex-shrink-0" />
-              <h4 className="font-serif font-black text-lg">Delete Local Report?</h4>
+              <h4 id="delete-report-title" className="font-serif font-black text-lg">
+                Delete Local Report?
+              </h4>
             </div>
             <p className="font-sans text-xs text-brand-gray leading-relaxed">
               This report will be permanently removed from this device's IndexedDB. This action cannot be undone.
@@ -302,14 +333,15 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setDeleteTargetId(null)}
-                className="px-4 py-2 border-2 border-brand-navy bg-brand-cream font-bold text-xs uppercase tracking-wider"
+                autoFocus
+                className="px-4 py-2 border-2 border-brand-navy bg-brand-cream font-bold text-xs uppercase tracking-wider hover:bg-brand-peach/40"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 border-2 border-brand-navy bg-red-600 text-white font-bold text-xs uppercase tracking-wider"
+                className="px-4 py-2 border-2 border-brand-navy bg-red-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-red-700 disabled:opacity-50"
               >
                 {isDeleting ? "Deleting..." : "Confirm Delete"}
               </button>
@@ -319,7 +351,7 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
       )}
 
       <Disclaimer />
-    </main>
+    </ContainerTag>
   );
 
   if (hideNavbar) {

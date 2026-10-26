@@ -166,17 +166,26 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
     }
   };
 
+  const ContainerTag = hideNavbar ? "section" : "main";
+  const HeadingTag = hideNavbar ? "h2" : "h1";
+
   const content = (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8">
+    <ContainerTag
+      {...(hideNavbar ? { "aria-labelledby": "scan-heading" } : {})}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+    >
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
           <Camera className="w-3.5 h-3.5 text-brand-orange" />
           <span>Human-in-the-Loop OCR</span>
         </div>
-        <h1 className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight">
+        <HeadingTag
+          {...(hideNavbar ? { id: "scan-heading" } : {})}
+          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+        >
           {t.scanTitle}
-        </h1>
+        </HeadingTag>
         <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
           {t.scanSubtitle}
         </p>
@@ -286,6 +295,27 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           </div>
         )}
 
+        {/* OCR Processing Error Alert (F22) */}
+        {ocrError && (
+          <div
+            role="alert"
+            className="p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+          >
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />
+              <span>{ocrError}</span>
+            </div>
+            {selectedFile && (
+              <button
+                onClick={handleRunOcr}
+                className="px-2.5 py-1 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[11px] flex items-center gap-1 flex-shrink-0"
+              >
+                <span>Retry OCR</span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* OCR Result View */}
         {ocrResponse && (
           <div className="space-y-5 pt-4 border-t-2 border-brand-navy/10 animate-in fade-in-50">
@@ -293,10 +323,13 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
               <ShieldAlert className="w-5 h-5 text-brand-navy flex-shrink-0 mt-0.5" />
               <div className="text-xs font-sans">
                 <span className="font-black uppercase tracking-wider block text-brand-navy mb-0.5">
-                  HUMAN CONFIRMATION REQUIRED
+                  HUMAN CONFIRMATION REQUIRED (LOCAL PREVIEW ONLY)
                 </span>
                 <p className="text-brand-navy/80 font-medium">
                   {t.ocrNotice}
+                </p>
+                <p className="text-brand-gray text-[11px] mt-1.5 italic border-t border-brand-navy/10 pt-1">
+                  Note: Text extracted here is for local review and generic comparison only. It has not been clinically confirmed or saved to your medical records on the server.
                 </p>
               </div>
             </div>
@@ -368,6 +401,27 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
             </button>
           </div>
 
+          {/* Manual Search Error Alert (F22) */}
+          {searchError && (
+            <div
+              role="alert"
+              className="p-3 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />
+                <span>{searchError}</span>
+              </div>
+              {correctionQuery.trim() && (
+                <button
+                  onClick={() => handleManualSearch(correctionQuery)}
+                  className="px-2 py-0.5 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[10px]"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
+          )}
+
           {candidates.length > 0 && (
             <div className="border-2 border-brand-navy divide-y divide-brand-navy/10 bg-brand-white mt-3">
               {candidates.map((cand) => (
@@ -411,7 +465,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
       <div className="max-w-3xl mx-auto">
         <Disclaimer />
       </div>
-    </main>
+    </ContainerTag>
   );
 
   if (hideNavbar) {

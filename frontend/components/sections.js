@@ -17,6 +17,7 @@ import {
 import {
   Sunrise,
   Sun,
+  Sunset,
   Moon,
   AlertCircle,
   Pill as PillIcon,
@@ -65,6 +66,7 @@ function useData(path, deps = []) {
 const SLOTS = [
   { key: "morning", label: "Morning", Icon: Sunrise, color: "#d97706" },
   { key: "afternoon", label: "Afternoon", Icon: Sun, color: "#2563eb" },
+  { key: "evening", label: "Evening", Icon: Sunset, color: "#ea580c" },
   { key: "night", label: "Night", Icon: Moon, color: "#1e3a8a" },
   { key: "sos", label: "As needed (SOS)", Icon: AlertCircle, color: "#dc2626" },
 ];
@@ -408,7 +410,7 @@ export function Summary() {
         <Stat
           icon={<CheckCircle2 size={20} />}
           label="Adherence Rate Today"
-          value={t.adherence_rate_today_pct != null ? `${t.adherence_rate_today_pct}%` : "100%"}
+          value={t.doses_per_day === 0 || t.adherence_rate_today_pct == null ? "No scheduled doses" : `${t.adherence_rate_today_pct}%`}
         />
       </div>
 
@@ -601,10 +603,11 @@ export function Summary() {
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
               <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                <label htmlFor="slot-time-morning" style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
                   🌅 Morning Dose Time
                 </label>
                 <input
+                  id="slot-time-morning"
                   type="time"
                   value={slotTimes.morning}
                   onChange={(e) => setSlotTimes({ ...slotTimes, morning: e.target.value })}
@@ -620,10 +623,11 @@ export function Summary() {
               </div>
 
               <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                <label htmlFor="slot-time-afternoon" style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
                   ☀️ Afternoon Dose Time
                 </label>
                 <input
+                  id="slot-time-afternoon"
                   type="time"
                   value={slotTimes.afternoon}
                   onChange={(e) => setSlotTimes({ ...slotTimes, afternoon: e.target.value })}
@@ -639,10 +643,11 @@ export function Summary() {
               </div>
 
               <div style={{ padding: 10, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--line-light)" }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
+                <label htmlFor="slot-time-night" style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", display: "block", marginBottom: 6 }}>
                   🌙 Night Dose Time
                 </label>
                 <input
+                  id="slot-time-night"
                   type="time"
                   value={slotTimes.night}
                   onChange={(e) => setSlotTimes({ ...slotTimes, night: e.target.value })}

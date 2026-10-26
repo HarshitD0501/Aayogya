@@ -1,11 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { formatPaise } from "@/lib/currency";
 import { Printer, ShieldAlert, X } from "lucide-react";
 
 export default function ChemistSlip({ report, onClose }) {
   if (!report) return null;
+
+  useEffect(() => {
+    if (!onClose) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
@@ -14,13 +25,21 @@ export default function ChemistSlip({ report, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="chemist-slip-title"
+      className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+    >
       <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch w-full max-w-2xl p-6 sm:p-8 space-y-6 relative my-8 print:m-0 print:p-0 print:border-none print:shadow-none">
         
         {/* Top Controls (Hidden in Print) */}
         <div className="flex items-center justify-between border-b-2 border-brand-navy/20 pb-4 print:hidden">
           <div className="flex items-center gap-2">
-            <span className="font-serif font-black text-lg text-brand-navy">
+            <span id="chemist-slip-title" className="font-serif font-black text-lg text-brand-navy">
               Counter Print Slip
             </span>
             <span className="text-[10px] font-sans font-bold bg-brand-orange text-brand-navy px-2 py-0.5 rounded uppercase tracking-widest border border-brand-navy">

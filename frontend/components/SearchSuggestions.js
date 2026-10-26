@@ -20,11 +20,12 @@ export default function SearchSuggestions({
         </div>
       )}
 
-      <ul className="max-h-80 overflow-y-auto" role="listbox">
+      <ul id="search-suggestions-listbox" className="max-h-80 overflow-y-auto" role="listbox">
         {candidates.map((cand, idx) => {
           const isSelected = highlightedIndex === idx;
           return (
             <li
+              id={`suggestion-${idx}`}
               key={cand.medicine_id || idx}
               role="option"
               aria-selected={isSelected}

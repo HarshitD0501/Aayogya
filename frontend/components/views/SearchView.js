@@ -116,6 +116,25 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
     }
   }, []);
 
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || candidates.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.min(prev + 1, candidates.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && candidates[highlightedIndex]) {
+        e.preventDefault();
+        handleSelectCandidate(candidates[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    }
+  };
+
   const handleQueryChange = (e) => {
     const val = e.target.value;
     setQuery(val);
@@ -198,17 +217,26 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
     }
   };
 
+  const ContainerTag = hideNavbar ? "section" : "main";
+  const HeadingTag = hideNavbar ? "h2" : "h1";
+
   const content = (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8">
+    <ContainerTag
+      {...(hideNavbar ? { "aria-labelledby": "search-heading" } : {})}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+    >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
           <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
           <span>PMBJP Price Transparency</span>
         </div>
-        <h1 className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight">
+        <HeadingTag
+          {...(hideNavbar ? { id: "search-heading" } : {})}
+          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+        >
           {t.searchTitle}
-        </h1>
+        </HeadingTag>
         <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
           {t.searchSubtitle}
         </p>
@@ -222,9 +250,15 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
             type="text"
             value={query}
             onChange={handleQueryChange}
+            onKeyDown={handleKeyDown}
             onFocus={() => candidates.length > 0 && setShowSuggestions(true)}
             placeholder={t.searchPlaceholder}
             aria-label={t.searchAriaLabel}
+            role="combobox"
+            aria-expanded={showSuggestions && candidates.length > 0}
+            aria-autocomplete="list"
+            aria-controls="search-suggestions-listbox"
+            aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
             className="w-full bg-transparent font-sans text-base sm:text-lg font-medium text-brand-navy placeholder:text-brand-gray/60 focus:outline-none"
           />
           {isSearching && (
@@ -262,6 +296,49 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
           />
         )}
       </div>
+
+      {/* Visible Error Alerts (F22) */}
+      {searchError && (
+        <div
+          role="alert"
+          className="max-w-3xl mx-auto p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+        >
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-800 flex-shrink-0" />
+            <span>{searchError}</span>
+          </div>
+          {query.trim() && (
+            <button
+              onClick={() => executeSearch(query)}
+              className="px-2.5 py-1 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[11px] flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Retry</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {compareError && (
+        <div
+          role="alert"
+          className="max-w-3xl mx-auto p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+        >
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-800 flex-shrink-0" />
+            <span>{compareError}</span>
+          </div>
+          {selectedCandidate && (
+            <button
+              onClick={() => executeCompare(selectedCandidate, selectedBrandId, packCount)}
+              className="px-2.5 py-1 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[11px] flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Retry</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Comparison Result Hero */}
       {isComparing && (
@@ -330,7 +407,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       <div className="max-w-3xl mx-auto">
         <Disclaimer />
       </div>
-    </main>
+    </ContainerTag>
   );
 
   if (hideNavbar) {

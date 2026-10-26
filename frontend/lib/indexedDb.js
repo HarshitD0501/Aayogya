@@ -120,6 +120,15 @@ export async function getPrescriptionReport(reportId) {
   });
 }
 
+export function filterPrescriptionReports(allReports, resolvedPid) {
+  if (resolvedPid) {
+    // Only exact patient match or unassigned guest reports. Reject loose substring matching.
+    return allReports.filter((r) => !r.patient_id || r.patient_id === resolvedPid);
+  }
+  // When unauthenticated / guest, NEVER leak records belonging to authenticated accounts
+  return allReports.filter((r) => !r.patient_id);
+}
+
 export async function getAllPrescriptionReports(patientId = null) {
   const resolvedPid =
     patientId ||
@@ -134,17 +143,7 @@ export async function getAllPrescriptionReports(patientId = null) {
     const req = store.getAll();
     req.onsuccess = () => {
       const allReports = req.result || [];
-      // Filter reports: if patient is active, show their reports or any unassigned device reports;
-      // if no patient is active, show all reports on this device
-      const reports = resolvedPid
-        ? allReports.filter((r) => {
-            if (!r.patient_id) return true;
-            if (r.patient_id === resolvedPid) return true;
-            const pidLower = String(resolvedPid).toLowerCase();
-            const rPidLower = String(r.patient_id).toLowerCase();
-            return pidLower.includes(rPidLower) || rPidLower.includes(pidLower);
-          })
-        : allReports;
+      const reports = filterPrescriptionReports(allReports, resolvedPid);
       // Sort newest first
       reports.sort(
         (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
