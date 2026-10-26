@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -14,29 +14,54 @@ import {
   X,
   ArrowLeft,
   LayoutDashboard,
+  LogIn,
 } from "lucide-react";
 
-export default function Navbar({ onTabChange, activeTab, inAppShell = false, isLanding = false }) {
+export default function Navbar({
+  onTabChange,
+  activeTab,
+  inAppShell = false,
+  isLanding = false,
+  onOpenAuth,
+}) {
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const toggleBtnRef = useRef(null);
 
   const isShell = inAppShell || pathname === "/app";
 
-  const navLinks = isLanding
-    ? [
-        { href: "#problem", label: "The Problem", isAnchor: true },
-        { href: "#features", label: "Case Files", isAnchor: true },
-        { href: "/search", label: t.navSearch || "Search & Compare", icon: Search },
-        { href: "/scan", label: t.navScan || "Scan Prescription", icon: Camera },
-        { href: "/stores", label: t.navStores || "Find Kendra", icon: MapPin },
-      ]
-    : [
-        { href: "/search", tab: "search", label: t.navSearch || "Search & Compare", icon: Search },
-        { href: "/scan", tab: "scan", label: t.navScan || "Scan Prescription", icon: Camera },
-        { href: "/stores", tab: "stores", label: t.navStores || "Find Kendra", icon: MapPin },
-        { href: "/history", tab: "history", label: t.navHistory || "Saved History", icon: History },
-      ];
+  // Handle Escape key to close mobile drawer and return focus
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        toggleBtnRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen]);
+
+  // Landing links contract: How It Works, Product, FAQ + quick tools
+  const landingNavLinks = [
+    { href: "#how-it-works", label: "How It Works", isAnchor: true },
+    { href: "#product", label: "Product", isAnchor: true },
+    { href: "#faq", label: "FAQ", isAnchor: true },
+    { href: "/search", label: t.navSearch || "Search & Compare", icon: Search },
+    { href: "/scan", label: t.navScan || "Scan Prescription", icon: Camera },
+    { href: "/stores", label: t.navStores || "Find Kendra", icon: MapPin },
+  ];
+
+  const appNavLinks = [
+    { href: "/search", tab: "search", label: t.navSearch || "Search & Compare", icon: Search },
+    { href: "/scan", tab: "scan", label: t.navScan || "Scan Prescription", icon: Camera },
+    { href: "/stores", tab: "stores", label: t.navStores || "Find Kendra", icon: MapPin },
+    { href: "/history", tab: "history", label: t.navHistory || "Saved History", icon: History },
+  ];
+
+  const navLinks = isLanding ? landingNavLinks : appNavLinks;
 
   const isCurrentActive = (item) => {
     if (activeTab) return activeTab === item.tab;
@@ -47,26 +72,38 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
     if (href.startsWith("#")) {
       e.preventDefault();
       const targetId = href.replace("#", "");
-      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        el.focus({ preventScroll: true });
+      }
       setMobileMenuOpen(false);
     }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-brand-cream/95 backdrop-blur-md border-b-2 border-brand-navy/15 shadow-sm transition-all duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-ui-canvas/95 backdrop-blur-md border-b border-ui-border-decorative transition-colors">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4">
         
-        {/* Brand Lockup: Ayogya Golden Leaf Logo */}
-        <Link href="/" className="flex items-center gap-3 group focus:outline-none shrink-0 py-1">
+        {/* Brand Lockup */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 rounded-lg py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2 shrink-0"
+          aria-label="Ayogya Home"
+        >
           <img
             src="/aayogya-logo.png"
             alt="Ayogya"
-            className="h-10 sm:h-11 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+            className="h-9 sm:h-10 w-auto object-contain"
           />
         </Link>
 
-        {/* Primary Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
+        {/* Primary Desktop Navigation Links */}
+        <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-1 xl:gap-2">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const active = isCurrentActive(item);
@@ -77,7 +114,7 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleAnchorClick(e, item.href)}
-                  className="px-3.5 py-2 text-xs font-black uppercase tracking-wider text-brand-navy/80 hover:text-brand-navy hover:bg-brand-navy/5 rounded-lg transition-all"
+                  className="px-3.5 py-2 text-xs font-semibold text-ui-text hover:text-ui-blue hover:bg-ui-surface rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-1"
                 >
                   {item.label}
                 </a>
@@ -88,81 +125,101 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
               <button
                 key={item.tab || item.href}
                 onClick={() => onTabChange && onTabChange(item.tab)}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                   active
-                    ? "bg-brand-navy text-brand-cream border-2 border-brand-navy shadow-sketch"
-                    : "text-brand-navy/80 hover:text-brand-navy hover:bg-brand-navy/5 border-2 border-transparent"
+                    ? "bg-ui-surface text-ui-blue border border-ui-border-decorative shadow-sm"
+                    : "text-ui-text hover:text-ui-blue hover:bg-ui-surface/60"
                 }`}
               >
-                {Icon && <Icon className={`w-4 h-4 ${active ? "text-brand-orange" : "text-brand-navy/60"}`} />}
+                {Icon && <Icon className={`w-4 h-4 ${active ? "text-ui-blue" : "text-ui-text-secondary"}`} aria-hidden="true" />}
                 <span>{item.label}</span>
               </button>
             ) : (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                   active
-                    ? "bg-brand-navy text-brand-cream border-2 border-brand-navy shadow-sketch"
-                    : "text-brand-navy/80 hover:text-brand-navy hover:bg-brand-navy/5 border-2 border-transparent"
+                    ? "bg-ui-surface text-ui-blue border border-ui-border-decorative shadow-sm"
+                    : "text-ui-text hover:text-ui-blue hover:bg-ui-surface/60"
                 }`}
               >
-                {Icon && <Icon className={`w-4 h-4 ${active ? "text-brand-orange" : "text-brand-navy/60"}`} />}
+                {Icon && <Icon className={`w-4 h-4 ${active ? "text-ui-blue" : "text-ui-text-secondary"}`} aria-hidden="true" />}
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Right Tools: Language Toggle & Dashboard Button */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Right Tools: Language Toggle & Auth / App Button */}
+        <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Language Switch */}
           <button
             onClick={() => setLanguage(language === "en" ? "hi" : "en")}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-white hover:bg-brand-peach/25 border-2 border-brand-navy text-brand-navy text-xs font-black rounded-lg shadow-sketch-hover transition-all"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 min-h-[36px] bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative text-ui-text text-xs font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-1"
             title="Toggle Hindi / English"
-            aria-label="Toggle language"
+            aria-label={language === "en" ? "Switch language to Hindi" : "Switch language to English"}
           >
-            <Globe className="w-3.5 h-3.5 text-brand-orange" />
+            <Globe className="w-3.5 h-3.5 text-ui-blue" aria-hidden="true" />
             <span>{language === "en" ? "हिन्दी" : "English"}</span>
           </button>
 
-          {/* Action Button: Dashboard */}
-          {isShell ? (
+          {/* Action Button: Sign In on Landing, or Back to Home / App */}
+          {isLanding ? (
+            <button
+              onClick={() => {
+                if (onOpenAuth) onOpenAuth();
+                else window.location.href = "/app";
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] bg-ui-blue hover:bg-ui-blue-hover text-white text-xs font-semibold rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
+            >
+              <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Sign in</span>
+            </button>
+          ) : isShell ? (
             <Link
               href="/"
               prefetch={true}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-white hover:bg-brand-peach/30 text-brand-navy border-2 border-brand-navy font-sans font-black text-xs uppercase tracking-wider rounded-lg shadow-sketch hover:shadow-sketch-hover transition-all"
+              className="hidden sm:flex items-center gap-2 px-3.5 py-2 min-h-[40px] bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative font-medium text-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-brand-orange" />
+              <ArrowLeft className="w-3.5 h-3.5 text-ui-blue" aria-hidden="true" />
               <span>{t.navBackLanding || "Home"}</span>
             </Link>
           ) : (
             <Link
               href="/app"
               prefetch={true}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-navy hover:bg-[#25314a] text-brand-cream border-2 border-brand-navy font-sans font-black text-xs uppercase tracking-wider rounded-lg shadow-sketch hover:shadow-sketch-hover transition-all"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 min-h-[40px] bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-brand-orange" />
+              <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{t.navDashboard || "Dashboard"}</span>
             </Link>
           )}
 
-          {/* Mobile Hamburger Toggle */}
+          {/* Mobile Menu Disclosure Button */}
           <button
+            ref={toggleBtnRef}
+            id="mobile-nav-toggle"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-drawer"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-brand-navy border-2 border-brand-navy bg-brand-white rounded-lg shadow-sketch-hover"
-            aria-label="Toggle Navigation Menu"
+            className="lg:hidden min-h-[40px] min-w-[40px] p-2 text-ui-text bg-ui-surface border border-ui-border-decorative rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-brand-cream border-b-2 border-brand-navy px-4 pt-3 pb-5 space-y-2 animate-in slide-in-from-top duration-200">
+        <div
+          id="mobile-nav-drawer"
+          role="region"
+          aria-labelledby="mobile-nav-toggle"
+          className="lg:hidden bg-ui-canvas border-b border-ui-border-decorative px-4 pt-3 pb-5 space-y-2 max-h-[calc(100vh-72px)] overflow-y-auto"
+        >
           {navLinks.map((item) => {
             const Icon = item.icon;
             const active = isCurrentActive(item);
@@ -173,7 +230,7 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleAnchorClick(e, item.href)}
-                  className="block px-4 py-2.5 text-sm font-black uppercase tracking-wider rounded-lg border-2 border-brand-navy/20 bg-brand-white text-brand-navy shadow-sketch-hover"
+                  className="flex items-center min-h-[44px] px-4 py-2.5 text-sm font-semibold text-ui-text hover:text-ui-blue bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
                 >
                   {item.label}
                 </a>
@@ -187,13 +244,13 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
                   onTabChange && onTabChange(item.tab);
                   setMobileMenuOpen(false);
                 }}
-                className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-black uppercase tracking-wider rounded-lg border-2 border-brand-navy transition-all ${
+                className={`flex items-center gap-3 w-full min-h-[44px] px-4 py-2.5 text-sm font-semibold rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                   active
-                    ? "bg-brand-navy text-brand-cream shadow-sketch"
-                    : "bg-brand-white text-brand-navy shadow-sketch-hover"
+                    ? "bg-ui-surface text-ui-blue border-ui-blue shadow-sm"
+                    : "bg-ui-surface text-ui-text border-ui-border-decorative hover:bg-ui-surface-subtle"
                 }`}
               >
-                {Icon && <Icon className="w-4 h-4 text-brand-orange" />}
+                {Icon && <Icon className={`w-4 h-4 ${active ? "text-ui-blue" : "text-ui-text-secondary"}`} aria-hidden="true" />}
                 <span>{item.label}</span>
               </button>
             ) : (
@@ -201,25 +258,37 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-black uppercase tracking-wider rounded-lg border-2 border-brand-navy transition-all ${
+                className={`flex items-center gap-3 w-full min-h-[44px] px-4 py-2.5 text-sm font-semibold rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                   active
-                    ? "bg-brand-navy text-brand-cream shadow-sketch"
-                    : "bg-brand-white text-brand-navy shadow-sketch-hover"
+                    ? "bg-ui-surface text-ui-blue border-ui-blue shadow-sm"
+                    : "bg-ui-surface text-ui-text border-ui-border-decorative hover:bg-ui-surface-subtle"
                 }`}
               >
-                {Icon && <Icon className="w-4 h-4 text-brand-orange" />}
+                {Icon && <Icon className={`w-4 h-4 ${active ? "text-ui-blue" : "text-ui-text-secondary"}`} aria-hidden="true" />}
                 <span>{item.label}</span>
               </Link>
             );
           })}
           
-          {isShell ? (
+          {isLanding ? (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenAuth) onOpenAuth();
+                else window.location.href = "/app";
+              }}
+              className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-sm rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+            >
+              <LogIn className="w-4 h-4" aria-hidden="true" />
+              <span>Sign in</span>
+            </button>
+          ) : isShell ? (
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-brand-white text-brand-navy border-2 border-brand-navy font-sans font-black text-xs uppercase tracking-wider rounded-lg shadow-sketch"
+              className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-surface text-ui-text border border-ui-border-decorative font-medium text-sm rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
-              <ArrowLeft className="w-4 h-4 text-brand-orange" />
+              <ArrowLeft className="w-4 h-4 text-ui-blue" aria-hidden="true" />
               <span>{t.navBackLanding || "Home"}</span>
             </Link>
           ) : (
@@ -227,9 +296,9 @@ export default function Navbar({ onTabChange, activeTab, inAppShell = false, isL
               href="/app"
               prefetch={true}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-brand-navy text-brand-cream border-2 border-brand-navy font-sans font-black text-sm uppercase tracking-wider rounded-lg shadow-sketch"
+              className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-sm rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
-              <LayoutDashboard className="w-4 h-4 text-brand-orange" />
+              <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
               <span>{t.navDashboard || "Dashboard"}</span>
             </Link>
           )}

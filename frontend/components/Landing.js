@@ -167,10 +167,10 @@ export default function Landing({
   onSelectDemo,
   onOpenDashboard,
   onLoginSuccess,
+  onOpenAuth,
 }) {
   const router = useRouter();
   const scope = useScrollReveal([]);
-  const [slide, setSlide] = useState(0);
   const [problem, setProblem] = useState("adherence");
   const [activeFeatureKey, setActiveFeatureKey] = useState("ocr");
   const [publicStats, setPublicStats] = useState(null);
@@ -184,17 +184,6 @@ export default function Landing({
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-
-  useEffect(() => {
-    let alive = true;
-    const t = setInterval(() => {
-      if (alive) setSlide((s) => (s + 1) % HERO_SLIDES.length);
-    }, 3400);
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
-  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -238,91 +227,93 @@ export default function Landing({
   };
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-navy font-sans antialiased selection:bg-brand-peach selection:text-brand-navy" ref={scope}>
+    <div className="landing-v2 min-h-screen bg-ui-canvas text-ui-text font-sans antialiased selection:bg-ui-surface-subtle selection:text-ui-text" ref={scope}>
       
       {/* ==============================================================
           1. UNIFIED AYOGYA NAVBAR
           ============================================================== */}
-      <Navbar isLanding={true} />
+      <Navbar isLanding={true} onOpenAuth={onOpenAuth} />
 
       {/* ==============================================================
-          2. SPLIT HERO SECTION
+          2. HERO SECTION
           ============================================================== */}
-      <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+      <header id="home" className="relative py-14 sm:py-16 lg:py-20 overflow-hidden">
+        <div id="main-content" className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 lg:gap-12 items-start relative z-10">
           
-          {/* Left: Content */}
-          <div className="lg:col-span-6 flex flex-col justify-center items-start space-y-8 reveal active">
+          {/* Left: Verified Value Proposition (5/12 on lg) */}
+          <div className="lg:col-span-5 flex flex-col justify-start items-start space-y-6 pt-2">
             
-            {/* Hand-drawn label */}
-            <div className="relative inline-block mb-2">
-              <div className="absolute inset-0 border-2 border-brand-orange sketchy-oval transform -rotate-2" />
-              <span className="relative block px-5 py-2 text-[10px] font-bold tracking-[0.15em] text-brand-navy uppercase">
-                Non-Clinical · Doctor-First
-              </span>
+            {/* Context Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-ui-surface border border-ui-border-decorative text-ui-text text-xs font-semibold shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-ui-blue" aria-hidden="true" />
+              <span>Prescription clarity for patients and caregivers</span>
             </div>
 
-            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl font-medium text-brand-navy leading-[1.05] tracking-tight">
-              Better decisions. <br />
-              <span className="marker-highlight inline-block px-1 transform -rotate-1">Better health.</span> <br />
-              Fair prices.
+            {/* Concise, Balanced H1 */}
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-semibold text-ui-text leading-[1.15] tracking-tight">
+              Understand prescriptions, safety warnings, and fair prices.
             </h1>
 
-            {/* Benefit Ticker */}
-            <div className="text-sm font-mono text-brand-navy bg-brand-peach/20 border border-brand-navy/20 px-3 py-1.5 sketchy-box">
-              <span className="text-brand-orange font-bold mr-2">●</span>
-              {HERO_SLIDES[slide]}
-            </div>
-
-            <p className="text-lg text-brand-gray font-sans font-light leading-relaxed max-w-lg">
-              Ayogya reads prescriptions from every specialist, explains them in simple language,
-              flags dangerous drug interactions, and uncovers <span className="border-b-2 border-brand-peach border-dashed">Jan Aushadhi generic savings</span> — while deferring every clinical decision to your registered doctor.
+            {/* Support Copy with Medical Disclaimer */}
+            <p className="text-base sm:text-lg text-ui-text-secondary font-sans leading-relaxed">
+              Ayogya helps families digitize prescriptions, track multi-doctor medication schedules, catch potential interaction warnings, and discover verified Jan Aushadhi generic savings — while deferring every diagnosis and clinical treatment decision to your doctor.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Link
-                href="/app"
-                prefetch={true}
-                className="sketchy-btn bg-brand-navy hover:bg-[#25314a] text-brand-cream border-2 border-brand-navy px-8 py-4 font-bold text-xs uppercase tracking-widest shadow-sketch hover:shadow-sketch-hover hover:translate-x-[2px] hover:translate-y-[2px] flex items-center gap-3 transition-all"
-              >
-                <LayoutDashboard className="w-4 h-4 text-brand-orange" />
-                Open Dashboard
-              </Link>
+            {/* Call to Actions */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2 w-full sm:w-auto">
               <a
-                href="#problem"
-                onClick={scrollTo("problem")}
-                className="sketchy-btn bg-transparent text-brand-navy border-2 border-brand-navy px-8 py-4 font-bold text-xs uppercase tracking-widest hover:bg-brand-white transition-colors"
+                href="#product"
+                className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-sm font-semibold transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
               >
-                See The Problem
+                <span>Explore the product</span>
+                <ChevronRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
               </a>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenAuth) onOpenAuth();
+                  else router.push("/app");
+                }}
+                className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative hover:border-ui-control-border rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
+              >
+                Sign in
+              </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs font-bold uppercase tracking-wider text-brand-navy/70">
-              <span className="flex items-center gap-1.5"><ShieldCheck size={16} className="text-brand-orange" /> Safety Moat</span>
-              <span className="flex items-center gap-1.5"><Tag size={16} className="text-brand-orange" /> Jan Aushadhi</span>
-              <span className="flex items-center gap-1.5"><MessageCircleHeart size={16} className="text-brand-orange" /> WhatsApp Bot</span>
+            {/* Credibility micro-points */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2 text-xs font-medium text-ui-text-secondary border-t border-ui-border-decorative/60 w-full">
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-ui-success" aria-hidden="true" /> Non-clinical assistance
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-ui-success" aria-hidden="true" /> Verified Jan Aushadhi catalogue
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-ui-success" aria-hidden="true" /> Patient-consented access
+              </span>
             </div>
           </div>
 
-          {/* Right: Player Card */}
-          <div className="lg:col-span-6 relative flex items-center justify-center lg:justify-end reveal delay-100 active w-full">
-            {/* Decorative Arrow SVG */}
+          {/* Right: Protected Player Card (7/12 on lg) */}
+          <div className="lg:col-span-7 relative flex items-center justify-center lg:justify-end w-full">
+            {/* Decorative arrow: visible on tablet/desktop, hidden on small mobile */}
             <svg
-              className="absolute -top-12 -left-12 w-24 h-24 text-brand-navy/20 transform rotate-12 z-0 hidden sm:block"
+              className="absolute -top-10 -left-8 w-20 h-20 text-brand-navy/20 transform rotate-12 z-0 hidden md:block pointer-events-none"
               viewBox="0 0 100 100"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden="true"
             >
-              <path d="M10,50 Q30,20 60,10" markerEnd="url(#arrowhead)" />
+              <path d="M10,50 Q30,20 60,10" markerEnd="url(#hero-arrowhead)" />
               <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <marker id="hero-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
                   <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
                 </marker>
               </defs>
             </svg>
 
-            <SahayakPlayerCard onLaunchDemo={() => onSelectDemo("ramesh")} />
+            <SahayakPlayerCard onLaunchDemo={onOpenAuth || (() => onSelectDemo("ramesh"))} />
           </div>
         </div>
       </header>
