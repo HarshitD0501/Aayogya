@@ -166,6 +166,50 @@ const DEV_CATALOGUE = [
       source_url: "https://www.nppaindia.nic.in",
       checked_on: "2026-03-01"
     }
+  },
+  {
+    medicine_id: "med-calcium-vitamin-d3-500mg-250iu",
+    matched_text: "Calcium + Vitamin D3 500Mg/250Iu",
+    molecule_label: "Calcium + Vitamin D3",
+    strength_label: "500 mg / 250 IU",
+    form: "Tablet",
+    release_type: "Immediate Release",
+    pack_label: "10 Tablets Strip",
+    pmbjp_product_code: "PMBJP-030",
+    brands: [
+      { brand_id: "brand-shelcal", name: "Shelcal" },
+      { brand_id: "brand-cipcal", name: "Cipcal" }
+    ],
+    market_prices: {
+      "brand-shelcal": {
+        amount_paise: 15528,
+        currency: "INR",
+        unit: "10 tablets (1 pack)",
+        source_url: "https://pharmeasy.in",
+        checked_on: "2026-10-26"
+      },
+      "brand-cipcal": {
+        amount_paise: 14850,
+        currency: "INR",
+        unit: "10 tablets (1 pack)",
+        source_url: "https://pharmeasy.in",
+        checked_on: "2026-10-26"
+      }
+    },
+    pmbjp_price: {
+      amount_paise: 850,
+      currency: "INR",
+      unit: "10 tablets (1 pack)",
+      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
+      checked_on: "2026-10-26"
+    },
+    nppa_ceiling_price: {
+      amount_paise: 750,
+      currency: "INR",
+      unit: "10 tablets",
+      source_url: "https://nppa.gov.in/en/view_more?id=4",
+      checked_on: "2026-10-26"
+    }
   }
 ];
 

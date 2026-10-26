@@ -6,6 +6,7 @@ graph run (reconcile_active) and flips the gate. Per-patient isolation (design
 §11) is enforced on every query.
 """
 from __future__ import annotations
+# Trigger reload for dataset updates
 
 import asyncio
 import base64

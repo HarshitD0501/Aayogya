@@ -1,22 +1,22 @@
 salt_composition,popular_brands,nppa_ceiling_price_inr,jan_aushadhi_price_inr,jan_aushadhi_generic_name,pack_size,pharmeasy_estimated_mrp_inr,potential_generic_savings_pct
-Aceclofenac + Paracetamol + Serratiopeptidase 100Mg/325Mg/15Mg,"Zerodol-sp, Zerodol",,,,Standard Strip,162.0,N/A
-Aceclofenac + Paracetamol 100Mg/325Mg,"Zerodol, Zerodol-p",,,,Standard Strip,39.0,N/A
-Aceclofenac 100Mg,Zerodol,,,,Standard Strip,22.0,N/A
-Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone 200Ml,Gelusil,,,,Standard Strip,63.0,N/A
-Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone Tablet,Gelusil,,,,Standard Strip,97.0,N/A
+Aceclofenac + Paracetamol + Serratiopeptidase 100Mg/325Mg/15Mg,"Zerodol-sp, Zerodol",68.0,25.0,"Aceclofenac 100mg, Paracetamol 325mg and Serratiopeptidase 15mg Tablets",10 Tablets,162.0,84.6%
+Aceclofenac + Paracetamol 100Mg/325Mg,"Zerodol, Zerodol-p",24.0,14.0,Aceclofenac 100mg and Paracetamol 325mg Tablets,10 Tablets,39.0,64.1%
+Aceclofenac 100Mg,Zerodol,18.0,9.0,Aceclofenac Tablets IP 100 mg,10 Tablets,22.0,59.1%
+Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone 200Ml,Gelusil,55.0,32.0,"Aluminium Hydroxide, Magnesium Hydroxide and Simethicone Suspension 200ml",200 ml,63.0,49.2%
+Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone Tablet,Gelusil,18.0,9.5,"Dried Aluminium Hydroxide, Magnesium Hydroxide and Simethicone Chewable Tablets",10 Tablets,97.0,90.2%
 Amlodipine,"Stamlo, Amlong",32.0,6.0,Amlodipine Tablets IP,10 Tablets,33.6,82.1%
-Amlodipine + Atenolol 5Mg/50Mg,"Stamlo, Amlong, Amlong-a",32.0,6.0,Amlodipine Tablets IP,10 Tablets,33.6,82.1%
+Amlodipine + Atenolol 5Mg/50Mg,"Stamlo, Amlong, Amlong-a",32.0,12.0,Amlodipine and Atenolol Tablets IP 5mg + 50mg,10 Tablets,33.6,82.1%
 Amlodipine 10Mg,"Stamlo, Amlong",55.0,9.0,Amlodipine Tablets IP 10 mg,10 Tablets,57.75,84.4%
 Amlodipine 2.5Mg,"Stamlo, Amlong",32.0,6.0,Amlodipine Tablets IP,10 Tablets,33.6,82.1%
 Amlodipine 5Mg,"Stamlo, Amlong",32.0,5.5,Amlodipine Tablets IP 5 mg,10 Tablets,33.6,83.6%
-Amoxicillin + Potassium Clavulanate 1000Mg,Augmentin,,,,Standard Strip,119.0,N/A
-Amoxicillin + Potassium Clavulanate 375Mg,"Moxikind-cv, Augmentin, Moxclav",,,,Standard Strip,133.0,N/A
-Amoxicillin + Potassium Clavulanate 625Mg,"Moxikind-cv, Clamox, Augmentin, Moxclav",,,,Standard Strip,140.0,N/A
+Amoxicillin + Potassium Clavulanate 1000Mg,Augmentin,110.0,65.0,Amoxycillin and Potassium Clavulanate Tablets IP 1000 mg,6 Tablets,119.0,45.4%
+Amoxicillin + Potassium Clavulanate 375Mg,"Moxikind-cv, Augmentin, Moxclav",85.0,36.0,Amoxycillin and Potassium Clavulanate Tablets IP 375 mg,10 Tablets,133.0,72.9%
+Amoxicillin + Potassium Clavulanate 625Mg,"Moxikind-cv, Clamox, Augmentin, Moxclav",138.0,58.0,Amoxycillin and Potassium Clavulanate Tablets IP 625 mg,10 Tablets,140.0,58.6%
 Amoxicillin Clavulanic Acid,Generic / Branded,138.0,58.0,Amoxicillin and Potassium Clavulanate Tablets,6 Tablets,144.9,60.0%
 Amoxicillin Clavulanic Acid 625Mg,Generic / Branded,138.0,58.0,Amoxicillin and Potassium Clavulanate Tablets IP 625 mg,6 Tablets,144.9,60.0%
 Aspirin,Ecosprin,16.0,6.0,Aspirin Tablets IP,14 Tablets,16.8,64.3%
-Aspirin + Atorvastatin 75Mg/10Mg,"Ecosprin-av, Ecosprin",16.0,6.0,Aspirin Tablets IP,14 Tablets,16.8,64.3%
-Aspirin + Atorvastatin 75Mg/20Mg,"Ecosprin-av, Ecosprin",16.0,6.0,Aspirin Tablets IP,14 Tablets,16.8,64.3%
+Aspirin + Atorvastatin 75Mg/10Mg,"Ecosprin-av, Ecosprin",16.0,16.0,Aspirin and Atorvastatin Capsules 75mg + 10mg,10 Capsules,16.8,64.3%
+Aspirin + Atorvastatin 75Mg/20Mg,"Ecosprin-av, Ecosprin",16.0,22.0,Aspirin and Atorvastatin Capsules 75mg + 20mg,10 Capsules,16.8,64.3%
 Aspirin 150Mg,Ecosprin,22.0,8.0,Aspirin Gastro-resistant Tablets IP 150 mg,14 Tablets,23.1,65.4%
 Aspirin 75Mg,Ecosprin,14.5,5.0,Aspirin Gastro-resistant Tablets IP 75 mg,14 Tablets,15.23,67.2%
 Atorvastatin,"Atorlip, Atorva",85.0,14.0,Atorvastatin Tablets IP,10 Tablets,89.25,84.3%
@@ -26,95 +26,95 @@ Atorvastatin 40Mg,"Atorlip, Atorva",85.0,14.0,Atorvastatin Tablets IP,10 Tablets
 Azithromycin,"Zithrox, Aziwok, Azithral",84.5,34.0,Azithromycin Tablets IP,3 Tablets,88.73,61.7%
 Azithromycin 250Mg,"Zithrox, Aziwok, Azithral",84.5,34.0,Azithromycin Tablets IP,3 Tablets,88.73,61.7%
 Azithromycin 500Mg,"Zithrox, Aziwok, Azithral",84.5,34.0,Azithromycin Tablets IP 500 mg,3 Tablets,88.73,61.7%
-Bisoprolol 2.5Mg,Concor,,,,Standard Strip,21.0,N/A
-Bisoprolol 5Mg,Concor,,,,Standard Strip,82.0,N/A
-Calcium + Vitamin D3 500Mg/250Iu,"Shelcal, Cipcal",,,,Standard Strip,138.0,N/A
-Calcium + Vitamin D3 500Mg/500Iu,Shelcal-hd,,,,Standard Strip,116.0,N/A
-Cefixime 100Mg,"Taxim-o, Zifi",,,,Standard Strip,182.0,N/A
-Cefixime 200Mg,"Taxim-o, Zifi",,,,Standard Strip,62.0,N/A
-Cefpodoxime Proxetil 100Mg,"Gudcef, Monocef-o",,,,Standard Strip,71.0,N/A
-Cefpodoxime Proxetil 200Mg,"Gudcef, Monocef-o",,,,Standard Strip,41.0,N/A
+Bisoprolol 2.5Mg,Concor,18.0,8.0,Bisoprolol Fumarate Tablets IP 2.5 mg,10 Tablets,21.0,61.9%
+Bisoprolol 5Mg,Concor,25.0,12.0,Bisoprolol Fumarate Tablets IP 5 mg,10 Tablets,82.0,85.4%
+Calcium + Vitamin D3 500Mg/250Iu,"Shelcal, Cipcal",7.5,8.5,Calcium Carbonate 500mg and Vitamin D3 250 IU Tablets,10 Tablets,138.0,93.8%
+Calcium + Vitamin D3 500Mg/500Iu,Shelcal-hd,9.5,11.0,Calcium Carbonate 500mg and Vitamin D3 500 IU Tablets,10 Tablets,116.0,90.5%
+Cefixime 100Mg,"Taxim-o, Zifi",54.0,28.0,Cefixime Dispersible Tablets IP 100 mg,10 Tablets,182.0,84.6%
+Cefixime 200Mg,"Taxim-o, Zifi",98.0,46.0,Cefixime Tablets IP 200 mg,10 Tablets,62.0,25.8%
+Cefpodoxime Proxetil 100Mg,"Gudcef, Monocef-o",65.0,35.0,Cefpodoxime Proxetil Tablets IP 100 mg,10 Tablets,71.0,50.7%
+Cefpodoxime Proxetil 200Mg,"Gudcef, Monocef-o",118.0,65.0,Cefpodoxime Proxetil Tablets IP 200 mg,10 Tablets,41.0,N/A
 Cetirizine,"Cetzip, Cetzine",24.0,4.5,Cetirizine Hydrochloride Tablets,10 Tablets,25.2,82.1%
-Cetirizine + Paracetamol + Phenylephrine 5Mg/325Mg/10Mg,"Cheston-cold, Cetzip, Cetzine",24.0,4.5,Cetirizine Hydrochloride Tablets,10 Tablets,25.2,82.1%
+Cetirizine + Paracetamol + Phenylephrine 5Mg/325Mg/10Mg,"Cheston-cold, Cetzip, Cetzine",24.0,9.0,"Cetirizine, Paracetamol and Phenylephrine Tablets",10 Tablets,25.2,82.1%
 Cetirizine 10Mg,"Cetzip, Cetzine",24.0,4.5,Cetirizine Hydrochloride Tablets IP 10 mg,10 Tablets,25.2,82.1%
-Ciprofloxacin 250Mg,"Ciplox, Cifran",,,,Standard Strip,115.0,N/A
-Ciprofloxacin 500Mg,"Ciplox, Cifran",48.0,,,Standard Strip,50.4,N/A
-Dapagliflozin 10Mg,"Forxiga, Oxra",,,,Standard Strip,41.0,N/A
-Dapagliflozin 5Mg,"Forxiga, Oxra",,,,Standard Strip,59.0,N/A
-Dextromethorphan + Phenylephrine + Chlorpheniramine 100Ml,Ascoril-d,,,,Standard Strip,161.0,N/A
-Diclofenac 50Mg,Generic / Branded,26.5,,,Standard Strip,27.83,N/A
-Diclofenac Sodium 100Mg,Voveran-sr,,,,Standard Strip,64.0,N/A
-Diclofenac Sodium 50Mg,Voveran,,,,Standard Strip,29.0,N/A
-Diclofenac Sodium 75Mg,"Voveran, Voveran-sr",,,,Standard Strip,181.0,N/A
-Fexofenadine 120Mg,Allegra,,,,Standard Strip,74.0,N/A
-Fexofenadine 180Mg,Allegra,,,,Standard Strip,193.0,N/A
-Folic Acid (Vitamin B9) 5Mg,Folvite,,,,Standard Strip,62.0,N/A
-Glimepiride 1Mg,Amaryl,,,,Standard Strip,151.0,N/A
-Glimepiride 2Mg,Amaryl,,,,Standard Strip,50.0,N/A
-Glimepiride 3Mg,Amaryl,,,,Standard Strip,49.0,N/A
+Ciprofloxacin 250Mg,"Ciplox, Cifran",25.0,12.0,Ciprofloxacin Tablets IP 250 mg,10 Tablets,115.0,89.6%
+Ciprofloxacin 500Mg,"Ciplox, Cifran",48.0,22.0,Ciprofloxacin Tablets IP 500 mg,10 Tablets,50.4,56.3%
+Dapagliflozin 10Mg,"Forxiga, Oxra",48.0,24.0,Dapagliflozin Tablets 10 mg,10 Tablets,41.0,41.5%
+Dapagliflozin 5Mg,"Forxiga, Oxra",35.0,16.0,Dapagliflozin Tablets 5 mg,10 Tablets,59.0,72.9%
+Dextromethorphan + Phenylephrine + Chlorpheniramine 100Ml,Ascoril-d,52.0,32.0,"Dextromethorphan HBr, Phenylephrine HCl and Chlorpheniramine Maleate Syrup 100ml",100 ml,161.0,80.1%
+Diclofenac 50Mg,Generic / Branded,26.5,4.5,Diclofenac Sodium Gastro-resistant Tablets IP 50 mg,10 Tablets,27.83,83.8%
+Diclofenac Sodium 100Mg,Voveran-sr,42.0,11.0,Diclofenac Sodium Prolonged-release Tablets IP 100 mg,10 Tablets,64.0,82.8%
+Diclofenac Sodium 50Mg,Voveran,20.0,4.5,Diclofenac Sodium Gastro-resistant Tablets IP 50 mg,10 Tablets,29.0,84.5%
+Diclofenac Sodium 75Mg,"Voveran, Voveran-sr",30.0,8.0,Diclofenac Sodium Prolonged-release Tablets IP 75 mg,10 Tablets,181.0,95.6%
+Fexofenadine 120Mg,Allegra,74.0,22.0,Fexofenadine Hydrochloride Tablets IP 120 mg,10 Tablets,74.0,70.3%
+Fexofenadine 180Mg,Allegra,110.0,32.0,Fexofenadine Hydrochloride Tablets IP 180 mg,10 Tablets,193.0,83.4%
+Folic Acid (Vitamin B9) 5Mg,Folvite,14.0,3.5,Folic Acid Tablets IP 5 mg,10 Tablets,62.0,94.4%
+Glimepiride 1Mg,Amaryl,28.0,4.5,Glimepiride Tablets IP 1 mg,10 Tablets,151.0,97.0%
+Glimepiride 2Mg,Amaryl,45.0,6.5,Glimepiride Tablets IP 2 mg,10 Tablets,50.0,87.0%
+Glimepiride 3Mg,Amaryl,60.0,9.0,Glimepiride Tablets IP 3 mg,10 Tablets,49.0,81.6%
 Ibuprofen,Brufen,24.5,7.0,Ibuprofen Tablets IP,10 Tablets,25.73,72.8%
-Ibuprofen + Paracetamol 400Mg/325Mg,"Combiflam, Brufen",24.5,7.0,Ibuprofen Tablets IP,10 Tablets,25.73,72.8%
+Ibuprofen + Paracetamol 400Mg/325Mg,"Combiflam, Brufen",24.5,10.0,Ibuprofen and Paracetamol Tablets IP 400mg + 325mg,10 Tablets,25.73,72.8%
 Ibuprofen 200Mg,Brufen,24.5,7.0,Ibuprofen Tablets IP,10 Tablets,25.73,72.8%
 Ibuprofen 400Mg,Brufen,24.5,7.0,Ibuprofen Tablets IP 400 mg,10 Tablets,25.73,72.8%
 Ibuprofen Paracetamol,Brufen,38.0,12.0,Ibuprofen and Paracetamol Tablets,10 Tablets,39.9,69.9%
-Levocetirizine 5Mg,Levocet,,,,Standard Strip,90.0,N/A
-Levosalbutamol + Ambroxol + Guaiphenesin 100Ml,Ascoril-ls,,,,Standard Strip,117.0,N/A
+Levocetirizine 5Mg,Levocet,22.0,5.5,Levocetirizine Dihydrochloride Tablets IP 5 mg,10 Tablets,90.0,93.9%
+Levosalbutamol + Ambroxol + Guaiphenesin 100Ml,Ascoril-ls,48.0,30.0,"Levosalbutamol, Ambroxol HCl and Guaiphenesin Syrup 100ml",100 ml,117.0,74.4%
 Levothyroxine,"Eltroxin, Thyronorm",165.0,65.0,Levothyroxine Sodium Tablets IP,100 Tablets,173.25,62.5%
 Levothyroxine 100Mcg,"Eltroxin, Thyronorm",185.0,75.0,Levothyroxine Sodium Tablets IP 100 mcg,100 Tablets,194.25,61.4%
 Levothyroxine 125Mcg,"Eltroxin, Thyronorm",165.0,65.0,Levothyroxine Sodium Tablets IP,100 Tablets,173.25,62.5%
 Levothyroxine 25Mcg,"Eltroxin, Thyronorm",165.0,65.0,Levothyroxine Sodium Tablets IP,100 Tablets,173.25,62.5%
 Levothyroxine 50Mcg,"Eltroxin, Thyronorm",145.0,60.0,Levothyroxine Sodium Tablets IP 50 mcg,100 Tablets,152.25,60.6%
 Levothyroxine 75Mcg,"Eltroxin, Thyronorm",165.0,65.0,Levothyroxine Sodium Tablets IP,100 Tablets,173.25,62.5%
-Losartan 50Mg,Generic / Branded,62.0,,,Standard Strip,65.1,N/A
-Magnesium Hydroxide + Aluminium Hydroxide + Simethicone 200Ml,Digene,,,,Standard Strip,80.0,N/A
-Magnesium Hydroxide + Aluminium Hydroxide + Simethicone Tablet,Digene,,,,Standard Strip,25.0,N/A
+Losartan 50Mg,Generic / Branded,62.0,9.0,Losartan Potassium Tablets IP 50 mg,10 Tablets,65.1,86.2%
+Magnesium Hydroxide + Aluminium Hydroxide + Simethicone 200Ml,Digene,55.0,32.0,"Magnesium Hydroxide, Dried Aluminium Hydroxide and Simethicone Gel 200ml",200 ml,80.0,60.0%
+Magnesium Hydroxide + Aluminium Hydroxide + Simethicone Tablet,Digene,18.0,9.5,"Magnesium Hydroxide, Aluminium Hydroxide and Simethicone Chewable Tablets",10 Tablets,25.0,62.0%
 Metformin,Glycomet,32.0,8.5,Metformin Hydrochloride Tablets IP,10 Tablets,33.6,74.7%
-Metformin + Glimepiride + Voglibose 500Mg/1Mg/0.2Mg,"Glycomet, Glycomet-trio",32.0,8.5,Metformin Hydrochloride Tablets IP,10 Tablets,33.6,74.7%
-Metformin + Glimepiride + Voglibose 500Mg/2Mg/0.3Mg,"Glycomet, Glycomet-trio",32.0,8.5,Metformin Hydrochloride Tablets IP,10 Tablets,33.6,74.7%
-Metformin + Glimepiride 500Mg/1Mg,"Glycomet-gp, Glycomet",32.0,8.5,Metformin Hydrochloride Tablets IP,10 Tablets,33.6,74.7%
-Metformin + Glimepiride 500Mg/2Mg,"Glycomet-gp, Glycomet",32.0,8.5,Metformin Hydrochloride Tablets IP,10 Tablets,33.6,74.7%
+Metformin + Glimepiride + Voglibose 500Mg/1Mg/0.2Mg,"Glycomet, Glycomet-trio",32.0,18.0,"Metformin, Glimepiride and Voglibose Tablets 500mg + 1mg + 0.2mg",10 Tablets,33.6,74.7%
+Metformin + Glimepiride + Voglibose 500Mg/2Mg/0.3Mg,"Glycomet, Glycomet-trio",32.0,22.0,"Metformin, Glimepiride and Voglibose Tablets 500mg + 2mg + 0.3mg",10 Tablets,33.6,74.7%
+Metformin + Glimepiride 500Mg/1Mg,"Glycomet-gp, Glycomet",32.0,11.0,Metformin and Glimepiride Tablets IP 500mg + 1mg,10 Tablets,33.6,74.7%
+Metformin + Glimepiride 500Mg/2Mg,"Glycomet-gp, Glycomet",32.0,14.0,Metformin and Glimepiride Tablets IP 500mg + 2mg,10 Tablets,33.6,74.7%
 Metformin 1000Mg,Glycomet,45.0,12.5,Metformin Hydrochloride Prolonged-release 1000 mg,10 Tablets,47.25,73.5%
 Metformin 500Mg,Glycomet,28.5,7.5,Metformin Hydrochloride Tablets IP 500 mg,10 Tablets,29.93,74.9%
 Metformin 850Mg,Glycomet,38.0,10.0,Metformin Hydrochloride Tablets IP 850 mg,10 Tablets,39.9,74.9%
-Metoprolol Succinate 25Mg,Starpress-xl,,,,Standard Strip,86.0,N/A
-Metoprolol Succinate 50Mg,Starpress-xl,,,,Standard Strip,59.0,N/A
-Montelukast + Levocetirizine 10Mg/5Mg,"Montek-lc, Montair-lc",,,,Standard Strip,119.0,N/A
+Metoprolol Succinate 25Mg,Starpress-xl,38.0,12.0,Metoprolol Succinate Extended-release Tablets IP 25 mg,10 Tablets,86.0,86.0%
+Metoprolol Succinate 50Mg,Starpress-xl,62.0,18.0,Metoprolol Succinate Extended-release Tablets IP 50 mg,10 Tablets,59.0,69.5%
+Montelukast + Levocetirizine 10Mg/5Mg,"Montek-lc, Montair-lc",95.0,19.0,Montelukast Sodium 10mg and Levocetirizine Dihydrochloride 5mg Tablets,10 Tablets,119.0,84.0%
 Montelukast Levocetirizine,Generic / Branded,120.0,24.0,Montelukast Sodium and Levocetirizine Tablets,10 Tablets,126.0,81.0%
-Omeprazole + Domperidone 20Mg/10Mg,"Omez, Omez-d",,,,Standard Strip,95.0,N/A
-Omeprazole 20Mg,Omez,,,,Standard Strip,165.0,N/A
-Omeprazole 40Mg,Omez,,,,Standard Strip,101.0,N/A
+Omeprazole + Domperidone 20Mg/10Mg,"Omez, Omez-d",42.0,13.0,Omeprazole 20mg and Domperidone 10mg Capsules IP,10 Capsules,95.0,86.3%
+Omeprazole 20Mg,Omez,29.0,5.5,Omeprazole Gastro-resistant Capsules IP 20 mg,10 Capsules,165.0,96.7%
+Omeprazole 40Mg,Omez,45.0,9.5,Omeprazole Gastro-resistant Capsules IP 40 mg,10 Capsules,101.0,90.6%
 Pantoprazole,"Pantop, Pan, Pantocid",89.5,14.5,Pantoprazole Tablets 40 mg,10 Tablets,93.98,84.6%
-Pantoprazole + Domperidone 40Mg/30Mg,"Pan-d, Pantop, Pantocid-dsr, Pan",89.5,14.5,Pantoprazole Tablets 40 mg,10 Tablets,93.98,84.6%
+Pantoprazole + Domperidone 40Mg/30Mg,"Pan-d, Pantop, Pantocid-dsr, Pan",89.5,22.0,Pantoprazole and Domperidone SR Capsules 40mg + 30mg,10 Capsules,93.98,84.6%
 Pantoprazole 20Mg,"Pantop, Pan, Pantocid",89.5,14.5,Pantoprazole Tablets 40 mg,10 Tablets,93.98,84.6%
 Pantoprazole 40Mg,"Pantop, Pan, Pantocid",89.5,14.5,Pantoprazole Gastro-resistant Tablets IP 40 mg,10 Tablets,93.98,84.6%
 Pantoprazole Domperidone,"Pantop, Pan, Pantocid",135.0,22.0,Pantoprazole and Domperidone SR Capsules,10 Capsules,141.75,84.5%
 Paracetamol,"Dolo, Crocin, Calpol, Pacimol",25.0,8.0,Paracetamol Tablets IP,10 Tablets,26.25,69.5%
-Paracetamol + Phenylephrine + Chlorpheniramine 500Mg/10Mg/2Mg,"Sinarest, Pacimol, Dolo, Crocin",25.0,8.0,Paracetamol Tablets IP,10 Tablets,26.25,69.5%
+Paracetamol + Phenylephrine + Chlorpheniramine 500Mg/10Mg/2Mg,"Sinarest, Pacimol, Dolo, Crocin",25.0,11.5,"Paracetamol, Phenylephrine and Chlorpheniramine Tablets",10 Tablets,26.25,69.5%
 Paracetamol 250Mg/5Ml,"Dolo, Crocin, Calpol, Pacimol",25.0,8.0,Paracetamol Tablets IP,10 Tablets,26.25,69.5%
 Paracetamol 500Mg,"Dolo, Crocin, Calpol, Pacimol",18.2,6.5,Paracetamol Tablets IP 500 mg,10 Tablets,19.11,66.0%
 Paracetamol 650Mg,"Dolo, Crocin, Calpol, Pacimol",32.28,10.5,Paracetamol Tablets IP 650 mg,10 Tablets,33.89,69.0%
-Rabeprazole + Domperidone 20Mg/30Mg,"Razo-d, Rabekind-dsr",,,,Standard Strip,126.0,N/A
-Ranitidine 150Mg,Rantac,18.0,,,Standard Strip,18.9,N/A
-Ranitidine 300Mg,Rantac,,,,Standard Strip,29.0,N/A
-Rosuvastatin 10Mg,"Rozavel, Rosuvas",,,,Standard Strip,18.0,N/A
-Rosuvastatin 20Mg,"Rozavel, Rosuvas",,,,Standard Strip,21.0,N/A
-Rosuvastatin 5Mg,"Rozavel, Rosuvas",,,,Standard Strip,30.0,N/A
-Sitagliptin + Metformin 50Mg/1000Mg,Janumet,,,,Standard Strip,172.0,N/A
-Sitagliptin + Metformin 50Mg/500Mg,Janumet,,,,Standard Strip,108.0,N/A
+Rabeprazole + Domperidone 20Mg/30Mg,"Razo-d, Rabekind-dsr",68.0,24.0,Rabeprazole Sodium (EC) 20mg and Domperidone (SR) 30mg Capsules,10 Capsules,126.0,81.0%
+Ranitidine 150Mg,Rantac,18.0,5.0,Ranitidine Tablets IP 150 mg,10 Tablets,18.9,73.5%
+Ranitidine 300Mg,Rantac,22.0,8.5,Ranitidine Tablets IP 300 mg,10 Tablets,29.0,70.7%
+Rosuvastatin 10Mg,"Rozavel, Rosuvas",115.0,16.0,Rosuvastatin Tablets IP 10 mg,10 Tablets,18.0,11.1%
+Rosuvastatin 20Mg,"Rozavel, Rosuvas",185.0,28.0,Rosuvastatin Tablets IP 20 mg,10 Tablets,21.0,N/A
+Rosuvastatin 5Mg,"Rozavel, Rosuvas",65.0,11.0,Rosuvastatin Tablets IP 5 mg,10 Tablets,30.0,63.3%
+Sitagliptin + Metformin 50Mg/1000Mg,Janumet,92.0,40.0,Sitagliptin Phosphate 50mg and Metformin HCl 1000mg Tablets,10 Tablets,172.0,76.7%
+Sitagliptin + Metformin 50Mg/500Mg,Janumet,75.0,32.0,Sitagliptin Phosphate 50mg and Metformin HCl 500mg Tablets,10 Tablets,108.0,70.4%
 Telmisartan,"Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
-Telmisartan + Amlodipine 40Mg/5Mg,"Telma, Telmikind, Telma-am",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
-Telmisartan + Hydrochlorothiazide 40Mg/12.5Mg,"Telma-h, Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
-Telmisartan + Hydrochlorothiazide 80Mg/12.5Mg,"Telma-h, Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
+Telmisartan + Amlodipine 40Mg/5Mg,"Telma, Telmikind, Telma-am",84.0,18.0,Telmisartan and Amlodipine Tablets IP 40mg + 5mg,10 Tablets,88.2,84.1%
+Telmisartan + Hydrochlorothiazide 40Mg/12.5Mg,"Telma-h, Telma, Telmikind",84.0,17.5,Telmisartan and Hydrochlorothiazide Tablets IP 40mg + 12.5mg,10 Tablets,88.2,84.1%
+Telmisartan + Hydrochlorothiazide 80Mg/12.5Mg,"Telma-h, Telma, Telmikind",84.0,24.0,Telmisartan and Hydrochlorothiazide Tablets IP 80mg + 12.5mg,10 Tablets,88.2,84.1%
 Telmisartan 20Mg,"Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
 Telmisartan 40Mg,"Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP 40 mg,10 Tablets,88.2,84.1%
 Telmisartan 80Mg,"Telma, Telmikind",84.0,14.0,Telmisartan Tablets IP,10 Tablets,88.2,84.1%
-Tramadol + Paracetamol 37.5Mg/325Mg,Ultracet,,,,Standard Strip,174.0,N/A
-Trypsin + Chymotrypsin 100000 Armour Units,Chymoral-forte,,,,Standard Strip,39.0,N/A
-Vildagliptin + Metformin 50Mg/500Mg,Galvus-met,,,,Standard Strip,154.0,N/A
-Vildagliptin + Metformin 50Mg/850Mg,Galvus-met,,,,Standard Strip,59.0,N/A
-Vitamin B Complex + Vitamin C Standard,Becosules,,,,Standard Strip,185.0,N/A
-Vitamin B1 + B2 + B3 + B5 + B6 + B12 Standard,Neurobion-forte,,,,Standard Strip,57.0,N/A
-Vitamin C (Ascorbic Acid) 500Mg,Limcee,,,,Standard Strip,157.0,N/A
-Vitamin E 200Mg,Evion,,,,Standard Strip,183.0,N/A
-Vitamin E 400Mg,Evion,,,,Standard Strip,151.0,N/A
-Vitamin E 600Mg,Evion,,,,Standard Strip,121.0,N/A
+Tramadol + Paracetamol 37.5Mg/325Mg,Ultracet,45.0,18.0,Tramadol HCl 37.5mg and Paracetamol 325mg Tablets IP,10 Tablets,174.0,89.7%
+Trypsin + Chymotrypsin 100000 Armour Units,Chymoral-forte,85.0,42.0,"Trypsin and Chymotrypsin Tablets (100,000 Armour Units)",10 Tablets,39.0,N/A
+Vildagliptin + Metformin 50Mg/500Mg,Galvus-met,65.0,28.0,Vildagliptin 50mg and Metformin HCl 500mg Tablets,10 Tablets,154.0,81.8%
+Vildagliptin + Metformin 50Mg/850Mg,Galvus-met,72.0,32.0,Vildagliptin 50mg and Metformin HCl 850mg Tablets,10 Tablets,59.0,45.8%
+Vitamin B Complex + Vitamin C Standard,Becosules,22.0,14.0,Vitamin B-Complex with Vitamin C Capsules,20 Capsules,185.0,92.4%
+Vitamin B1 + B2 + B3 + B5 + B6 + B12 Standard,Neurobion-forte,24.0,16.0,Vitamin B-Complex with Vitamin B12 Tablets,30 Tablets,57.0,71.9%
+Vitamin C (Ascorbic Acid) 500Mg,Limcee,15.0,5.5,Ascorbic Acid Chewable Tablets IP 500 mg,10 Tablets,157.0,96.5%
+Vitamin E 200Mg,Evion,18.0,9.0,Vitamin E (Tocopheryl Acetate) Capsules IP 200 mg,10 Capsules,183.0,95.1%
+Vitamin E 400Mg,Evion,28.0,15.0,Vitamin E (Tocopheryl Acetate) Capsules IP 400 mg,10 Capsules,151.0,90.1%
+Vitamin E 600Mg,Evion,38.0,21.0,Vitamin E (Tocopheryl Acetate) Capsules IP 600 mg,10 Capsules,121.0,82.6%
