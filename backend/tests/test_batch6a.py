@@ -23,6 +23,30 @@ from app.models import Patient, ReminderLog, Interaction
 from app import summary as summary_svc
 
 
+import pytest
+
+
+@pytest.fixture
+def db_session():
+    session = create_test_db()
+    yield session
+    session.close()
+
+
+@pytest.fixture
+def client(db_session):
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+
 def create_test_db():
     engine = create_engine(
         "sqlite:///:memory:",

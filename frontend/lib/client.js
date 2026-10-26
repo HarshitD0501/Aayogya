@@ -171,17 +171,26 @@ const DEV_CATALOGUE = [
 
 class Client {
   async fetchWithTimeout(url, options = {}) {
+    const timeoutMs = options.timeout || 8000;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), options.timeout || 8000);
-    const signal = options.signal || controller.signal;
+    let timeoutId;
+
+    if (options.signal) {
+      if (options.signal.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
+      options.signal.addEventListener("abort", () => controller.abort(options.signal.reason), { once: true });
+    }
+
+    timeoutId = setTimeout(() => {
+      controller.abort(new DOMException(`Request timed out after ${timeoutMs}ms`, "TimeoutError"));
+    }, timeoutMs);
 
     try {
-      const res = await fetch(url, { ...options, signal });
-      clearTimeout(timeout);
+      const res = await fetch(url, { ...options, signal: controller.signal });
       return res;
-    } catch (err) {
-      clearTimeout(timeout);
-      throw err;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -352,102 +361,63 @@ class Client {
       if (res.ok) return await res.json();
     } catch {}
     return [
-      { city_id: "delhi", name: "Delhi NCR", latitude: 28.6139, longitude: 77.2090 },
-      { city_id: "jaipur", name: "Jaipur", latitude: 26.9124, longitude: 75.7873 },
-      { city_id: "mumbai", name: "Mumbai", latitude: 19.0760, longitude: 72.8777 },
-      { city_id: "bengaluru", name: "Bengaluru", latitude: 12.9716, longitude: 77.5946 }
+      {"city_id": "lucknow", "name": "Lucknow", "latitude": 26.8467, "longitude": 80.9462},
+      {"city_id": "delhi", "name": "Delhi NCR", "latitude": 28.6139, "longitude": 77.2090},
+      {"city_id": "jaipur", "name": "Jaipur", "latitude": 26.9124, "longitude": 75.7873},
+      {"city_id": "mumbai", "name": "Mumbai", "latitude": 19.0760, "longitude": 72.8777},
+      {"city_id": "bengaluru", "name": "Bengaluru", "latitude": 12.9716, "longitude": 77.5946}
     ];
   }
 
-  // 5. Stores
-  async getStores(cityId = "delhi", lat, lng) {
+  // 4b. Localities
+  async getLocalities(cityId = "lucknow") {
     try {
-      const query = cityId ? `?city_id=${cityId}` : `?lat=${lat}&lng=${lng}`;
-      const res = await this.fetchWithTimeout(`/api/v1/stores${query}`);
+      const res = await this.fetchWithTimeout(`/api/v1/localities?city_id=${encodeURIComponent(cityId)}`);
       if (res.ok) return await res.json();
-    } catch {}
+    } catch (e) {
+      console.warn("Localities lookup failed:", e);
+    }
+    return [];
+  }
 
-    return [
-      {
-        store_id: "kendra-dl-01",
-        name: "Pradhan Mantri Jan Aushadhi Kendra #10842",
-        kind: "kendra",
-        address: "Shop 4, DDA Market, Block B, Connaught Place, New Delhi",
-        city_id: "delhi",
-        phone: "+91 98112 33445",
-        opening_hours: "09:00 - 20:00 (Mon-Sat)",
-        latitude: 28.6315,
-        longitude: 77.2167,
-        distance_km: 0.8,
-        verified: true
-      },
-      {
-        store_id: "kendra-dl-02",
-        name: "Jan Aushadhi Medical Store #9214",
-        kind: "kendra",
-        address: "Near Gate 2, RML Hospital Complex, Baba Kharak Singh Marg",
-        city_id: "delhi",
-        phone: "+91 98115 77889",
-        opening_hours: "08:30 - 21:00 (All Days)",
-        latitude: 28.6235,
-        longitude: 77.2035,
-        distance_km: 1.4,
-        verified: true
-      },
-      {
-        store_id: "pharmacy-dl-03",
-        name: "Apollo Pharmacy 24x7",
-        kind: "pharmacy",
-        address: "M-14, Outer Circle, Connaught Place",
-        city_id: "delhi",
-        phone: "+91 98110 55667",
-        opening_hours: "24 Hours Open",
-        latitude: 28.6340,
-        longitude: 77.2210,
-        distance_km: 1.1,
-        verified: false
-      },
-      {
-        store_id: "kendra-dl-04",
-        name: "PMBJP Kendra South Extension",
-        kind: "kendra",
-        address: "GF-8, Main Market, South Extension Part 1",
-        city_id: "delhi",
-        phone: "+91 98119 44332",
-        opening_hours: "10:00 - 20:30 (Mon-Sat)",
-        latitude: 28.5726,
-        longitude: 77.2238,
-        distance_km: 4.2,
-        verified: true
+  // 5. Stores
+  async getStores(cityId = "lucknow", lat, lng, kind = "all", ownership = "all", locality = "all", query = "") {
+    try {
+      const params = new URLSearchParams();
+      if (cityId) params.append("city_id", cityId);
+      if (lat != null && lng != null) {
+        params.append("lat", lat);
+        params.append("lng", lng);
       }
-    ];
+      if (kind && kind !== "all") params.append("kind", kind);
+      if (ownership && ownership !== "all") params.append("ownership", ownership);
+      if (locality && locality !== "all") params.append("locality", locality);
+      if (query && query.trim()) params.append("q", query.trim());
+      const res = await this.fetchWithTimeout(`/api/v1/stores?${params.toString()}`);
+      if (res.ok) return await res.json();
+    } catch (e) {
+      if (e.name === "AbortError") throw e;
+      console.warn("Store lookup failed:", e);
+    }
+    return [];
   }
 
   // 6. Routes
   async getRoute(startLat, startLng, endLat, endLng) {
     try {
-      const res = await this.fetchWithTimeout(`/api/v1/routes?start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}`);
-      if (res.ok) return await res.json();
-    } catch {}
-
-    return {
-      distance_km: 1.2,
-      duration_minutes: 6,
-      profile: "driving",
-      steps: [
-        "Head north on Radial Road toward Inner Circle (300 m)",
-        "Turn right at roundabout onto Outer Circle (600 m)",
-        "Turn left at Shop 4 DDA Market, destination will be on the left (300 m)"
-      ],
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [startLng || 77.2100, startLat || 28.6250],
-          [77.2130, 28.6280],
-          [endLng || 77.2167, endLat || 28.6315]
-        ]
+      const res = await this.fetchWithTimeout(
+        `/api/v1/routes?start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.geometry) return data;
       }
-    };
+    } catch (e) {
+      if (e.name === "AbortError") throw e;
+      console.warn("Routing lookup failed:", e);
+    }
+    // Return null instead of fictional hardcoded 1.2 km / 6 min route (ERR-007)
+    return null;
   }
 
   // 7. Public Catalogue ETag

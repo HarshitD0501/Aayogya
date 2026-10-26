@@ -103,11 +103,21 @@ export default function Pharmacies() {
         popupAnchor: [0, -40],
       });
       shops.forEach((s) => {
+        const popupDiv = document.createElement("div");
+        const titleB = document.createElement("b");
+        titleB.textContent = s.name || "Pharmacy";
+        popupDiv.appendChild(titleB);
+        popupDiv.appendChild(document.createElement("br"));
+        const link = document.createElement("a");
+        link.href = dirs(s);
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.textContent = "Directions →";
+        popupDiv.appendChild(link);
+
         Ll.marker([s.lat, s.lng], { icon: pharmacyIcon })
           .addTo(layer.current)
-          .bindPopup(
-            `<b>${s.name}</b><br><a href="${dirs(s)}" target="_blank" rel="noreferrer">Directions →</a>`
-          );
+          .bindPopup(popupDiv);
       });
       setList(shops);
       setStatus(
