@@ -3,9 +3,28 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, getToken, clearToken, loginAsDemo, setActivePatientId } from "@/lib/api";
-import Dashboard from "@/components/Dashboard";
-import Caregiver from "@/components/Caregiver";
+import dynamic from "next/dynamic";
 import Login from "@/components/Login";
+
+const Dashboard = dynamic(() => import("@/components/Dashboard"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
+      <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
+      <p className="font-serif font-black text-xl tracking-tight">Opening Ayogya Patient Dashboard…</p>
+    </div>
+  ),
+});
+
+const Caregiver = dynamic(() => import("@/components/Caregiver"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center p-6 text-brand-navy">
+      <img src="/aayogya-logo.png" alt="Ayogya" className="h-12 w-auto object-contain animate-pulse mb-4" />
+      <p className="font-serif font-black text-xl tracking-tight">Opening Caregiver Hub…</p>
+    </div>
+  ),
+});
 
 function AppContent() {
   const router = useRouter();

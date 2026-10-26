@@ -4,7 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { askAssistant, getAssistantHealth } from "@/lib/api";
 import { useReveal } from "@/lib/gsap";
 import { Card, Note } from "@/components/ui";
-import LiveVoiceAgent from "@/components/LiveVoiceAgent";
+import dynamic from "next/dynamic";
+
+const LiveVoiceAgent = dynamic(() => import("@/components/LiveVoiceAgent"), {
+  ssr: false,
+  loading: () => (
+    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto my-6">
+      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-bold text-brand-navy">Initializing Live Voice System…</p>
+    </div>
+  ),
+});
 import {
   Mic,
   Send,

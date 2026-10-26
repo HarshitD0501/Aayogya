@@ -12,7 +12,12 @@ import {
   Prices,
   Reports,
 } from "@/components/sections";
-import Assistant from "@/components/Assistant";
+import dynamic from "next/dynamic";
+
+const Assistant = dynamic(() => import("@/components/Assistant"), {
+  ssr: false,
+  loading: () => <Loader text="Connecting to Sahayak Voice Assistant…" />,
+});
 import {
   getFamilyOverview,
   updatePatientContact,

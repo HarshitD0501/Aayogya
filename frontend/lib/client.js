@@ -169,6 +169,28 @@ const DEV_CATALOGUE = [
   }
 ];
 
+// In-memory TTL cache for public data to eliminate redundant request waterfalls (Batch 8)
+const _MEM_CACHE = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key) {
+  const hit = _MEM_CACHE.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.timestamp > CACHE_TTL_MS) {
+    _MEM_CACHE.delete(key);
+    return null;
+  }
+  return hit.data;
+}
+
+function setCached(key, data) {
+  if (_MEM_CACHE.size > 100) {
+    const firstKey = _MEM_CACHE.keys().next().value;
+    if (firstKey) _MEM_CACHE.delete(firstKey);
+  }
+  _MEM_CACHE.set(key, { timestamp: Date.now(), data });
+}
+
 class Client {
   async fetchWithTimeout(url, options = {}) {
     const timeoutMs = options.timeout || 8000;
@@ -356,24 +378,39 @@ class Client {
 
   // 4. Cities
   async getCities() {
+    const cached = getCached("cities");
+    if (cached) return cached;
     try {
       const res = await this.fetchWithTimeout(`/api/v1/cities`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        setCached("cities", data);
+        return data;
+      }
     } catch {}
-    return [
+    const fallback = [
       {"city_id": "lucknow", "name": "Lucknow", "latitude": 26.8467, "longitude": 80.9462},
       {"city_id": "delhi", "name": "Delhi NCR", "latitude": 28.6139, "longitude": 77.2090},
       {"city_id": "jaipur", "name": "Jaipur", "latitude": 26.9124, "longitude": 75.7873},
       {"city_id": "mumbai", "name": "Mumbai", "latitude": 19.0760, "longitude": 72.8777},
       {"city_id": "bengaluru", "name": "Bengaluru", "latitude": 12.9716, "longitude": 77.5946}
     ];
+    setCached("cities", fallback);
+    return fallback;
   }
 
   // 4b. Localities
   async getLocalities(cityId = "lucknow") {
+    const cacheKey = `localities:${cityId}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
     try {
       const res = await this.fetchWithTimeout(`/api/v1/localities?city_id=${encodeURIComponent(cityId)}`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        setCached(cacheKey, data);
+        return data;
+      }
     } catch (e) {
       console.warn("Localities lookup failed:", e);
     }
@@ -382,19 +419,28 @@ class Client {
 
   // 5. Stores
   async getStores(cityId = "lucknow", lat, lng, kind = "all", ownership = "all", locality = "all", query = "") {
+    const params = new URLSearchParams();
+    if (cityId) params.append("city_id", cityId);
+    if (lat != null && lng != null) {
+      params.append("lat", lat);
+      params.append("lng", lng);
+    }
+    if (kind && kind !== "all") params.append("kind", kind);
+    if (ownership && ownership !== "all") params.append("ownership", ownership);
+    if (locality && locality !== "all") params.append("locality", locality);
+    if (query && query.trim()) params.append("q", query.trim());
+
+    const cacheKey = `stores:${params.toString()}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
-      const params = new URLSearchParams();
-      if (cityId) params.append("city_id", cityId);
-      if (lat != null && lng != null) {
-        params.append("lat", lat);
-        params.append("lng", lng);
-      }
-      if (kind && kind !== "all") params.append("kind", kind);
-      if (ownership && ownership !== "all") params.append("ownership", ownership);
-      if (locality && locality !== "all") params.append("locality", locality);
-      if (query && query.trim()) params.append("q", query.trim());
       const res = await this.fetchWithTimeout(`/api/v1/stores?${params.toString()}`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        setCached(cacheKey, data);
+        return data;
+      }
     } catch (e) {
       if (e.name === "AbortError") throw e;
       console.warn("Store lookup failed:", e);
@@ -404,13 +450,20 @@ class Client {
 
   // 6. Routes
   async getRoute(startLat, startLng, endLat, endLng) {
+    const cacheKey = `route:${startLat},${startLng}->${endLat},${endLng}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
       const res = await this.fetchWithTimeout(
         `/api/v1/routes?start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}`
       );
       if (res.ok) {
         const data = await res.json();
-        if (data && data.geometry) return data;
+        if (data && data.geometry) {
+          setCached(cacheKey, data);
+          return data;
+        }
       }
     } catch (e) {
       if (e.name === "AbortError") throw e;

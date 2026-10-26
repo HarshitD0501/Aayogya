@@ -134,9 +134,21 @@ export async function googleAuth({ credential, mode, role }) {
   return data.patient;
 }
 
+// In-memory cache for public platform stats and prices to avoid request waterfalls (Batch 8)
+let _cachedPublicStats = null;
+let _cachedPublicStatsExpiry = 0;
+const _publicPricesCache = new Map();
+
 export async function getPublicStats() {
+  const now = Date.now();
+  if (_cachedPublicStats && now < _cachedPublicStatsExpiry) {
+    return _cachedPublicStats;
+  }
   try {
-    return await api("/public/stats", { timeoutMs: 8000 });
+    const data = await api("/public/stats", { timeoutMs: 8000 });
+    _cachedPublicStats = data;
+    _cachedPublicStatsExpiry = now + 60 * 1000; // 60s cache
+    return data;
   } catch {
     return {
       verified_medicines: null,
@@ -153,7 +165,17 @@ export async function getPublicPrices({ brand, salt, strength }) {
   if (brand) params.set("brand", brand);
   if (salt) params.set("salt", salt);
   if (strength) params.set("strength", strength);
-  return api(`/prices?${params.toString()}`);
+  const cacheKey = params.toString();
+
+  const now = Date.now();
+  const hit = _publicPricesCache.get(cacheKey);
+  if (hit && now - hit.timestamp < 3 * 60 * 1000) {
+    return hit.data;
+  }
+
+  const res = await api(`/prices?${cacheKey}`);
+  _publicPricesCache.set(cacheKey, { timestamp: now, data: res });
+  return res;
 }
 
 export const DEMO_USERS = [

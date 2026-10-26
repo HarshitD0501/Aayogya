@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Disclaimer from "@/components/Disclaimer";
 import SearchSuggestions from "@/components/SearchSuggestions";
@@ -49,6 +49,15 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
+  // ERR-030: Clean object URL teardown on unmount or URL replacement
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileChange = (file) => {
     setValidationError(null);
     setOcrError(null);
@@ -56,7 +65,9 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
 
     if (!file) {
       setSelectedFile(null);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(null);
       return;
     }
@@ -71,6 +82,9 @@ export default function ScanView({ hideNavbar = false, onNavigateTab }) {
       return;
     }
 
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };

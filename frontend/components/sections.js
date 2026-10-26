@@ -1074,8 +1074,10 @@ export function Prices() {
 export function Reports() {
   const [refresh, setRefresh] = useState(0);
   const [busyId, setBusyId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
   const { loading, error, data } = useData("/reports", [refresh]);
-  const scope = useReveal([loading, data]);
+  const scope = useReveal([loading, data, currentPage]);
 
   const confirm = async (id) => {
     setBusyId(id);
@@ -1091,11 +1093,15 @@ export function Reports() {
 
   if (loading) return <Loader label="Loading archival records…" />;
   if (error) return <Note tone="err">{error}</Note>;
-  if (!data.length) return <Empty icon="📄">No archived prescriptions found.</Empty>;
+  const reportsList = data || [];
+  if (!reportsList.length) return <Empty icon="📄">No archived prescriptions found.</Empty>;
+
+  const totalPages = Math.ceil(reportsList.length / PAGE_SIZE) || 1;
+  const paginatedReports = reportsList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <div ref={scope} className="grid">
-      {data.map((r) => (
+      {paginatedReports.map((r) => (
         <Card
           key={r.id}
           title={r.prescriber_name || "Doctor's Prescription"}
@@ -1158,6 +1164,28 @@ export function Reports() {
           )}
         </Card>
       ))}
+
+      {totalPages > 1 && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, padding: "12px 16px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8 }}>
+          <button
+            className="btn btn-outline btn-sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            ← Previous
+          </button>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>
+            Page {currentPage} of {totalPages} ({reportsList.length} records)
+          </span>
+          <button
+            className="btn btn-outline btn-sm"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1173,6 +1201,15 @@ export function Upload({ goto }) {
   const inputRef = useRef(null);
   const scope = useReveal([report]);
 
+  // ERR-030: Clean object URL teardown on unmount or URL replacement
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
   const pick = (f) => {
     if (!f) return;
     if (!f.type.startsWith("image/")) {
@@ -1181,6 +1218,9 @@ export function Upload({ goto }) {
     }
     setErr("");
     setReport(null);
+    if (preview && preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };

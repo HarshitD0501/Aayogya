@@ -30,6 +30,8 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
   const [loading, setLoading] = useState(true);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   const loadReports = useCallback(async () => {
     setLoading(true);
@@ -174,77 +176,106 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {reports.map((rep) => {
-              const saving = rep.totals?.saving_total_paise;
-              const pmbjpTotal = rep.totals?.pmbjp_total_paise;
-              return (
-                <div
-                  key={rep.report_id}
-                  className="p-5 sm:p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-sketch-hover transition-shadow"
+            {reports
+              .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+              .map((rep) => {
+                const saving = rep.totals?.saving_total_paise;
+                const pmbjpTotal = rep.totals?.pmbjp_total_paise;
+                return (
+                  <div
+                    key={rep.report_id}
+                    className="p-5 sm:p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-sketch-hover transition-shadow"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-serif font-black text-lg sm:text-xl text-brand-navy">
+                          {rep.patient_label || "Prescription Report"}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold bg-brand-navy/5 border border-brand-navy/20 px-2 py-0.5 rounded text-brand-navy">
+                          {rep.report_id}
+                        </span>
+                      </div>
+
+                      <p className="font-sans text-xs text-brand-gray">
+                        Created:{" "}
+                        <span className="font-bold text-brand-navy">
+                          {new Date(rep.created_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>{" "}
+                        • {rep.items?.length || 0} Medicines Confirmed
+                      </p>
+
+                      <div className="flex items-center gap-4 text-xs font-sans pt-1">
+                        <div>
+                          <span className="text-brand-gray block text-[10px] uppercase font-bold">
+                            Generic Total:
+                          </span>
+                          <span className="font-serif font-bold text-brand-navy">
+                            {pmbjpTotal ? formatPaise(pmbjpTotal) : "₹--"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-brand-gray block text-[10px] uppercase font-bold">
+                            Potential Saving:
+                          </span>
+                          <span className="font-serif font-black text-emerald-800">
+                            {saving ? formatPaise(saving) : "₹0"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <Link
+                        href={`/prescriptions/${rep.report_id}`}
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
+                        <span>Open & Print</span>
+                      </Link>
+
+                      <button
+                        onClick={() => setDeleteTargetId(rep.report_id)}
+                        className="p-2.5 bg-brand-cream hover:bg-red-100 border-2 border-brand-navy text-brand-navy hover:text-red-700 rounded transition-colors"
+                        title="Delete from local device"
+                        aria-label="Delete report"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+            {/* Pagination Controls */}
+            {reports.length > PAGE_SIZE && (
+              <div className="flex items-center justify-between pt-4 border-t-2 border-brand-navy/10 text-xs font-sans">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-serif font-black text-lg sm:text-xl text-brand-navy">
-                        {rep.patient_label || "Prescription Report"}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold bg-brand-navy/5 border border-brand-navy/20 px-2 py-0.5 rounded text-brand-navy">
-                        {rep.report_id}
-                      </span>
-                    </div>
-
-                    <p className="font-sans text-xs text-brand-gray">
-                      Created:{" "}
-                      <span className="font-bold text-brand-navy">
-                        {new Date(rep.created_at).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>{" "}
-                      • {rep.items?.length || 0} Medicines Confirmed
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs font-sans pt-1">
-                      <div>
-                        <span className="text-brand-gray block text-[10px] uppercase font-bold">
-                          Generic Total:
-                        </span>
-                        <span className="font-serif font-bold text-brand-navy">
-                          {pmbjpTotal ? formatPaise(pmbjpTotal) : "₹--"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-brand-gray block text-[10px] uppercase font-bold">
-                          Potential Saving:
-                        </span>
-                        <span className="font-serif font-black text-emerald-800">
-                          {saving ? formatPaise(saving) : "₹0"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <Link
-                      href={`/prescriptions/${rep.report_id}`}
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
-                      <span>Open & Print</span>
-                    </Link>
-
-                    <button
-                      onClick={() => setDeleteTargetId(rep.report_id)}
-                      className="p-2.5 bg-brand-cream hover:bg-red-100 border-2 border-brand-navy text-brand-navy hover:text-red-700 rounded transition-colors"
-                      title="Delete from local device"
-                      aria-label="Delete report"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                  ← Previous
+                </button>
+                <span className="font-bold text-brand-navy">
+                  Page {currentPage} of {Math.ceil(reports.length / PAGE_SIZE)} ({reports.length} total)
+                </span>
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) =>
+                      Math.min(Math.ceil(reports.length / PAGE_SIZE), p + 1)
+                    )
+                  }
+                  disabled={currentPage >= Math.ceil(reports.length / PAGE_SIZE)}
+                  className="px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
