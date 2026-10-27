@@ -40,7 +40,23 @@ async function handleRequest(request, params, method) {
       path.includes("/trigger");
     const timeoutMs = isHeavyEndpoint ? 90000 : 45000;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const timeout = setTimeout(
+      () => controller.abort(new DOMException(`Upstream request timed out after ${timeoutMs}ms`, "TimeoutError")),
+      timeoutMs
+    );
+
+    // Forward client abort to upstream fetch
+    if (request.signal) {
+      if (request.signal.aborted) {
+        controller.abort(request.signal.reason || new DOMException("Client aborted request", "AbortError"));
+      } else {
+        request.signal.addEventListener(
+          "abort",
+          () => controller.abort(request.signal.reason || new DOMException("Client aborted request", "AbortError")),
+          { once: true }
+        );
+      }
+    }
 
     const headers = new Headers(request.headers);
     headers.delete("host");
@@ -71,7 +87,19 @@ async function handleRequest(request, params, method) {
       },
     });
   } catch (err) {
-    const isTimeout = err.name === "AbortError";
+    const isAbort =
+      err?.name === "AbortError" ||
+      err?.name === "TimeoutError" ||
+      err?.message?.toLowerCase().includes("abort");
+    const isTimeout =
+      err?.name === "TimeoutError" ||
+      controller?.signal?.reason?.name === "TimeoutError";
+
+    if (isAbort && !isTimeout) {
+      // Client cancelled/aborted request (e.g. navigation, tab change)
+      return new NextResponse(null, { status: 499 });
+    }
+
     console.error(`[Proxy] Backend at ${BACKEND_URL} unreachable for ${path}: ${err.message}`);
     return NextResponse.json(
       {

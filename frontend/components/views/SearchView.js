@@ -73,7 +73,9 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       return;
     }
 
-    if (searchAbortRef.current) searchAbortRef.current.abort();
+    if (searchAbortRef.current) {
+      searchAbortRef.current.abort(new DOMException("New search dispatched", "AbortError"));
+    }
     const controller = new AbortController();
     searchAbortRef.current = controller;
 
@@ -87,6 +89,13 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       setIsOfflineMode(false);
       setShowSuggestions((response.candidates || []).length > 0);
     } catch (err) {
+      if (
+        err?.name === "AbortError" ||
+        err?.message?.toLowerCase().includes("abort") ||
+        controller.signal.aborted
+      ) {
+        return;
+      }
       try {
         const offlineRecords = await searchOfflineCatalogue(trimmed);
         if (offlineRecords.length > 0) {
@@ -112,7 +121,9 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       setSearchError("Unable to reach medicine search service. Please check your connection.");
       setCandidates([]);
     } finally {
-      setIsSearching(false);
+      if (!controller.signal.aborted) {
+        setIsSearching(false);
+      }
     }
   }, []);
 
@@ -147,7 +158,9 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
   // Compare on selection
   const executeCompare = useCallback(async (candidate, brandId, count) => {
-    if (compareAbortRef.current) compareAbortRef.current.abort();
+    if (compareAbortRef.current) {
+      compareAbortRef.current.abort(new DOMException("New compare dispatched", "AbortError"));
+    }
     const controller = new AbortController();
     compareAbortRef.current = controller;
 
@@ -176,10 +189,19 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
         setComparisonItem(null);
       }
     } catch (err) {
+      if (
+        err?.name === "AbortError" ||
+        err?.message?.toLowerCase().includes("abort") ||
+        controller.signal.aborted
+      ) {
+        return;
+      }
       setCompareError("Failed to verify price comparison. Please retry.");
       setComparisonItem(null);
     } finally {
-      setIsComparing(false);
+      if (!controller.signal.aborted) {
+        setIsComparing(false);
+      }
     }
   }, []);
 

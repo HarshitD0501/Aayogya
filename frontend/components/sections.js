@@ -45,15 +45,25 @@ function useData(path, deps = []) {
   const [state, setState] = useState({ loading: true, error: "", data: null });
   useEffect(() => {
     let alive = true;
+    const controller = new AbortController();
     setState((prev) => ({ ...prev, loading: true, error: "" }));
 
-    fetchWithResourceCache(path, () => api(path))
+    fetchWithResourceCache(
+      path,
+      (sig) => api(path, { signal: sig }),
+      { signal: controller.signal }
+    )
       .then((d) => {
         if (alive) setState({ loading: false, error: "", data: d });
       })
       .catch((e) => {
         if (alive) {
-          if (e?.name === "AbortError") return;
+          const isAbort =
+            e?.name === "AbortError" ||
+            e?.name === "TimeoutError" ||
+            e?.message?.toLowerCase().includes("abort") ||
+            controller.signal.aborted;
+          if (isAbort) return;
           setState({
             loading: false,
             error: e.message || "Failed to load.",
@@ -64,6 +74,7 @@ function useData(path, deps = []) {
 
     return () => {
       alive = false;
+      controller.abort(new DOMException("Component unmounted or deps changed", "AbortError"));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, ...deps]);

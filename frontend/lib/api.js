@@ -71,14 +71,18 @@ export async function api(path, opts = {}) {
   const ac = new AbortController();
   const timer = setTimeout(() => {
     isTimeout = true;
-    ac.abort();
+    ac.abort(new DOMException("The server took too long to respond — please try again.", "TimeoutError"));
   }, opts.timeoutMs ?? 90000);
 
   if (opts.signal) {
     if (opts.signal.aborted) {
-      ac.abort();
+      ac.abort(opts.signal.reason || new DOMException("Operation aborted by caller", "AbortError"));
     } else {
-      opts.signal.addEventListener("abort", () => ac.abort(), { once: true });
+      opts.signal.addEventListener(
+        "abort",
+        () => ac.abort(opts.signal.reason || new DOMException("Operation aborted by caller", "AbortError")),
+        { once: true }
+      );
     }
   }
   let res;
@@ -86,11 +90,18 @@ export async function api(path, opts = {}) {
     res = await fetch(`${API_BASE}/api${path}`, { ...init, signal: ac.signal });
   } catch (e) {
     clearTimeout(timer);
-    if (e.name === "AbortError") {
-      if (isTimeout) {
+    const isAbort =
+      e?.name === "AbortError" ||
+      e?.name === "TimeoutError" ||
+      e?.message?.toLowerCase().includes("abort") ||
+      ac.signal.aborted;
+
+    if (isAbort) {
+      if (isTimeout || e?.name === "TimeoutError" || ac.signal.reason?.name === "TimeoutError") {
         throw new Error("The server took too long to respond — please try again.");
       }
-      throw e; // Client cancellation (e.g. unmount or navigation), re-throw as AbortError
+      // Re-throw standardized DOMException AbortError for caller
+      throw new DOMException("The operation was aborted", "AbortError");
     }
     throw new Error("Couldn't reach the server. Make sure the backend is running, then try again.");
   } finally {
@@ -105,10 +116,13 @@ export async function api(path, opts = {}) {
     path.startsWith("/auth/register");
 
   if (res.status === 401 && !isAuthEndpoint) {
-    clearToken();
-    clearResourceCache();
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("aushadh:logout"));
+    // A response from an older request must not log out a newly signed-in user.
+    if (getToken() === token) {
+      clearToken();
+      clearResourceCache();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("aushadh:logout"));
+      }
     }
     throw new Error("Session expired — please sign in again.");
   }
@@ -143,6 +157,7 @@ export async function login(identifier, password, role) {
   const data = await api("/auth/login", {
     method: "POST",
     json: { identifier, password, role },
+    timeoutMs: 15000,
   });
   setToken(data.token);
   if (data.patient?.id) {
@@ -155,6 +170,7 @@ export async function register({ name, email, phone, password, role }) {
   const data = await api("/auth/register", {
     method: "POST",
     json: { name, email, phone, password, role },
+    timeoutMs: 20000,
   });
   setToken(data.token);
   if (data.patient?.id) {
@@ -167,6 +183,7 @@ export async function googleAuth({ credential, mode, role }) {
   const data = await api("/auth/google", {
     method: "POST",
     json: { credential, mode, role },
+    timeoutMs: 20000,
   });
   setToken(data.token);
   if (data.patient?.id) {

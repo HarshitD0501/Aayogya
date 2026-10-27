@@ -243,9 +243,13 @@ class Client {
 
     if (options.signal) {
       if (options.signal.aborted) {
-        throw new DOMException("Aborted", "AbortError");
+        throw new DOMException("The operation was aborted", "AbortError");
       }
-      options.signal.addEventListener("abort", () => controller.abort(options.signal.reason), { once: true });
+      options.signal.addEventListener(
+        "abort",
+        () => controller.abort(options.signal.reason || new DOMException("The operation was aborted", "AbortError")),
+        { once: true }
+      );
     }
 
     timeoutId = setTimeout(() => {
@@ -255,6 +259,15 @@ class Client {
     try {
       const res = await fetch(url, { ...options, signal: controller.signal });
       return res;
+    } catch (err) {
+      if (err?.name === "AbortError" || err?.message?.toLowerCase().includes("abort") || controller.signal.aborted) {
+        const isTimeout = controller.signal.reason?.name === "TimeoutError";
+        if (isTimeout) {
+          throw new DOMException(`Request timed out after ${timeoutMs}ms`, "TimeoutError");
+        }
+        throw new DOMException("The operation was aborted", "AbortError");
+      }
+      throw err;
     } finally {
       clearTimeout(timeoutId);
     }

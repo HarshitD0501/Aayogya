@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Note, Loader } from "@/components/ui";
-import {
-  Summary,
-  Upload,
-  Medicines,
-  Interactions,
-  Prices,
-  Reports,
-} from "@/components/sections";
 import dynamic from "next/dynamic";
+
+const sectionFallback = () => <Loader label="Loading patient information…" />;
+const Summary = dynamic(() => import("@/components/sections").then((module) => module.Summary), { loading: sectionFallback });
+const Upload = dynamic(() => import("@/components/sections").then((module) => module.Upload), { loading: sectionFallback });
+const Medicines = dynamic(() => import("@/components/sections").then((module) => module.Medicines), { loading: sectionFallback });
+const Interactions = dynamic(() => import("@/components/sections").then((module) => module.Interactions), { loading: sectionFallback });
+const Prices = dynamic(() => import("@/components/sections").then((module) => module.Prices), { loading: sectionFallback });
+const Reports = dynamic(() => import("@/components/sections").then((module) => module.Reports), { loading: sectionFallback });
 
 const Assistant = dynamic(() => import("@/components/Assistant"), {
   ssr: false,

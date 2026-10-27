@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Script from "next/script";
 import { login, register as registerAccount, googleAuth } from "@/lib/api";
+import { preloadWorkspace } from "@/lib/workspacePreload";
 import {
   X,
   Lock,
@@ -89,6 +90,7 @@ export default function LoginDialog({
   googleHandler.current = async (credential) => {
     setBusy(true);
     setErr("");
+    void preloadWorkspace(role).catch(() => {});
     try {
       const user = await googleAuth({
         credential,
@@ -132,6 +134,7 @@ export default function LoginDialog({
     e.preventDefault();
     setBusy(true);
     setErr("");
+    void preloadWorkspace(role).catch(() => {});
 
     try {
       if (isRegister) {
@@ -156,12 +159,14 @@ export default function LoginDialog({
 
   const handleSelectDemo = (demoType) => {
     if (demoType === "caregiver") {
+      void preloadWorkspace("caregiver").catch(() => {});
       setId("meera@demo.in");
       setPw(DEMO_PW);
       setRole("caregiver");
       setIsRegister(false);
       setErr("");
     } else if (demoType === "patient_pro") {
+      void preloadWorkspace("patient").catch(() => {});
       setId("shanti@demo.in");
       setPw(DEMO_PW);
       setRole("patient");

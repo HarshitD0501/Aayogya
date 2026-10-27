@@ -3,14 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import dynamic from "next/dynamic";
-import {
-  Summary,
-  Upload,
-  Medicines,
-  Interactions,
-  Prices,
-  Reports,
-} from "@/components/sections";
+
+// Keep the workspace shell interactive while the selected clinical module loads.
+// All named imports below share the same deferred sections chunk.
+const sectionFallback = () => (
+  <div className="rounded-xl border border-ui-border-decorative bg-ui-surface p-6 text-sm text-ui-text-secondary" role="status">
+    Loading health information…
+  </div>
+);
+const Summary = dynamic(() => import("@/components/sections").then((module) => module.Summary), { loading: sectionFallback });
+const Medicines = dynamic(() => import("@/components/sections").then((module) => module.Medicines), { loading: sectionFallback });
+const Interactions = dynamic(() => import("@/components/sections").then((module) => module.Interactions), { loading: sectionFallback });
 
 // Code-split heavy tool tabs to guarantee sub-second initial dashboard entry
 const Assistant = dynamic(() => import("@/components/Assistant"), {
