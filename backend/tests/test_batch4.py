@@ -425,7 +425,8 @@ def test_err_029_reschedule_tool_truthful_wording():
     """ERR-029: Voice reschedule tool does not claim false clinic notification."""
     import subprocess
 
-    agent_python = Path(root_dir) / "agent" / ".venv" / "Scripts" / "python.exe"
+    venv_dir = Path(root_dir) / "agent" / ".venv"
+    agent_python = venv_dir / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     script = (
         "import asyncio\n"
         "import voice\n"
