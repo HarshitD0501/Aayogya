@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { BrandMark, Pill, Note, Loader } from "@/components/ui";
-import ShinyText from "@/components/reactbits/ShinyText";
+import { Note, Loader } from "@/components/ui";
 import {
   Summary,
   Upload,
@@ -16,7 +15,7 @@ import dynamic from "next/dynamic";
 
 const Assistant = dynamic(() => import("@/components/Assistant"), {
   ssr: false,
-  loading: () => <Loader text="Connecting to Sahayak Voice Assistant…" />,
+  loading: () => <Loader label="Connecting to Sahayak Voice Assistant…" />,
 });
 import {
   getFamilyOverview,
@@ -48,7 +47,9 @@ import {
   Loader2,
   AlertCircle,
   Heart,
-  Compass,
+  Menu,
+  X,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -82,95 +83,47 @@ function dueTone(days) {
 
 // --- Family card grid -------------------------------------------------------
 
-function FamilyGrid({ caregiver, cards, loading, err, onOpenPatient }) {
-  const cardsRef = useRef(null);
-
-  useEffect(() => {
-    if (!cards?.length || !cardsRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cardsRef.current.children,
-        { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.07, ease: "power2.out" }
-      );
-    }, cardsRef);
-    return () => ctx.revert();
-  }, [cards]);
-
-  if (err) return <Note tone="err">{err}</Note>;
+function FamilyGrid({ caregiver, cards, loading, err, onOpenPatient, onRetry }) {
+  if (err) return <div className="cg-error"><Note tone="err">{err}</Note><button type="button" className="cg-retry" onClick={onRetry}><RefreshCw size={16} /> Try again</button></div>;
   if (loading || !cards) return <Loader label="Loading your family…" />;
+
+  const medicines = cards.reduce((total, patient) => total + (patient.active_medicines || 0), 0);
+  const visits = cards.filter((patient) => patient.next_followup).length;
 
   return (
     <div className="cg-family">
       <div className="cg-family-head">
         <div>
-          <ShinyText
-            text={`Namaste, ${caregiver.name?.split(" ")[0]}`}
-            speed={5}
-            gradient="linear-gradient(135deg, #111827 0%, #9a6b26 60%, #b07f14 100%)"
-          />
+          <span className="cg-eyebrow">Family care</span>
+          <h2>Good to see you, {caregiver.name?.split(" ")[0] || "caregiver"}</h2>
           <p className="cg-sub">
             {cards.length > 0
-              ? `You manage ${cards.length} family member${cards.length === 1 ? "" : "s"}. Tap a card to open their full health profile.`
+              ? "Choose a family member to review their medicines, schedule and records."
               : "Welcome to your family caregiving hub. Link family members to begin monitoring their prescriptions."}
           </p>
         </div>
       </div>
 
+      {cards.length > 0 && <div className="cg-overview-stats" aria-label="Family summary">
+        <div><strong>{cards.length}</strong><span>Linked family members</span></div>
+        <div><strong>{medicines}</strong><span>Active medicines</span></div>
+        <div><strong>{visits}</strong><span>Upcoming visits</span></div>
+      </div>}
+
       {cards.length === 0 ? (
-        <div
-          className="cg-empty"
-          style={{
-            padding: "36px 24px",
-            background: "#ffffff",
-            borderRadius: 12,
-            border: "2px dashed #9a6b26",
-            textAlign: "center",
-            marginTop: 20,
-          }}
-        >
-          <Users size={36} color="#9a6b26" style={{ margin: "0 auto 12px" }} />
-          <h3 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 8px", color: "#111827" }}>
-            No Family Members Linked Yet
-          </h3>
-          <p
-            style={{
-              fontSize: 14,
-              color: "#6b7280",
-              maxWidth: 480,
-              margin: "0 auto 16px",
-              lineHeight: 1.5,
-            }}
-          >
-            You are registered as a Caregiver. Once a patient links you with your registered contact (
-            <strong style={{ color: "#111827" }}>{caregiver.phone || caregiver.email}</strong>
-            ), their active medicines, upcoming doctor appointments, and daily dose schedules will appear here.
-          </p>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 16px",
-              background: "rgba(154, 107, 38, 0.08)",
-              borderRadius: 6,
-              fontSize: 13,
-              color: "#9a6b26",
-              fontWeight: 600,
-            }}
-          >
-            <Heart size={14} />
-            <span>Ready for patient linking</span>
-          </div>
+        <div className="cg-empty">
+          <Users size={32} aria-hidden="true" />
+          <h3>No family members linked yet</h3>
+          <p>Ask a patient to link your registered contact, <strong>{caregiver.phone || caregiver.email}</strong>. Their information will appear here once access is granted.</p>
         </div>
       ) : (
-        <div className="cg-cards" ref={cardsRef}>
+        <div className="cg-cards">
           {cards.map((p) => {
             const fu = p.next_followup;
             const tone = fu ? dueTone(fu.days_until) : "muted";
             const adherPct = p.doses_today ? Math.round((p.taken_today / p.doses_today) * 100) : null;
             return (
-              <button key={p.id} className="cg-card" onClick={() => onOpenPatient(p.id)}>
+              <button key={p.id} type="button" className="cg-card" onClick={() => onOpenPatient(p.id)} aria-label={`Open ${p.name}'s health profile`}>
                 <div className="cg-card-top">
                   <div className="cg-avatar">{initialsOf(p.name)}</div>
                   <div style={{ minWidth: 0 }}>
@@ -247,9 +200,10 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
     setBusy("save");
     setSaveMsg("");
     try {
-      await updatePatientContact(patientCard.id, phone);
-      setSaveMsg("Saved — call & WhatsApp buttons now use this number.");
-      onContactSaved(patientCard.id, phone);
+      const result = await updatePatientContact(patientCard.id, phone);
+      setPhone(result.phone);
+      setSaveMsg("Contact number saved. Calls and WhatsApp now use this number.");
+      onContactSaved(patientCard.id, result.phone);
     } catch (e) {
       setSaveMsg(e.message);
     } finally {
@@ -286,7 +240,7 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
   return (
     <div className="cg-actions">
       <div className="cg-actions-title">
-        <Phone size={15} color="#9a6b26" />
+        <Phone size={15} aria-hidden="true" />
         <span>Reach {patientCard.name?.split(" ")[0]}</span>
       </div>
 
@@ -307,8 +261,10 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
 
       <div className="cg-action-btns">
         <a
-          className="btn btn-primary cg-btn"
-          href={`tel:${patientCard.phone || ""}`}
+          className="cg-action-button cg-action-primary"
+          href={patientCard.phone ? `tel:${patientCard.phone}` : undefined}
+          aria-disabled={!patientCard.phone}
+          tabIndex={patientCard.phone ? undefined : -1}
           key={patientCard.phone}
         >
           <Phone size={15} />
@@ -316,8 +272,10 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
         </a>
 
         <a
-          className="btn cg-btn cg-btn-wa"
-          href={whatsappLink(patientCard.phone, waText)}
+          className="cg-action-button cg-action-secondary"
+          href={patientCard.phone ? whatsappLink(patientCard.phone, waText) : undefined}
+          aria-disabled={!patientCard.phone}
+          tabIndex={patientCard.phone ? undefined : -1}
           target="_blank"
           rel="noopener noreferrer"
           key={`wa-${patientCard.phone}`}
@@ -328,9 +286,9 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
 
         {fu?.report_id && (
           <button
-            className="btn cg-btn cg-btn-ai"
+            className="cg-action-button cg-action-secondary"
             onClick={placeAiCall}
-            disabled={busy === "call"}
+            disabled={busy === "call" || !patientCard.phone}
           >
             {busy === "call" ? <Loader2 size={15} className="spin" /> : <BotIcon size={15} />}
             <span>{busy === "call" ? "Calling…" : "Let Sahayak call"}</span>
@@ -339,22 +297,26 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
       </div>
 
       <div className="cg-contact">
-        <label htmlFor="cg-phone">Number Sahayak should call</label>
+        <label htmlFor="cg-phone">Patient contact number</label>
+        <p className="cg-contact-help">This also updates the patient’s registered phone number.</p>
         <div className="cg-contact-row">
           <input
             id="cg-phone"
-            className="input"
+            className="cg-phone-input"
+            type="tel"
+            autoComplete="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+91 98765 43210"
           />
-          <button className="btn btn-sm" onClick={saveContact} disabled={busy === "save"}>
+          <button type="button" className="cg-save-button" onClick={saveContact} disabled={busy === "save" || !phone.trim()}>
             {busy === "save" ? <Loader2 size={13} className="spin" /> : <CheckCircle2 size={13} />}
             <span>Save</span>
           </button>
         </div>
-        {saveMsg && <div className="cg-msg">{saveMsg}</div>}
-        {callMsg && <div className="cg-msg">{callMsg}</div>}
+        {!patientCard.phone && <p className="cg-msg">Save a contact number to enable phone and WhatsApp reminders.</p>}
+        {saveMsg && <div className="cg-msg" role="status">{saveMsg}</div>}
+        {callMsg && <div className="cg-msg" role="status">{callMsg}</div>}
       </div>
     </div>
   );
@@ -388,7 +350,7 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
 
   useEffect(() => {
     const el = mainRef.current;
-    if (!el) return;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
     }, el);
@@ -404,7 +366,7 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
   return (
     <div className="cg-detail">
       <div className="cg-detail-top">
-        <button className="btn btn-ghost btn-sm" onClick={onBack}>
+        <button type="button" className="cg-back" onClick={onBack}>
           <ArrowLeft size={14} />
           <span>Family</span>
         </button>
@@ -430,7 +392,9 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
           return (
             <button
               key={s.key}
+              type="button"
               className={`cg-tab ${isActive ? "active" : ""}`}
+              aria-current={isActive ? "page" : undefined}
               onClick={() => setActive(s.key)}
             >
               <Icon size={14} />
@@ -455,23 +419,61 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   const [cards, setCards] = useState(null);
   const [gridErr, setGridErr] = useState("");
   const [version, setVersion] = useState(0); // bump to refetch the overview
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const menuButtonRef = useRef(null);
+  const drawerRef = useRef(null);
+
+  useEffect(() => {
+    if (!mobileDrawerOpen) return;
+    const priorOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeButton = drawerRef.current?.querySelector("button");
+    closeButton?.focus();
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const onDesktop = (event) => { if (event.matches) setMobileDrawerOpen(false); };
+    desktopQuery.addEventListener("change", onDesktop);
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMobileDrawerOpen(false);
+        menuButtonRef.current?.focus();
+      }
+      if (event.key !== "Tab") return;
+      const controls = [...(drawerRef.current?.querySelectorAll("button, a[href]") || [])].filter((control) => !control.disabled);
+      if (!controls.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.body.style.overflow = priorOverflow; document.removeEventListener("keydown", onKeyDown); desktopQuery.removeEventListener("change", onDesktop); };
+  }, [mobileDrawerOpen]);
 
   // Single fetch point for the family cards.
   useEffect(() => {
     let alive = true;
+    setGridErr("");
     getFamilyOverview()
       .then((d) => {
         if (!alive) return;
         const pts = d.patients || [];
         setCards(pts);
 
-        // Check if URL has ?patient= param that matches an authorized linked patient
+        // Restore only patients confirmed by the caregiver's current links.
         if (typeof window !== "undefined") {
           const params = new URLSearchParams(window.location.search);
-          const urlPid = params.get("patient");
-          if (urlPid && pts.some((p) => p.id === urlPid)) {
-            setActivePatientId(urlPid);
-            setOpenId(urlPid);
+          const requested = params.get("patient") || getActivePatientId();
+          if (requested && pts.some((p) => p.id === requested)) {
+            setActivePatientId(requested);
+            setOpenId(requested);
+          } else if (requested) {
+            setActivePatientId(null);
+            setOpenId(null);
+            if (params.has("patient")) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("patient");
+              window.history.replaceState({}, "", url.toString());
+            }
           }
         }
       })
@@ -481,15 +483,12 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     };
   }, [version]);
 
-  // Restore last-open patient, if any (per-viewer convenience).
-  useEffect(() => {
-    const stored = getActivePatientId();
-    if (stored) setOpenId(stored);
-  }, []);
-
   const handleOpen = (pid) => {
+    if (!cards?.some((card) => card.id === pid)) return;
     setActivePatientId(pid);
     setOpenId(pid);
+    if (mobileDrawerOpen) menuButtonRef.current?.focus();
+    setMobileDrawerOpen(false);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("patient", pid);
@@ -500,6 +499,8 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   const handleBack = () => {
     setActivePatientId(null);
     setOpenId(null);
+    if (mobileDrawerOpen) menuButtonRef.current?.focus();
+    setMobileDrawerOpen(false);
     setVersion((v) => v + 1); // refresh cards when returning to the grid
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -515,100 +516,112 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   };
 
   const cardFor = () => cards?.find((c) => c.id === openId) || null;
+  const selectedPatient = cardFor();
+  const closeDrawer = () => {
+    setMobileDrawerOpen(false);
+    menuButtonRef.current?.focus();
+  };
+
+  const familyNav = (mobile = false) => (
+    <>
+      <button
+        type="button"
+        className={`cg-nav-item ${!openId ? "active" : ""}`}
+        aria-current={!openId ? "page" : undefined}
+        onClick={handleBack}
+      >
+        <Users size={17} aria-hidden="true" />
+        <span>Family overview</span>
+      </button>
+      {(cards || []).map((patient) => (
+        <button
+          key={patient.id}
+          type="button"
+          className={`cg-nav-item ${openId === patient.id ? "active" : ""}`}
+          aria-current={openId === patient.id ? "page" : undefined}
+          onClick={() => handleOpen(patient.id)}
+        >
+          <span className="cg-nav-initials" aria-hidden="true">{initialsOf(patient.name)}</span>
+          <span className="cg-nav-label">{patient.name}<small>{patient.relation}</small></span>
+        </button>
+      ))}
+      {mobile && !cards && <span className="cg-nav-loading">Loading family…</span>}
+    </>
+  );
 
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <BrandMark />
-
+    <div className="workspace-v2 caregiver-workspace">
+      <aside className="cg-sidebar" aria-label="Caregiver workspace">
+        <div className="cg-sidebar-brand">
+          <Link href="/" aria-label="Ayogya home"><img src="/aayogya-logo.png" alt="" /></Link>
+          <span>Caregiver</span>
+        </div>
         {onGoHome && (
-          <button className="home-link" onClick={onGoHome} title="Back to landing page">
-            <Home size={14} />
-            <span>Home</span>
+          <button type="button" className="cg-home-link" onClick={onGoHome}>
+            <Home size={16} aria-hidden="true" /> Return to home
           </button>
         )}
-
-        <div className="nav-group">
-          <div className="nav-group-label">Family</div>
-          <button
-            className={`nav-item ${openId === null ? "active" : ""}`}
-            onClick={handleBack}
-          >
-            <span className="ic">
-              <Users size={18} strokeWidth={openId === null ? 2.5 : 2} />
-            </span>
-            <span>Family Overview</span>
-          </button>
-          {(cards || []).map((p) => (
-            <button
-              key={p.id}
-              className={`nav-item ${openId === p.id ? "active" : ""}`}
-              onClick={() => handleOpen(p.id)}
-            >
-              <span className="ic">
-                <Heart size={18} strokeWidth={openId === p.id ? 2.5 : 2} />
-              </span>
-              <span>{p.name?.split(" ")[0]} ({p.relation})</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="nav-spacer" />
-
-        <div className="who-card">
-          <div className="who-row">
-            <div className="who-avatar">{initialsOf(caregiver.name)}</div>
-            <div className="who-meta">
-              <div className="nm">{caregiver.name}</div>
-              <div className="em">{caregiver.email || caregiver.phone}</div>
-            </div>
+        <nav className="cg-sidebar-nav" aria-label="Family members">
+          <span className="cg-nav-heading">Your family</span>
+          {familyNav()}
+        </nav>
+        <div className="cg-sidebar-account">
+          <div className="cg-account-row">
+            <span className="cg-account-avatar">{initialsOf(caregiver.name)}</span>
+            <span><strong>{caregiver.name}</strong><small>{caregiver.email || caregiver.phone}</small></span>
           </div>
-          <div className="who-actions">
-            <span className="plan-badge free">Caregiver</span>
-            <button className="btn btn-ghost btn-sm" onClick={onLogout} title="Sign out">
-              <LogOut size={14} />
-              <span>Sign out</span>
-            </button>
-          </div>
+          <button type="button" onClick={onLogout}><LogOut size={15} aria-hidden="true" /> Sign out</button>
         </div>
       </aside>
 
-      <main className="main">
-        <header className="topbar">
-          <div className="topbar-title">
-            <div className="topbar-eyebrow" style={{ color: "#9a6b26" }}>
-              <Users size={13} />
-              <span>{openId ? "Patient Detail" : "Family Overview"}</span>
+      <div className="cg-mobile-bar">
+        <Link href="/" aria-label="Ayogya home"><img src="/aayogya-logo.png" alt="" /></Link>
+        <span>{selectedPatient?.name || "Family overview"}</span>
+        <button
+          ref={menuButtonRef}
+          type="button"
+          aria-label="Open family navigation"
+          aria-controls="caregiver-mobile-menu"
+          aria-expanded={mobileDrawerOpen}
+          onClick={() => setMobileDrawerOpen(true)}
+        ><Menu size={21} aria-hidden="true" /></button>
+      </div>
+      {mobileDrawerOpen && (
+        <div className="cg-drawer-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDrawer(); }}>
+          <div id="caregiver-mobile-menu" ref={drawerRef} role="dialog" aria-modal="true" aria-label="Family navigation" className="cg-drawer">
+            <div className="cg-drawer-head">
+              <strong>Family navigation</strong>
+              <button type="button" onClick={closeDrawer} aria-label="Close navigation"><X size={20} /></button>
             </div>
-            <h1>{openId ? cardFor()?.name || "Family member" : "Your Family"}</h1>
-            <p>
-              {openId
-                ? `Viewing ${cardFor()?.relation || "family member"}’s medicines, schedule and reminders.`
-                : "Everyone you care for, side by side — medicines, adherence and next visits."}
-            </p>
+            <div className="cg-drawer-account">
+              <span className="cg-account-avatar">{initialsOf(caregiver.name)}</span>
+              <span><strong>{caregiver.name}</strong><small>{caregiver.email || caregiver.phone}</small></span>
+            </div>
+            <nav aria-label="Family members">{familyNav(true)}</nav>
+            <div className="cg-drawer-actions">
+              {onGoHome && <button type="button" onClick={() => { closeDrawer(); onGoHome(); }}><Home size={16} /> Return to home</button>}
+              <button type="button" onClick={() => { closeDrawer(); onLogout(); }}><LogOut size={16} /> Sign out</button>
+            </div>
           </div>
-          <div className="topbar-side">
-            <span className="live-chip">
-              <Heart size={14} className="live-pulse" />
-              Linked
-            </span>
+        </div>
+      )}
+
+      <main className="cg-main" id="main-content">
+        <header className="cg-page-header">
+          <div>
+            <span className="cg-eyebrow">{selectedPatient ? "Family member" : "Caregiver workspace"}</span>
+            <h1>{selectedPatient?.name || "Your family"}</h1>
+            <p>{selectedPatient ? `Review ${selectedPatient.relation || "your family member"}'s medicines, schedule and records.` : "Medicines, doses and visits for the people linked to your account."}</p>
           </div>
+          <span className="cg-role-pill"><Heart size={14} aria-hidden="true" /> Caregiver</span>
         </header>
-        {openId && cardFor() ? (
-          <PatientDetail
-            patientCard={cardFor()}
-            onBack={handleBack}
-            onContactSaved={handleContactSaved}
-          />
-        ) : (
-          <FamilyGrid
-            caregiver={caregiver}
-            cards={cards}
-            loading={!gridErr && !cards}
-            err={gridErr}
-            onOpenPatient={handleOpen}
-          />
-        )}
+        <div className="cg-content">
+          {selectedPatient ? (
+            <PatientDetail key={selectedPatient.id} patientCard={selectedPatient} onBack={handleBack} onContactSaved={handleContactSaved} />
+          ) : (
+            <FamilyGrid caregiver={caregiver} cards={cards} loading={!gridErr && !cards} err={gridErr} onRetry={() => setVersion((value) => value + 1)} onOpenPatient={handleOpen} />
+          )}
+        </div>
       </main>
     </div>
   );

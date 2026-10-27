@@ -189,10 +189,10 @@ export default function PriceComparisonHero({
           <button
             onClick={() => onAddToReport && onAddToReport(item, packCount)}
             disabled={isAdding}
-            className={`px-5 py-3 font-serif font-black text-sm uppercase tracking-wider border-2 border-brand-navy sketchy-btn shadow-sketch hover:shadow-sketch-hover transition-all flex items-center justify-center gap-2 ${
+            className={`px-5 py-3 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 ${
               addedSuccess
-                ? "bg-emerald-600 text-brand-cream border-emerald-900"
-                : "bg-brand-navy text-brand-cream hover:bg-brand-navy/90"
+                ? "bg-emerald-600 text-white border border-emerald-700"
+                : "bg-ui-blue hover:bg-ui-blue-hover text-white"
             }`}
           >
             {addedSuccess ? (

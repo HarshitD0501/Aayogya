@@ -139,14 +139,22 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
         {onNavigateTab ? (
           <button
             onClick={() => onNavigateTab("search")}
-            className="w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
+            className={
+              hideNavbar
+                ? "w-full sm:w-auto px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
+                : "w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
+            }
           >
             + New Prescription Compare
           </button>
         ) : (
           <Link
             href="/search"
-            className="w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
+            className={
+              hideNavbar
+                ? "w-full sm:w-auto px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
+                : "w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
+            }
           >
             + New Prescription Compare
           </Link>
@@ -213,21 +221,25 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                 return (
                   <div
                     key={rep.report_id}
-                    className="p-5 sm:p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-sketch-hover transition-shadow"
+                    className={
+                      hideNavbar
+                        ? "p-5 sm:p-6 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-md transition-shadow"
+                        : "p-5 sm:p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-sketch-hover transition-shadow"
+                    }
                   >
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-serif font-black text-lg sm:text-xl text-brand-navy">
+                        <span className={`font-serif ${hideNavbar ? "font-bold text-lg sm:text-xl text-ui-text" : "font-black text-lg sm:text-xl text-brand-navy"}`}>
                           {rep.patient_label || "Prescription Report"}
                         </span>
-                        <span className="text-[10px] font-mono font-bold bg-brand-navy/5 border border-brand-navy/20 px-2 py-0.5 rounded text-brand-navy">
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${hideNavbar ? "bg-ui-surface-subtle border border-ui-border-decorative text-ui-text" : "bg-brand-navy/5 border border-brand-navy/20 text-brand-navy"}`}>
                           {rep.report_id}
                         </span>
                       </div>
 
-                      <p className="font-sans text-xs text-brand-gray">
+                      <p className={`font-sans text-xs ${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"}`}>
                         Created:{" "}
-                        <span className="font-bold text-brand-navy">
+                        <span className={`font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
                           {new Date(rep.created_at).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
@@ -239,15 +251,15 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
                       <div className="flex items-center gap-4 text-xs font-sans pt-1">
                         <div>
-                          <span className="text-brand-gray block text-[10px] uppercase font-bold">
+                          <span className={`${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"} block text-[10px] uppercase font-bold`}>
                             Generic Total:
                           </span>
-                          <span className="font-serif font-bold text-brand-navy">
+                          <span className={`font-serif font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
                             {pmbjpTotal ? formatPaise(pmbjpTotal) : "₹--"}
                           </span>
                         </div>
                         <div>
-                          <span className="text-brand-gray block text-[10px] uppercase font-bold">
+                          <span className={`${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"} block text-[10px] uppercase font-bold`}>
                             Potential Saving:
                           </span>
                           <span className="font-serif font-black text-emerald-800">
@@ -257,18 +269,26 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto">
                       <Link
                         href={`/prescriptions/${rep.report_id}`}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+                        className={
+                          hideNavbar
+                            ? "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-sm transition-colors"
+                            : "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+                        }
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
+                        <ExternalLink className={`w-3.5 h-3.5 ${hideNavbar ? "text-white" : "text-brand-orange"}`} />
                         <span>Open & Print</span>
                       </Link>
 
                       <button
                         onClick={() => setDeleteTargetId(rep.report_id)}
-                        className="p-2.5 bg-brand-cream hover:bg-red-100 border-2 border-brand-navy text-brand-navy hover:text-red-700 rounded transition-colors"
+                        className={
+                          hideNavbar
+                            ? "p-2 bg-ui-surface hover:bg-rose-50 border border-ui-border-decorative hover:border-rose-300 text-ui-text-secondary hover:text-rose-700 rounded-lg shadow-sm transition-colors"
+                            : "p-2.5 bg-brand-cream hover:bg-red-100 border-2 border-brand-navy text-brand-navy hover:text-red-700 rounded transition-colors"
+                        }
                         title="Delete from local device"
                         aria-label="Delete report"
                       >
@@ -281,15 +301,19 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
             {/* Pagination Controls */}
             {reports.length > PAGE_SIZE && (
-              <div className="flex items-center justify-between pt-4 border-t-2 border-brand-navy/10 text-xs font-sans">
+              <div className={`flex items-center justify-between pt-4 ${hideNavbar ? "border-t border-ui-border-decorative" : "border-t-2 border-brand-navy/10"} text-xs font-sans`}>
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
+                  className={
+                    hideNavbar
+                      ? "px-3 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-sm transition-colors disabled:opacity-40"
+                      : "px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
+                  }
                 >
                   ← Previous
                 </button>
-                <span className="font-bold text-brand-navy">
+                <span className={`font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
                   Page {currentPage} of {Math.ceil(reports.length / PAGE_SIZE)} ({reports.length} total)
                 </span>
                 <button
@@ -299,7 +323,11 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                     )
                   }
                   disabled={currentPage >= Math.ceil(reports.length / PAGE_SIZE)}
-                  className="px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
+                  className={
+                    hideNavbar
+                      ? "px-3 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-sm transition-colors disabled:opacity-40"
+                      : "px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
+                  }
                 >
                   Next →
                 </button>

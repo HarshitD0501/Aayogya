@@ -81,10 +81,10 @@ export default function SearchSuggestions({
               </div>
 
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-[10px] font-mono font-bold bg-brand-navy/5 border border-brand-navy/20 px-2 py-1 rounded text-brand-navy">
+                <span className="text-[10px] font-mono font-bold bg-ui-surface-subtle border border-ui-border-decorative px-2 py-1 rounded text-ui-blue">
                   Match: {cand.match_score ?? 85}%
                 </span>
-                <ChevronRight className="w-4 h-4 text-brand-gray" />
+                <ChevronRight className="w-4 h-4 text-ui-text-secondary" />
               </div>
             </li>
           );
