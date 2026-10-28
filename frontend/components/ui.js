@@ -6,7 +6,7 @@ import { useCountUp, useIsoLayout } from "@/lib/gsap";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import ShinyText from "@/components/reactbits/ShinyText";
 import GlowPill from "@/components/reactbits/GlowPill";
-import { Sparkles, Activity, AlertTriangle, Info, ExternalLink } from "lucide-react";
+import { Sparkles, Activity, AlertTriangle, Info, ExternalLink, CheckCircle2 } from "lucide-react";
 
 export function BrandMark({ className = "" }) {
   // Ayogya Golden Leaf lockup (golden leaf + pulse mark + wordmark).
@@ -23,8 +23,8 @@ export function Card({
   actions,
   className = "",
   reveal = true,
-  spotlightColor = "rgba(99, 102, 241, 0.10)",
-  borderColor = "rgba(176, 127, 20, 0.35)",
+  spotlightColor = "rgba(36, 87, 167, 0.04)",
+  borderColor = "var(--ui-border-decorative, #E8DFD0)",
   children,
   ...props
 }) {
@@ -62,8 +62,8 @@ export function Stat({ icon, label, value, animate = true, format }) {
   return (
     <SpotlightCard
       className="stat"
-      spotlightColor="rgba(232, 168, 56, 0.12)"
-      borderColor="rgba(26, 34, 52, 0.14)"
+      spotlightColor="rgba(232, 168, 56, 0.08)"
+      borderColor="var(--ui-border-decorative, #E8DFD0)"
     >
       <div className="stat-top">
         {icon && <span className="ic">{icon}</span>}
@@ -77,12 +77,14 @@ export function Stat({ icon, label, value, animate = true, format }) {
 }
 
 export function Pill({ tone, dot = true, children }) {
-  // Map legacy tones to Aura GlowPill tones
+  // Map legacy tones to refined GlowPill tones
   const toneMap = {
-    brand: "purple",
+    brand: "blue",
     accent: "blue",
     warn: "amber",
     danger: "rose",
+    success: "green",
+    neutral: "purple",
   };
   const auraTone = toneMap[tone] || "purple";
 
@@ -104,22 +106,26 @@ export function Loader({ label }) {
 
 export function Note({ tone = "info", children }) {
   return (
-    <div className={`note ${tone}`}>
-      {tone === "err" ? (
-        <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+    <div className={`note ${tone}`} role="alert">
+      {tone === "err" || tone === "danger" ? (
+        <AlertTriangle size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
+      ) : tone === "success" ? (
+        <CheckCircle2 size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
+      ) : tone === "warn" ? (
+        <AlertTriangle size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
       ) : (
-        <Info size={18} style={{ flexShrink: 0 }} />
+        <Info size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
       )}
-      <div>{children}</div>
+      <div className="flex-1">{children}</div>
     </div>
   );
 }
 
 export function Empty({ icon = "🌿", children }) {
   return (
-    <div className="empty">
-      <div className="big">{icon}</div>
-      <div style={{ fontWeight: 500 }}>{children}</div>
+    <div className="empty" role="status">
+      <div className="big" aria-hidden="true">{icon}</div>
+      <div className="text-sm font-medium text-ui-text-secondary">{children}</div>
     </div>
   );
 }
@@ -267,6 +273,7 @@ export function UIButton({
     primary: "bg-ui-blue text-white hover:bg-ui-blue-hover active:bg-[#15366A] shadow-sm",
     secondary: "bg-ui-surface text-ui-text border border-ui-border-decorative hover:bg-ui-surface-subtle hover:border-ui-control-border active:bg-[#E5DEC9]",
     tertiary: "bg-transparent text-ui-blue hover:bg-ui-surface-subtle active:bg-[#E5DEC9]",
+    accent: "bg-ui-amber text-white hover:bg-ui-amber-hover active:bg-[#B87C1D] shadow-sm",
     danger: "bg-ui-danger text-white hover:bg-[#911C13] active:bg-[#70150E] shadow-sm",
   };
 
@@ -417,7 +424,7 @@ export function UICard({
       {(title || actions || sub) && (
         <div className="flex items-start justify-between gap-4 mb-4 pb-3 border-b border-ui-border-decorative/60">
           <div>
-            {title && <h3 className="text-base font-semibold text-ui-text tracking-tight">{title}</h3>}
+            {title && <h3 className="text-base font-semibold text-ui-text tracking-tight font-serif">{title}</h3>}
             {sub && <p className="text-xs text-ui-text-secondary mt-0.5">{sub}</p>}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
