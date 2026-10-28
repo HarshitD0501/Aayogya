@@ -34,6 +34,9 @@ module.exports = {
           success: 'var(--ui-success, #25633E)',
           warning: 'var(--ui-warning, #855800)',
           danger: 'var(--ui-danger, #B42318)',
+          amber: 'var(--ui-amber, #E8A838)',
+          'amber-hover': 'var(--ui-amber-hover, #D4942B)',
+          'amber-subtle': 'var(--ui-amber-subtle, #FFF8E6)',
         },
       },
       backgroundImage: {
