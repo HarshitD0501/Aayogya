@@ -176,7 +176,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
     >
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-semibold uppercase tracking-wider text-ui-text">
           <Camera className="w-3.5 h-3.5 text-brand-orange" />
           <span>Human-in-the-Loop OCR</span>
         </div>
@@ -192,7 +192,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
       </div>
 
       {/* Upload Container */}
-      <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
+      <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
         {/* File Picker Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
@@ -278,7 +278,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
             <button
               onClick={handleRunOcr}
               disabled={isProcessing}
-              className="w-full py-3.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-sm uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-xl font-semibold text-sm shadow-sm transition-colors flex items-center justify-center gap-2"
             >
               {isProcessing ? (
                 <>
@@ -299,7 +299,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
         {ocrError && (
           <div
             role="alert"
-            className="p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+            className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center justify-between gap-3 shadow-xs"
           >
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />
@@ -354,7 +354,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
                     </div>
                     <button
                       onClick={() => handleManualSearch(sug.query_tokens.join(" "))}
-                      className="px-3 py-1.5 bg-brand-orange text-brand-navy border border-brand-navy text-xs font-black uppercase tracking-wider sketchy-btn shadow-sketch-hover"
+                      className="px-3.5 py-1.5 bg-ui-amber hover:bg-ui-amber-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
                     >
                       Verify & Match
                     </button>
@@ -395,7 +395,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
             />
             <button
               onClick={() => handleManualSearch(correctionQuery)}
-              className="px-4 py-2 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+              className="px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg font-semibold text-xs shadow-xs transition-colors"
             >
               Search
             </button>
@@ -405,7 +405,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           {searchError && (
             <div
               role="alert"
-              className="p-3 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+              className="p-3 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center justify-between gap-3 shadow-xs"
             >
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />

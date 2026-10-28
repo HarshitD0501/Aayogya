@@ -34,30 +34,32 @@ export default function ChemistSlip({ report, onClose }) {
         if (e.target === e.currentTarget && onClose) onClose();
       }}
     >
-      <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch w-full max-w-2xl p-6 sm:p-8 space-y-6 relative my-8 print:m-0 print:p-0 print:border-none print:shadow-none">
+      <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-modal w-full max-w-2xl p-6 sm:p-8 space-y-6 relative my-8 print:m-0 print:p-0 print:border-none print:shadow-none">
         
         {/* Top Controls (Hidden in Print) */}
-        <div className="flex items-center justify-between border-b-2 border-brand-navy/20 pb-4 print:hidden">
+        <div className="flex items-center justify-between border-b border-ui-border-decorative pb-4 print:hidden">
           <div className="flex items-center gap-2">
-            <span id="chemist-slip-title" className="font-serif font-black text-lg text-brand-navy">
+            <span id="chemist-slip-title" className="font-serif font-semibold text-lg text-ui-text">
               Counter Print Slip
             </span>
-            <span className="text-[10px] font-sans font-bold bg-brand-orange text-brand-navy px-2 py-0.5 rounded uppercase tracking-widest border border-brand-navy">
+            <span className="text-[10px] font-sans font-semibold bg-ui-surface-subtle text-ui-blue border border-ui-border-decorative px-2 py-0.5 rounded-full uppercase tracking-wider">
               Chemist Ready
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-bold text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+              className="flex items-center gap-1.5 px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg font-semibold text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
               <Printer className="w-4 h-4" />
               <span>Print Slip</span>
             </button>
             {onClose && (
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 border-2 border-brand-navy bg-brand-cream text-brand-navy rounded hover:bg-brand-peach/40"
+                className="p-2 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
                 aria-label="Close Preview"
               >
                 <X className="w-4 h-4" />

@@ -343,35 +343,37 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-report-title"
-          className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#172B4D]/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget) setDeleteTargetId(null);
           }}
         >
-          <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center gap-2 text-red-700">
-              <AlertTriangle className="w-6 h-6 flex-shrink-0" />
-              <h4 id="delete-report-title" className="font-serif font-black text-lg">
+          <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-modal max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-2.5 text-ui-danger">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+              <h4 id="delete-report-title" className="font-serif font-semibold text-lg text-ui-text">
                 Delete Local Report?
               </h4>
             </div>
-            <p className="font-sans text-xs text-brand-gray leading-relaxed">
-              This report will be permanently removed from this device's IndexedDB. This action cannot be undone.
+            <p className="font-sans text-xs text-ui-text-secondary leading-relaxed">
+              This report will be permanently removed from this device&apos;s IndexedDB. This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => setDeleteTargetId(null)}
                 autoFocus
-                className="px-4 py-2 border-2 border-brand-navy bg-brand-cream font-bold text-xs uppercase tracking-wider hover:bg-brand-peach/40"
+                className="px-4 py-2 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text font-semibold text-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 border-2 border-brand-navy bg-red-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 bg-ui-danger hover:bg-[#911C13] text-white font-semibold text-xs rounded-lg transition-colors disabled:opacity-50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-danger"
               >
-                {isDeleting ? "Deleting..." : "Confirm Delete"}
+                {isDeleting ? "Deleting…" : "Confirm Delete"}
               </button>
             </div>
           </div>

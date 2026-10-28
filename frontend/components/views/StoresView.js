@@ -241,7 +241,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-semibold uppercase tracking-wider text-ui-text">
           <Compass className="w-3.5 h-3.5 text-brand-orange" />
           <span>Verified Healthcare & Medicine Network</span>
         </div>
@@ -257,7 +257,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       </div>
 
       {/* City & Neighborhood Filter Bar */}
-      <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2">
             <label className="text-xs font-black uppercase tracking-wider text-brand-navy whitespace-nowrap">
@@ -305,7 +305,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         <button
           onClick={handleUseLocation}
           disabled={isLocating}
-          className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-brand-cream hover:bg-brand-peach/40 border-2 border-brand-navy text-brand-navy text-xs font-black uppercase tracking-wider sketchy-btn shadow-sketch-hover"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative text-ui-text text-xs font-semibold rounded-lg shadow-xs transition-colors"
         >
           <Navigation className={`w-4 h-4 text-brand-orange ${isLocating ? "animate-spin" : ""}`} />
           <span>{isLocating ? "Detecting GPS Location…" : (userCoords ? "📍 Location Active (Refresh)" : t.useLocation)}</span>
@@ -314,7 +314,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
 
       {/* GPS Denial / Error Banner */}
       {gpsError && (
-        <div className="bg-amber-50 border-2 border-brand-navy sketchy-box shadow-sketch p-4 text-xs text-brand-navy flex items-start sm:items-center justify-between gap-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl shadow-xs p-4 text-xs text-amber-900 flex items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 text-brand-orange flex-shrink-0" />
             <span className="font-medium">{gpsError}</span>
@@ -377,7 +377,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
             onClick={() => setFilterKind("all")}
             className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
               filterKind === "all"
-                ? "bg-brand-navy text-brand-cream sketchy-btn shadow-sketch"
+                ? "bg-ui-blue text-white shadow-xs rounded-lg"
                 : "bg-brand-white text-brand-navy"
             }`}
           >
@@ -387,7 +387,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
             onClick={() => setFilterKind("neighbourhood")}
             className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
               filterKind === "neighbourhood"
-                ? "bg-blue-700 text-white sketchy-btn shadow-sketch"
+                ? "bg-ui-blue text-white shadow-xs rounded-lg"
                 : "bg-brand-white text-brand-navy"
             }`}
           >
@@ -397,7 +397,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
             onClick={() => setFilterKind("kendra")}
             className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
               filterKind === "kendra"
-                ? "bg-brand-navy text-brand-cream sketchy-btn shadow-sketch"
+                ? "bg-ui-blue text-white shadow-xs rounded-lg"
                 : "bg-brand-white text-brand-navy"
             }`}
           >
@@ -407,7 +407,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
             onClick={() => setFilterKind("hospital")}
             className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
               filterKind === "hospital"
-                ? "bg-brand-navy text-brand-cream sketchy-btn shadow-sketch"
+                ? "bg-ui-blue text-white shadow-xs rounded-lg"
                 : "bg-brand-white text-brand-navy"
             }`}
           >
@@ -417,7 +417,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
             onClick={() => setFilterKind("pharmacy")}
             className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
               filterKind === "pharmacy"
-                ? "bg-brand-navy text-brand-cream sketchy-btn shadow-sketch"
+                ? "bg-ui-blue text-white shadow-xs rounded-lg"
                 : "bg-brand-white text-brand-navy"
             }`}
           >
@@ -494,7 +494,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       {showRouteSteps && (
         <div className="space-y-4">
           {loadingRoute && (
-            <div className="p-6 text-center bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch">
+            <div className="p-6 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card shadow-sketch">
               <div className="w-6 h-6 border-2 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <p className="font-serif font-bold text-xs uppercase tracking-wider text-brand-navy">
                 Calculating real-time OSRM driving route…
@@ -503,7 +503,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
           )}
 
           {routeError && (
-            <div className="bg-amber-50 border-2 border-brand-navy sketchy-box shadow-sketch p-5 space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl shadow-xs p-5 space-y-3 text-amber-900">
               <div className="flex items-center gap-2 text-brand-navy">
                 <AlertCircle className="w-5 h-5 text-brand-orange flex-shrink-0" />
                 <h4 className="font-serif font-black text-base">Route Navigation Notice</h4>
@@ -524,7 +524,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
           )}
 
           {activeRoute && (
-            <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-5 space-y-4 animate-in fade-in-50">
+            <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-5 space-y-4 animate-in fade-in duration-150">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-brand-navy/10 pb-3">
                 <div>
                   <div className="flex items-center gap-2">
@@ -595,7 +595,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         </div>
 
         {loadingStores ? (
-          <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box">
+          <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
             <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="font-serif font-bold text-brand-navy">Locating verified medical facilities…</p>
           </div>
@@ -634,7 +634,8 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                   key={store.store_id}
                   id={`store-card-${store.store_id}`}
                   onClick={() => setSelectedStore(store)}
-                  className={`p-5 bg-brand-white border-2 border-brand-navy sketchy-box transition-all cursor-pointer flex flex-col justify-between gap-4 ${
+                  className={`p-5 bg-ui-surface border rounded-xl shadow-ui-card transition-all cursor-pointer flex flex-col justify-between gap-4 ${
+                  selectedStore?.store_id === s.store_id ? "border-ui-blue ring-2 ring-ui-blue/30" : "border-ui-border-decorative hover:border-ui-blue/50"
                     isSelected ? "shadow-sketch ring-2 ring-brand-orange" : "shadow-sketch-hover"
                   }`}
                 >
@@ -705,7 +706,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                         e.stopPropagation();
                         handleGetRoute(store);
                       }}
-                      className="flex-1 py-2 px-3 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-bold text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2 px-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Navigation className="w-3.5 h-3.5 text-brand-orange" />
                       <span>Route Steps</span>
@@ -715,7 +716,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="py-2 px-3 bg-brand-cream hover:bg-brand-peach/40 border-2 border-brand-navy font-serif font-bold text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover flex items-center justify-center gap-1.5 text-brand-navy"
+                      className="py-2 px-3 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 text-ui-text"
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
                       <span>Google Maps</span>

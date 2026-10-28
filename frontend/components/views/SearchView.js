@@ -249,7 +249,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-bold uppercase tracking-wider text-brand-navy">
           <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
           <span>PMBJP Price Transparency</span>
         </div>
@@ -266,7 +266,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
       {/* Search Input Box */}
       <div className="relative max-w-3xl mx-auto">
-        <div className="flex items-center bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-2 sm:p-3 transition-shadow focus-within:shadow-sketch-hover">
+        <div className="flex items-center bg-ui-surface border border-ui-control-border rounded-xl shadow-xs p-2 sm:p-3 transition-all focus-within:border-ui-blue focus-within:ring-2 focus-within:ring-ui-blue/20">
           <SearchIcon className="w-6 h-6 text-brand-orange ml-2 mr-3 flex-shrink-0" />
           <input
             type="text"
