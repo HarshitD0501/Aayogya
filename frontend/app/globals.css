@@ -621,13 +621,21 @@ button { font-family: inherit; }
 .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 
+@media (max-width: 1024px) {
+  .grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid.cols-4, .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
+}
+
 /* ---- Card Standard (Wrapped in SpotlightCard) ---- */
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--ui-border-decorative, #E8DFD0);
   border-radius: var(--radius);
   padding: 22px 24px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px -2px rgba(26, 34, 52, 0.05);
   transition: all 0.25s ease;
 }
 .card.pad-lg { padding: 30px; }
@@ -641,7 +649,8 @@ button { font-family: inherit; }
 }
 .card-head h3 {
   margin: 0;
-  font-size: 17px;
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -659,15 +668,16 @@ button { font-family: inherit; }
   justify-content: space-between;
   padding: 20px 22px;
   background: var(--surface);
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--ui-border-decorative, #E8DFD0);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(26, 34, 52, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   min-height: 120px;
 }
 .stat:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(26, 34, 52, 0.08);
+  border-color: rgba(232, 168, 56, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(26, 34, 52, 0.08);
 }
 .stat-top {
   display: flex;
@@ -676,8 +686,8 @@ button { font-family: inherit; }
   margin-bottom: 12px;
 }
 .stat .ic {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   background: rgba(232, 168, 56, 0.12);
   color: #d4942b;
@@ -695,9 +705,9 @@ button { font-family: inherit; }
   line-height: 1.35;
 }
 .stat .val {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.015em;
   color: var(--ink);
   line-height: 1;
@@ -707,54 +717,60 @@ button { font-family: inherit; }
 /* ---- Daily Schedule (Aura Grid) ---- */
 .schedule {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+@media (min-width: 1024px) {
+  .schedule.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .slot {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
+  background: var(--surface);
+  border: 1px solid var(--ui-border-decorative, #E8DFD0);
   border-radius: var(--radius-sm);
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(26, 34, 52, 0.03);
 }
 .slot:hover {
-  background: var(--surface);
-  border-color: rgba(176, 127, 20, 0.3);
-  box-shadow: var(--shadow-sm);
+  border-color: rgba(232, 168, 56, 0.35);
+  box-shadow: 0 4px 16px -2px rgba(26, 34, 52, 0.06);
 }
 .slot.empty {
-  color: var(--muted-light);
-  font-size: 14px;
+  color: var(--ui-text-secondary, #526174);
+  font-size: 13px;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
-  background: #fafafc;
-  border-style: dashed;
+  min-height: 140px;
+  background: rgba(248, 245, 238, 0.5);
+  border: 1.5px dashed var(--ui-border-decorative, #E8DFD0);
+  border-radius: var(--radius-sm);
 }
 .slot h4 {
   margin: 0;
-  font-size: 13px;
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
+  letter-spacing: -0.01em;
+  color: var(--ink);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .slot .med {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink);
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--surface);
-  border: 1px solid var(--line-light);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--ui-border-decorative, #E8DFD0);
+  box-shadow: 0 1px 3px rgba(26, 34, 52, 0.04);
 }
 .slot .med small {
   color: var(--muted);

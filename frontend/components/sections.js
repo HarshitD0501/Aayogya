@@ -38,6 +38,19 @@ import {
   Sparkles,
   RotateCcw,
   RefreshCw,
+  Check,
+  X,
+  HeartPulse,
+  Stethoscope,
+  Info,
+  CalendarCheck,
+  ChevronDown,
+  ChevronUp,
+  Sliders,
+  Send,
+  ShieldCheck,
+  Activity,
+  CheckCircle,
 } from "lucide-react";
 
 // Shared GET-with-loading/error helper with deduplication & scoped caching. Re-fetches when `deps` change.
@@ -81,14 +94,50 @@ function useData(path, deps = []) {
   return state;
 }
 
-const SLOTS = [
-  { key: "morning", label: "Morning", Icon: Sunrise, color: "#d97706" },
-  { key: "afternoon", label: "Afternoon", Icon: Sun, color: "#2563eb" },
-  { key: "evening", label: "Evening", Icon: Sunset, color: "#ea580c" },
-  { key: "night", label: "Night", Icon: Moon, color: "#1e3a8a" },
-  { key: "sos", label: "As needed (SOS)", Icon: AlertCircle, color: "#dc2626" },
+const ROUTINE_SLOTS = [
+  {
+    key: "morning",
+    label: "Morning Dose",
+    defaultTime: "08:00 AM",
+    prefKey: "reminder_time_morning",
+    Icon: Sunrise,
+    headerBg: "bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent",
+    iconBg: "bg-amber-100 text-amber-800 border-amber-200",
+    windowHint: "Breakfast window · 1 consolidated message",
+  },
+  {
+    key: "afternoon",
+    label: "Afternoon Dose",
+    defaultTime: "01:00 PM",
+    prefKey: "reminder_time_afternoon",
+    Icon: Sun,
+    headerBg: "bg-gradient-to-r from-amber-600/10 via-amber-600/5 to-transparent",
+    iconBg: "bg-amber-100 text-amber-900 border-amber-200",
+    windowHint: "Lunch window · 1 consolidated message",
+  },
+  {
+    key: "evening",
+    label: "Evening Dose",
+    defaultTime: "05:00 PM",
+    prefKey: null,
+    Icon: Sunset,
+    headerBg: "bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent",
+    iconBg: "bg-orange-100 text-orange-800 border-orange-200",
+    windowHint: "Sunset / Tea window · 1 consolidated message",
+  },
+  {
+    key: "night",
+    label: "Night Dose",
+    defaultTime: "08:00 PM",
+    prefKey: "reminder_time_night",
+    Icon: Moon,
+    headerBg: "bg-gradient-to-r from-slate-900/10 via-slate-900/5 to-transparent",
+    iconBg: "bg-slate-100 text-slate-800 border-slate-200",
+    windowHint: "Dinner / Bedtime window · 1 consolidated message",
+  },
 ];
 
+const SLOTS = ROUTINE_SLOTS;
 const SEV = { major: "danger", moderate: "warn", minor: "brand" };
 
 function medLine(m) {
@@ -97,25 +146,28 @@ function medLine(m) {
 
 function TimingPills({ m }) {
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+    <div className="flex items-center gap-1.5 flex-wrap">
       {m.prn ? (
-        <span className="text-[11px] font-semibold text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">
-          SOS · as needed
+        <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-200/90 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+          SOS · As needed
         </span>
       ) : (
         (m.timing || []).map((t) => (
-          <span key={t} className="text-[11px] font-semibold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-2.5 py-0.5 rounded-full">
+          <span
+            key={t}
+            className="text-[10px] font-bold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+          >
             {t}
           </span>
         ))
       )}
       {m.dosage_notation && (
-        <span className="text-[11px] font-semibold text-ui-text bg-ui-canvas border border-ui-border-decorative px-2.5 py-0.5 rounded-full">
+        <span className="text-[10px] font-semibold text-ui-text bg-ui-canvas border border-ui-border-decorative px-2 py-0.5 rounded-full">
           {m.dosage_notation}
         </span>
       )}
       {m.duration_days ? (
-        <span className="text-[11px] font-semibold text-ui-text-secondary bg-ui-surface border border-ui-border-decorative px-2.5 py-0.5 rounded-full">
+        <span className="text-[10px] font-medium text-ui-text-secondary bg-ui-surface border border-ui-border-decorative px-2 py-0.5 rounded-full">
           {m.duration_days} days
         </span>
       ) : null}
@@ -123,113 +175,191 @@ function TimingPills({ m }) {
   );
 }
 
-function Slot({
-  label,
-  Icon,
-  color,
-  meds,
+function SlotCard({
+  slot,
+  meds = [],
+  scheduledTime,
   onSendReminder,
   onSimulateReply,
   onStopMedicine,
   onToggleReminders,
   sendingId,
 }) {
-  if (!meds || !meds.length)
-    return (
-      <div className="slot empty">
-        <Icon size={18} style={{ opacity: 0.6, marginBottom: 4 }} />
-        <span>{label}</span>
-      </div>
-    );
+  const Icon = slot.Icon;
+  const hasMeds = meds && meds.length > 0;
+  const firstWithAdh = hasMeds ? meds.find((m) => m.adherence_id) : null;
+  const isSending = Boolean(firstWithAdh && sendingId === firstWithAdh.adherence_id);
+  const anyRemindersEnabled = hasMeds && meds.some((m) => m.reminders_enabled !== false);
+
   return (
-    <div className="slot">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 4 }}>
-        <h4 style={{ margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
-          <Icon size={16} color={color} /> {label}
-        </h4>
-        <span className="text-[11px] font-semibold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-2 py-0.5 rounded-full">
-          {meds.length > 1 ? `Single Message (${meds.length} medicines)` : "1 medicine"}
-        </span>
-      </div>
-      {meds.map((m, i) => (
-        <div className="med" key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-            <div>
-              <strong className="text-ui-text">{m.brand}</strong>
-              <small className="text-ui-text-secondary">
-                {" "}
-                · {m.salt || "—"}
-                {m.strength ? ` ${m.strength}` : ""}
-              </small>
-              {!m.reminders_enabled && (
-                <span className="inline-flex items-center text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full ml-1.5">
-                  🔕 Paused
-                </span>
-              )}
+    <div className="flex flex-col rounded-2xl bg-ui-surface border border-ui-border-decorative shadow-xs overflow-hidden transition-all hover:shadow-md hover:border-brand-orange/30">
+      {/* Top Banner / Time Header */}
+      <div className={`p-4 border-b border-ui-border-decorative/60 ${slot.headerBg}`}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${slot.iconBg}`}>
+              <Icon size={16} />
             </div>
-            {m.adherence_status === "taken" ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                ✓ Taken {m.adherence_time ? `(${m.adherence_time})` : ""}
-              </span>
-            ) : m.adherence_status === "missed" ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-800 bg-rose-50 border border-rose-200/90 px-2.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                ✕ Missed
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/90 px-2.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                ⏳ Due Today
-              </span>
-            )}
+            <div className="min-w-0">
+              <h4 className="font-serif font-bold text-sm text-ui-text truncate leading-tight">
+                {slot.label}
+              </h4>
+              <div className="text-[11px] font-medium text-ui-text-secondary truncate mt-0.5">
+                ⏰ {scheduledTime} IST
+              </div>
+            </div>
           </div>
-          {m.adherence_id && (
-            <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap", alignItems: "center" }}>
-              <button
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold bg-ui-blue hover:bg-ui-blue-hover text-white rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                disabled={sendingId === m.adherence_id || !m.reminders_enabled}
-                onClick={() => onSendReminder(m.adherence_id)}
-                title="Send ONE consolidated WhatsApp checklist containing all medicines for this time slot"
-              >
-                🔔 {sendingId === m.adherence_id ? "Sending…" : meds.length > 1 ? "WhatsApp Nudge (All Meds)" : "WhatsApp Nudge"}
-              </button>
-              {m.adherence_status !== "taken" && (
-                <button
-                  className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors"
-                  onClick={() => onSimulateReply(m.adherence_id, "taken")}
-                  title="Simulate patient clicking 'Yes, All Taken' on WhatsApp"
-                >
-                  ✓ Tap &apos;Yes, Taken&apos;
-                </button>
-              )}
-              {m.adherence_status !== "missed" && (
-                <button
-                  className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md transition-colors"
-                  onClick={() => onSimulateReply(m.adherence_id, "missed")}
-                  title="Simulate patient clicking 'Missed / Forgot' on WhatsApp"
-                >
-                  ✕ Tap &apos;Missed&apos;
-                </button>
-              )}
-              <button
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-ui-text-secondary hover:text-ui-text bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-md transition-colors"
-                onClick={() => onToggleReminders(m.id)}
-                title={m.reminders_enabled ? "Pause reminders for this medicine" : "Resume reminders"}
-              >
-                {m.reminders_enabled ? "🔕 Pause" : "🔔 Resume"}
-              </button>
-              <button
-                className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-md transition-colors"
-                onClick={() => onStopMedicine(m.id, m.brand)}
-                title="I'm feeling fit / recovered. Stop reminders completely for this medicine."
-              >
-                ✋ I&apos;m Fit / Stop
-              </button>
-            </div>
-          )}
+          <span
+            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${
+              hasMeds
+                ? "bg-ui-surface text-ui-text border-ui-border-decorative"
+                : "bg-ui-surface-subtle text-ui-text-secondary border-ui-border-decorative/60"
+            }`}
+          >
+            {hasMeds ? (meds.length === 1 ? "1 Medicine" : `${meds.length} Medicines`) : "Dose-free"}
+          </span>
         </div>
-      ))}
+
+        {/* Slot-level WhatsApp Nudge Bar when medicines exist */}
+        {hasMeds && firstWithAdh && (
+          <div className="mt-3 pt-2.5 border-t border-ui-border-decorative/50 flex items-center justify-between gap-2">
+            <span className="text-[11px] text-ui-text-secondary truncate">
+              {slot.windowHint}
+            </span>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg shadow-xs transition-colors shrink-0 disabled:opacity-50 disabled:pointer-events-none"
+              disabled={isSending || !anyRemindersEnabled}
+              onClick={() => onSendReminder(firstWithAdh.adherence_id)}
+              title="Send 1 consolidated WhatsApp checklist containing all medicines for this time slot"
+            >
+              <MessageSquare size={12} />
+              <span>{isSending ? "Sending…" : "WhatsApp Nudge"}</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Medicines List or Empty State */}
+      <div className="p-3.5 flex-1 flex flex-col gap-3 bg-ui-canvas/20">
+        {!hasMeds ? (
+          <div className="py-8 px-4 rounded-xl border border-dashed border-ui-border-decorative/80 bg-ui-surface/60 text-center flex flex-col items-center justify-center flex-1 min-h-[140px]">
+            <div className="w-8 h-8 rounded-full bg-ui-surface-subtle border border-ui-border-decorative flex items-center justify-center text-ui-success mb-2">
+              <Check size={14} />
+            </div>
+            <span className="font-serif font-semibold text-xs text-ui-text">Dose-Free Interval</span>
+            <span className="text-[11px] text-ui-text-secondary mt-0.5">No doses scheduled for this window</span>
+          </div>
+        ) : (
+          meds.map((m, i) => (
+            <div
+              key={m.id || i}
+              className="p-3 rounded-xl bg-ui-surface border border-ui-border-decorative/90 shadow-xs flex flex-col gap-2.5 transition-all hover:border-brand-orange/40 hover:shadow-sm"
+            >
+              {/* Medicine Brand & Adherence Status */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="font-serif font-bold text-sm text-ui-text truncate" title={m.brand}>
+                    {m.brand}
+                  </div>
+                  <div className="text-[11px] text-ui-text-secondary truncate mt-0.5">
+                    {m.salt || "—"}{m.strength ? ` · ${m.strength}` : ""}
+                  </div>
+                </div>
+
+                {/* Adherence Status Pill */}
+                {m.adherence_status === "taken" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full shrink-0 shadow-xs">
+                    ✓ Taken {m.adherence_time ? `(${m.adherence_time})` : ""}
+                  </span>
+                ) : m.adherence_status === "missed" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-50 border border-rose-200/90 px-2 py-0.5 rounded-full shrink-0 shadow-xs">
+                    ✕ Missed
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/90 px-2 py-0.5 rounded-full shrink-0 shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Due Today
+                  </span>
+                )}
+              </div>
+
+              {/* Timing & Tags */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <TimingPills m={m} />
+                {!m.reminders_enabled && (
+                  <span className="inline-flex items-center text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full">
+                    🔕 Paused
+                  </span>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              {m.adherence_id && (
+                <div className="pt-2 border-t border-ui-border-decorative/60 flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {m.adherence_status !== "taken" ? (
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center gap-1 py-1 px-2 text-[11px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors"
+                        onClick={() => onSimulateReply(m.adherence_id, "taken")}
+                        title="Simulate patient tapping 'Yes, All Taken' on WhatsApp"
+                      >
+                        <Check size={12} />
+                        <span>Taken</span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center justify-center gap-1 py-1 px-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50/60 rounded-md">
+                        ✓ Recorded
+                      </span>
+                    )}
+
+                    {m.adherence_status !== "missed" ? (
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center gap-1 py-1 px-2 text-[11px] font-semibold text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md transition-colors"
+                        onClick={() => onSimulateReply(m.adherence_id, "missed")}
+                        title="Simulate patient tapping 'Missed / Forgot' on WhatsApp"
+                      >
+                        <X size={12} />
+                        <span>Missed</span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center justify-center gap-1 py-1 px-2 text-[11px] font-semibold text-rose-700 bg-rose-50/60 rounded-md">
+                        ✕ Missed
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 text-[10px] pt-0.5">
+                    <button
+                      type="button"
+                      className="text-ui-text-secondary hover:text-ui-text hover:underline transition-colors font-medium"
+                      onClick={() => onToggleReminders(m.id)}
+                      title={m.reminders_enabled ? "Pause reminders for this medicine" : "Resume reminders"}
+                    >
+                      {m.reminders_enabled ? "🔕 Pause" : "🔔 Resume"}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-teal-800 hover:text-teal-900 hover:underline transition-colors font-medium"
+                      onClick={() => onStopMedicine(m.id, m.brand)}
+                      title="Patient completed course or feeling fit"
+                    >
+                      ✋ I&apos;m Fit / Stop
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
+
+const Slot = SlotCard;
 
 function timeTo24h(t) {
   if (!t) return "08:00";
@@ -411,37 +541,39 @@ export function Summary() {
   const p = data.patient;
 
   return (
-    <div ref={scope} className="grid">
-      <div className="grid cols-4">
+    <div ref={scope} className="flex flex-col gap-6">
+      {/* 1. At-A-Glance Health Telemetry */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat
-          icon={<PillIcon size={20} />}
-          label="Active medicines"
+          icon={<PillIcon size={20} className="text-amber-600" />}
+          label="Active Medicines"
           value={t.active_medicines}
         />
         <Stat
-          icon={<Clock size={20} />}
-          label="Doses per day"
+          icon={<Clock size={20} className="text-ui-blue" />}
+          label="Daily Scheduled Doses"
           value={t.doses_per_day}
         />
         <Stat
-          icon={<MessageSquare size={20} />}
-          label="WhatsApp nudges"
+          icon={<MessageSquare size={20} className="text-emerald-600" />}
+          label="WhatsApp Alerts Sent"
           value={t.whatsapp_reminders_sent}
         />
         <Stat
-          icon={<CheckCircle2 size={20} />}
-          label="Adherence Rate Today"
-          value={t.doses_per_day === 0 || t.adherence_rate_today_pct == null ? "No scheduled doses" : `${t.adherence_rate_today_pct}%`}
+          icon={<CheckCircle2 size={20} className="text-emerald-700" />}
+          label="Today's Dose Adherence"
+          value={t.doses_per_day === 0 || t.adherence_rate_today_pct == null ? "No doses" : `${t.adherence_rate_today_pct}%`}
         />
       </div>
 
-      {/* Smart Auto-Reminder Control Panel */}
+      {/* 2. Automated Medication Reminders & Call Scheduler */}
       <Card
         title="Automated Medication Reminders & Call Scheduler"
         sub="Control automatic WhatsApp nudges and Sahayak voice reminders so you only receive alerts when needed"
         actions={
           <button
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative text-xs font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-60"
+            type="button"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative text-xs font-semibold rounded-lg shadow-xs transition-colors disabled:opacity-60"
             disabled={testingScheduler}
             onClick={handleTriggerScheduler}
           >
@@ -450,28 +582,25 @@ export function Summary() {
           </button>
         }
       >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {/* WhatsApp Switch */}
-          <div
-            className="p-3.5 rounded-xl border border-ui-border-decorative bg-ui-surface shadow-sm flex items-center justify-between gap-3"
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
-                className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0"
-              >
-                <MessageSquare size={18} />
+          <div className="p-3.5 rounded-xl border border-ui-border-decorative bg-ui-surface shadow-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                <MessageSquare size={19} />
               </div>
-              <div>
-                <div className="font-semibold text-sm text-ui-text">
+              <div className="min-w-0">
+                <div className="font-serif font-bold text-sm text-ui-text truncate">
                   Daily Medicines (WhatsApp Only)
                 </div>
-                <div className="text-xs text-ui-text-secondary">
+                <div className="text-xs text-ui-text-secondary truncate mt-0.5">
                   Interactive Yes/No dose alerts delivered exclusively via WhatsApp
                 </div>
               </div>
             </div>
             <button
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-sm min-w-[88px] text-center shrink-0 ${
+              type="button"
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-xs min-w-[88px] text-center shrink-0 ${
                 p.whatsapp_reminders_enabled
                   ? "bg-emerald-700 hover:bg-emerald-800 text-white"
                   : "bg-ui-surface hover:bg-ui-surface-subtle text-ui-text-secondary border border-ui-border-decorative"
@@ -483,26 +612,23 @@ export function Summary() {
           </div>
 
           {/* Voice Call Switch */}
-          <div
-            className="p-3.5 rounded-xl border border-ui-border-decorative bg-ui-surface shadow-sm flex items-center justify-between gap-3"
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
-                className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0"
-              >
-                <PhoneCall size={18} />
+          <div className="p-3.5 rounded-xl border border-ui-border-decorative bg-ui-surface shadow-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                <PhoneCall size={19} />
               </div>
-              <div>
-                <div className="font-semibold text-sm text-ui-text">
-                  Doctor Meets & Tests (Voice Call Only)
+              <div className="min-w-0">
+                <div className="font-serif font-bold text-sm text-ui-text truncate">
+                  Doctor Meets &amp; Tests (Voice Call Only)
                 </div>
-                <div className="text-xs text-ui-text-secondary">
+                <div className="text-xs text-ui-text-secondary truncate mt-0.5">
                   Sahayak automated call 2 days before appointment (No WhatsApp)
                 </div>
               </div>
             </div>
             <button
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-sm min-w-[88px] text-center shrink-0 ${
+              type="button"
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors shadow-xs min-w-[88px] text-center shrink-0 ${
                 p.call_reminders_enabled
                   ? "bg-emerald-700 hover:bg-emerald-800 text-white"
                   : "bg-ui-surface hover:bg-ui-surface-subtle text-ui-text-secondary border border-ui-border-decorative"
@@ -514,25 +640,25 @@ export function Summary() {
           </div>
         </div>
 
-        <div
-          className="mt-3.5 p-3.5 rounded-xl bg-ui-surface-subtle/70 border border-ui-border-decorative flex items-center justify-between flex-wrap gap-2.5 text-xs sm:text-sm"
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <Clock size={16} className="text-ui-blue" />
+        <div className="mt-3.5 p-3.5 rounded-xl bg-ui-surface-subtle/70 border border-ui-border-decorative flex items-center justify-between flex-wrap gap-2.5 text-xs sm:text-sm">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Clock size={16} className="text-ui-blue shrink-0" />
             <span className="font-semibold text-ui-text">Precision Schedule (IST):</span>
             <span className="text-ui-text-secondary">
               🌅 Morning (<strong>{p.reminder_time_morning || "08:00 AM"}</strong>) · ☀️ Afternoon (<strong>{p.reminder_time_afternoon || "01:00 PM"}</strong>) · 🌙 Night (<strong>{p.reminder_time_night || "08:00 PM"}</strong>)
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="flex items-center gap-2">
             <button
-              className="px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-sm"
+              type="button"
+              className="px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-xs"
               onClick={() => setEditingTimes((v) => !v)}
             >
               {editingTimes ? "Close Settings" : "⚙️ Change Slot Times"}
             </button>
             <button
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm ${
+              type="button"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-xs ${
                 p.auto_reminders_enabled
                   ? "text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200"
                   : "text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
@@ -545,32 +671,29 @@ export function Summary() {
         </div>
 
         {editingTimes && (
-          <div
-            className="mt-3 p-4 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-sm flex flex-col gap-3"
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+          <div className="mt-3 p-4 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-xs flex flex-col gap-3">
+            <div className="flex justify-between items-center flex-wrap gap-2">
               <div>
-                <div className="font-semibold text-sm text-ui-text">
+                <div className="font-serif font-bold text-sm text-ui-text">
                   Configure Exact WhatsApp Dose Schedule
                 </div>
-                <div className="text-xs text-ui-text-secondary">
+                <div className="text-xs text-ui-text-secondary mt-0.5">
                   Set the exact minute in Indian Standard Time (IST) when your interactive WhatsApp medication card will be dispatched.
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-sm disabled:opacity-60"
-                  disabled={savingTimes}
-                  onClick={handleSaveTimes}
-                >
-                  <CheckCircle2 size={14} />
-                  <span>{savingTimes ? "Saving…" : "Save Exact Schedule"}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs disabled:opacity-60"
+                disabled={savingTimes}
+                onClick={handleSaveTimes}
+              >
+                <CheckCircle2 size={14} />
+                <span>{savingTimes ? "Saving…" : "Save Exact Schedule"}</span>
+              </button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-              <div className="p-2.5 rounded-lg bg-ui-canvas border border-ui-border-decorative">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-ui-canvas border border-ui-border-decorative">
                 <label htmlFor="slot-time-morning" className="text-xs font-semibold text-ui-text block mb-1.5">
                   🌅 Morning Dose Time
                 </label>
@@ -583,7 +706,7 @@ export function Summary() {
                 />
               </div>
 
-              <div className="p-2.5 rounded-lg bg-ui-canvas border border-ui-border-decorative">
+              <div className="p-3 rounded-lg bg-ui-canvas border border-ui-border-decorative">
                 <label htmlFor="slot-time-afternoon" className="text-xs font-semibold text-ui-text block mb-1.5">
                   ☀️ Afternoon Dose Time
                 </label>
@@ -596,7 +719,7 @@ export function Summary() {
                 />
               </div>
 
-              <div className="p-2.5 rounded-lg bg-ui-canvas border border-ui-border-decorative">
+              <div className="p-3 rounded-lg bg-ui-canvas border border-ui-border-decorative">
                 <label htmlFor="slot-time-night" className="text-xs font-semibold text-ui-text block mb-1.5">
                   🌙 Night Dose Time
                 </label>
@@ -610,53 +733,129 @@ export function Summary() {
               </div>
             </div>
 
-            <div
-              className="text-xs text-ui-text-secondary bg-ui-surface-subtle border border-ui-border-decorative/80 p-3 rounded-lg leading-relaxed"
-            >
+            <div className="text-xs text-ui-text-secondary bg-ui-surface-subtle border border-ui-border-decorative/80 p-3 rounded-lg leading-relaxed">
               💡 <strong>Instant Test Tip:</strong> Set one of the times above to <strong>1–2 minutes ahead</strong> of your current clock and click <em>Save Exact Schedule</em>! The APScheduler ticks every 30 seconds and will immediately deliver the interactive WhatsApp message to your registered phone.
             </div>
           </div>
         )}
       </Card>
 
+      {/* 3. Daily Dose Schedule & WhatsApp Adherence (The Core Medication Timeline) */}
       <Card
         title="Daily Dose Schedule & WhatsApp Adherence"
-        sub="Interactive WhatsApp reminders with instant 'Yes, Taken' / 'Missed' status tracking"
+        sub="Interactive medication timeline with real-time dose confirmation and WhatsApp telemetry"
+        actions={
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-ui-surface-subtle text-ui-text text-xs font-semibold rounded-full border border-ui-border-decorative">
+            <span className="w-2 h-2 rounded-full bg-ui-success" />
+            <span>Today&apos;s Active Regimen</span>
+          </span>
+        }
       >
-        <div className="schedule">
-          {SLOTS.map(({ key, label, Icon, color }) => (
-            <Slot
-              key={key}
-              label={label}
-              Icon={Icon}
-              color={color}
-              meds={s[key]}
-              onSendReminder={handleSendReminder}
-              onSimulateReply={handleSimulateReply}
-              onStopMedicine={handleStopMedicine}
-              onToggleReminders={handleToggleReminders}
-              sendingId={sendingId}
-            />
-          ))}
+        {/* Responsive 4-Column Routine Timeline */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {ROUTINE_SLOTS.map((slot) => {
+            const timeVal = slot.prefKey && p[slot.prefKey] ? p[slot.prefKey] : slot.defaultTime;
+            return (
+              <SlotCard
+                key={slot.key}
+                slot={slot}
+                meds={s[slot.key]}
+                scheduledTime={timeVal}
+                onSendReminder={handleSendReminder}
+                onSimulateReply={handleSimulateReply}
+                onStopMedicine={handleStopMedicine}
+                onToggleReminders={handleToggleReminders}
+                sendingId={sendingId}
+              />
+            );
+          })}
         </div>
+
+        {/* Dedicated As-Needed (SOS / PRN) Medications Shelf */}
+        {s.sos && s.sos.length > 0 && (
+          <div className="mt-5 p-4 rounded-2xl border border-amber-200/90 bg-gradient-to-r from-amber-50/70 via-amber-50/30 to-ui-surface shadow-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                  <AlertCircle size={17} />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-sm text-ui-text">
+                    As-Needed (SOS) &amp; Symptomatic Relief Prescriptions
+                  </h4>
+                  <p className="text-[11px] text-ui-text-secondary mt-0.5">
+                    Take only when acute symptoms arise (e.g. pain, fever, acidity). These do not trigger automated daily clock alarms.
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold text-amber-900 bg-amber-100/80 border border-amber-300 px-3 py-0.5 rounded-full">
+                {s.sos.length} {s.sos.length === 1 ? "Medicine" : "Medicines"} (PRN)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {s.sos.map((m, i) => (
+                <div
+                  key={m.id || i}
+                  className="p-3.5 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-xs flex flex-col justify-between gap-2.5"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-serif font-bold text-sm text-ui-text">
+                        {m.brand}
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                        SOS · PRN
+                      </span>
+                    </div>
+                    <div className="text-xs text-ui-text-secondary mt-0.5">
+                      {m.salt || "—"}{m.strength ? ` · ${m.strength}` : ""}
+                    </div>
+                  </div>
+
+                  {m.adherence_id && (
+                    <div className="pt-2 border-t border-ui-border-decorative/60 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 py-1 px-2.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors"
+                        onClick={() => onSimulateReply(m.adherence_id, "taken")}
+                        title="Record taking this SOS dose today"
+                      >
+                        <Check size={12} />
+                        <span>Taken Today</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="text-[11px] text-teal-800 hover:text-teal-900 hover:underline transition-colors font-medium"
+                        onClick={() => onStopMedicine(m.id, m.brand)}
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
-      {/* Completed & Stopped Prescriptions section */}
+      {/* 4. Completed & Stopped Prescriptions section */}
       {data.stopped_medicines && data.stopped_medicines.length > 0 && (
         <Card
           title="Completed & Stopped Prescriptions"
           sub="Medicines you finished or stopped taking because you felt healthy (Reminders inactive)"
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="flex flex-col gap-2.5">
             {data.stopped_medicines.map((sm) => (
               <div
                 key={sm.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-sm gap-3"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-xs gap-3 hover:border-brand-orange/30 transition-colors"
               >
                 <div>
-                  <div className="font-semibold text-ui-text text-sm">
+                  <div className="font-serif font-bold text-ui-text text-sm">
                     {sm.brand}{" "}
-                    <span className="font-normal text-ui-text-secondary">
+                    <span className="font-normal font-sans text-ui-text-secondary text-xs">
                       ({sm.strength || sm.salt})
                     </span>
                   </div>
@@ -665,7 +864,8 @@ export function Summary() {
                   </div>
                 </div>
                 <button
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-sm shrink-0"
+                  type="button"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-xs shrink-0"
                   onClick={() => handleResumeMedicine(sm.id)}
                 >
                   <RotateCcw size={12} className="text-ui-blue" />
@@ -677,20 +877,30 @@ export function Summary() {
         </Card>
       )}
 
-      <div className="grid cols-2">
-        <Card title="Conditions & Indications" sub="Informational, not a formal diagnosis">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* 5. Conditions Dossier & Next Doctor Review */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Conditions & Indications */}
+        <Card
+          title="Clinical Indications & Drug Dossier"
+          sub="Informational summary of active salts and therapeutic indications (Non-diagnostic)"
+        >
+          <div className="flex flex-col gap-2.5">
             {data.conditions.map((c, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between p-3 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-sm gap-3"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-ui-surface border border-ui-border-decorative shadow-xs gap-3 hover:border-brand-orange/30 transition-colors"
               >
-                <div>
-                  <div className="font-semibold text-ui-text text-sm">{c.medicine}</div>
-                  <div className="text-xs text-ui-text-secondary">{c.salt}</div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-ui-surface-subtle border border-ui-border-decorative flex items-center justify-center shrink-0 text-ui-blue">
+                    <PillIcon size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-serif font-bold text-ui-text text-sm truncate">{c.medicine}</div>
+                    <div className="text-xs text-ui-text-secondary truncate mt-0.5">{c.salt}</div>
+                  </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="inline-block text-xs font-semibold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1 rounded-full shadow-sm">
+                  <span className="inline-block text-xs font-semibold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1 rounded-full shadow-xs">
                     {c.used_for || "General Care"}
                   </span>
                 </div>
@@ -700,37 +910,44 @@ export function Summary() {
           <Disclaimer>{data.conditions_disclaimer}</Disclaimer>
         </Card>
 
+        {/* Next Doctor Review & Checkup */}
         <Card
           title="Next Doctor Review & Checkup"
           sub="Reminders for checkups are delivered through Sahayak Voice Call 2 days before, never WhatsApp"
         >
           {data.next_followup ? (
-            <div
-              className="flex flex-col gap-3 p-5 rounded-xl bg-gradient-to-br from-ui-surface to-ui-surface-subtle/50 border border-ui-border-decorative shadow-sm"
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "gap 8", gap: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Calendar size={22} className="text-amber-600" />
-                  <span className="text-2xl font-serif font-bold text-ui-text">
-                    {data.next_followup.date}
-                  </span>
+            <div className="flex flex-col gap-3.5 p-5 rounded-xl bg-gradient-to-br from-ui-surface via-ui-surface to-ui-surface-subtle/50 border border-ui-border-decorative shadow-sm relative overflow-hidden">
+              <div className="flex justify-between items-start flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-300 text-amber-700 flex items-center justify-center shrink-0">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-ui-text-secondary block">
+                      Appointment Date
+                    </span>
+                    <span className="text-2xl font-serif font-bold text-ui-text">
+                      {data.next_followup.date}
+                    </span>
+                  </div>
                 </div>
                 {data.next_followup.follow_up_status === "reschedule_requested" ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shadow-sm">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shadow-xs">
                     🔄 Reschedule Requested
                   </span>
                 ) : data.next_followup.follow_up_status === "confirmed" ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shadow-sm">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shadow-xs">
                     ✓ Confirmed by Patient
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-ui-blue bg-ui-surface border border-ui-border-decorative px-3 py-1 rounded-full shadow-sm">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1 rounded-full shadow-xs">
                     📞 Voice Call (2 Days Prior)
                   </span>
                 )}
               </div>
-              <div className="text-sm text-ui-text-secondary font-medium">
-                Consultation & Review with <strong className="text-ui-text">{data.next_followup.doctor}</strong>
+
+              <div className="text-sm text-ui-text-secondary font-medium pt-1">
+                Consultation &amp; Review with <strong className="text-ui-text font-serif text-base">{data.next_followup.doctor}</strong>
                 {data.next_followup.follow_up_status === "reschedule_requested" && (
                   <div className="text-amber-700 text-xs mt-1 font-semibold">
                     Preferred Time: {data.next_followup.reschedule_preferred_date}
@@ -738,17 +955,17 @@ export function Summary() {
                   </div>
                 )}
               </div>
-              <div
-                className="p-3 rounded-lg bg-ui-surface border border-ui-border-decorative flex items-center justify-between flex-wrap gap-2.5"
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <PhoneCall size={16} className="text-amber-600" />
+
+              <div className="p-3 rounded-lg bg-ui-surface border border-ui-border-decorative flex items-center justify-between flex-wrap gap-2.5">
+                <div className="flex items-center gap-2">
+                  <PhoneCall size={15} className="text-amber-600 shrink-0" />
                   <span className="text-xs font-semibold text-ui-text">
                     {data.next_followup.call_reminder_status || "Call scheduled 2 days before"}
                   </span>
                 </div>
                 <button
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                  type="button"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ui-canvas hover:bg-ui-surface-subtle text-ui-text border border-ui-border-decorative rounded-lg text-xs font-semibold transition-colors shadow-xs"
                   onClick={() => handleTriggerDoctorCall(data.next_followup.report_id)}
                   title="Simulate or place the 2-day prior doctor follow-up phone call"
                 >
@@ -773,49 +990,52 @@ function MedCard({ m, onStop, onToggle }) {
       title={m.brand}
       sub={medLine(m)}
       actions={
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {m.needs_salt_confirmation && (
-            <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full shadow-xs">
               Confirm Salt
             </span>
           )}
           {m.reminders_enabled !== false ? (
-            <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full shadow-xs">
               🔔 Reminders ON
             </span>
           ) : (
-            <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full shadow-xs">
               🔕 Paused
             </span>
           )}
         </div>
       }
     >
-      <div style={{ marginBottom: 12 }}>
+      <div className="mb-3">
         <TimingPills m={m} />
       </div>
-      <div className="small muted">Prescribed by {m.prescriber_name || "Doctor"}</div>
+      <div className="text-xs text-ui-text-secondary">
+        Prescribed by <strong className="text-ui-text font-serif">{m.prescriber_name || "Treating Physician"}</strong>
+      </div>
       {best && (
-        <div
-          className="mt-3 p-2.5 rounded-lg bg-ui-surface-subtle/70 border border-ui-border-decorative flex items-center justify-between"
-        >
-          <span className="text-xs text-ui-text-secondary">Best price on {best.platform}</span>
-          <span className="font-serif font-bold text-ui-blue text-sm">
+        <div className="mt-3 p-3 rounded-xl bg-ui-surface-subtle/80 border border-ui-border-decorative flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-ui-text-secondary">Verified Jan Aushadhi / Best Price:</span>
+            <span className="text-xs font-semibold text-ui-text">{best.platform}</span>
+          </div>
+          <span className="font-serif font-bold text-ui-blue text-base">
             ₹{Number(best.price).toFixed(2)}
           </span>
         </div>
       )}
-      <div
-        className="mt-3.5 pt-3 border-t border-ui-border-decorative flex items-center justify-between flex-wrap gap-2"
-      >
+      <div className="mt-4 pt-3 border-t border-ui-border-decorative flex items-center justify-between flex-wrap gap-2">
         <button
-          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 text-ui-text-secondary hover:text-ui-text bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-lg transition-colors"
+          type="button"
+          className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 text-ui-text-secondary hover:text-ui-text bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-lg transition-colors shadow-xs"
           onClick={() => onToggle(m.id)}
         >
           {m.reminders_enabled !== false ? "🔕 Pause Reminders" : "🔔 Resume Reminders"}
         </button>
         <button
-          className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors"
+          type="button"
+          className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors shadow-xs"
           onClick={() => onStop(m.id, m.brand)}
           title="Patient feeling healthy / completed course. Stops all upcoming reminders."
         >
@@ -863,7 +1083,7 @@ export function Medicines() {
   if (!data.length)
     return <Empty icon="💊">No active medicines found. Upload a prescription to get started.</Empty>;
   return (
-    <div ref={scope} className="grid cols-2">
+    <div ref={scope} className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((m) => (
         <MedCard key={m.id} m={m} onStop={handleStop} onToggle={handleToggle} />
       ))}
