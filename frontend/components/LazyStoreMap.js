@@ -108,7 +108,7 @@ export default function LazyStoreMap({
       const isNeighbourhood = Boolean(store.is_neighbourhood);
 
       let iconBg = "#059669"; // emerald for 24x7 pharmacy
-      let markerBorder = isSelected ? "#1a2234" : "#ffffff";
+      let markerBorder = isSelected ? "#2457a7" : "#ffffff";
       let markerEmoji = "💊";
 
       if (isHospital) {
@@ -126,7 +126,7 @@ export default function LazyStoreMap({
 
       const storeIcon = L.divIcon({
         className: "facility-marker",
-        html: `<div style="background-color: ${iconBg}; width: ${iconSize}px; height: ${iconSize}px; border-radius: 50%; border: 3px solid ${markerBorder}; box-shadow: 2px 2px 0px #1a2234; display: flex; align-items: center; justify-content: center; font-size: ${isSelected ? "13px" : "10px"};">${markerEmoji}</div>`,
+        html: `<div style="background-color: ${iconBg}; width: ${iconSize}px; height: ${iconSize}px; border-radius: 50%; border: 3px solid ${markerBorder}; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; font-size: ${isSelected ? "13px" : "10px"};">${markerEmoji}</div>`,
         iconSize: [iconSize, iconSize],
         iconAnchor: [iconSize / 2, iconSize / 2],
       });
@@ -239,9 +239,9 @@ export default function LazyStoreMap({
   }, [stores, selectedStore, userCoords, activeRoute, focusedCenter, onSelectStore]);
 
   return (
-    <div className="w-full h-80 sm:h-[400px] md:h-[440px] border-2 border-brand-navy sketchy-box shadow-sketch overflow-hidden relative">
+    <div className="w-full h-80 sm:h-[400px] md:h-[440px] bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card overflow-hidden relative">
       <div ref={mapContainerRef} className="w-full h-full z-10" />
-      <div className="absolute bottom-2 left-2 z-20 bg-brand-white/95 border border-brand-navy/30 px-3 py-1.5 rounded text-[10px] font-sans font-bold text-brand-navy shadow-sm flex flex-wrap items-center gap-2">
+      <div className="absolute bottom-3 left-3 z-20 bg-ui-surface/95 backdrop-blur-xs border border-ui-border-decorative px-3.5 py-1.5 rounded-lg text-[10px] font-sans font-semibold text-ui-text shadow-sm flex flex-wrap items-center gap-2">
         <span>🏘️ Neighborhood Chemist</span>
         <span>•</span>
         <span>🟡 Govt Jan Aushadhi</span>

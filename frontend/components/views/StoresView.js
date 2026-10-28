@@ -17,27 +17,30 @@ import {
   AlertCircle,
   ExternalLink,
   ShieldCheck,
+  Hospital,
+  Building2,
+  HeartPulse,
 } from "lucide-react";
 
 const LUCKNOW_LOCALITY_COORDS = {
-  "hazratganj": { lat: 26.8495, lng: 80.9445 },
-  "indira nagar": { lat: 26.8780, lng: 80.9850 },
-  "gomti nagar": { lat: 26.8510, lng: 80.9960 },
-  "aliganj": { lat: 26.8850, lng: 80.9450 },
-  "alambagh": { lat: 26.8150, lng: 80.9020 },
-  "chowk": { lat: 26.8680, lng: 80.9120 },
-  "aminabad": { lat: 26.8450, lng: 80.9290 },
-  "rajajipuram": { lat: 26.8380, lng: 80.8870 },
-  "jankipuram": { lat: 26.9120, lng: 80.9440 },
-  "ashiyana": { lat: 26.8010, lng: 80.9180 },
-  "telibagh": { lat: 26.7850, lng: 80.9420 },
-  "mahanagar": { lat: 26.8750, lng: 80.9540 },
-  "vikas nagar": { lat: 26.8940, lng: 80.9610 },
-  "thakurganj": { lat: 26.8680, lng: 80.8920 },
-  "charbagh": { lat: 26.8330, lng: 80.9230 },
+  hazratganj: { lat: 26.8495, lng: 80.9445 },
+  "indira nagar": { lat: 26.878, lng: 80.985 },
+  "gomti nagar": { lat: 26.851, lng: 80.996 },
+  aliganj: { lat: 26.885, lng: 80.945 },
+  alambagh: { lat: 26.815, lng: 80.902 },
+  chowk: { lat: 26.868, lng: 80.912 },
+  aminabad: { lat: 26.845, lng: 80.929 },
+  rajajipuram: { lat: 26.838, lng: 80.887 },
+  jankipuram: { lat: 26.912, lng: 80.944 },
+  ashiyana: { lat: 26.801, lng: 80.918 },
+  telibagh: { lat: 26.785, lng: 80.942 },
+  mahanagar: { lat: 26.875, lng: 80.954 },
+  "vikas nagar": { lat: 26.894, lng: 80.961 },
+  thakurganj: { lat: 26.868, lng: 80.892 },
+  charbagh: { lat: 26.833, lng: 80.923 },
 };
 
-export default function StoresView({ hideNavbar = false, onNavigateTab }) {
+export default function StoresView({ hideNavbar = false, onNavigateTab, initialKind = "all" }) {
   const { t } = useLanguage();
 
   const [cities, setCities] = useState([]);
@@ -48,7 +51,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
   const [stores, setStores] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
   const [selectedStore, setSelectedStore] = useState(null);
-  const [filterKind, setFilterKind] = useState("all");
+  const [filterKind, setFilterKind] = useState(initialKind);
   const [filterOwnership, setFilterOwnership] = useState("all");
   const [selectedLocality, setSelectedLocality] = useState("all");
   const [availableLocalities, setAvailableLocalities] = useState([]);
@@ -60,7 +63,13 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
   const [gpsError, setGpsError] = useState(null);
   const [routeError, setRouteError] = useState(null);
 
-  // 1. Fetch cities (GPS is requested only on explicit user consent via handleUseLocation)
+  useEffect(() => {
+    if (initialKind) {
+      setFilterKind(initialKind);
+    }
+  }, [initialKind]);
+
+  // 1. Fetch cities
   useEffect(() => {
     let active = true;
     (async () => {
@@ -68,7 +77,6 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         const res = await apiClient.getCities();
         if (active && res.length > 0) {
           setCities(res);
-          // If no city selected yet, pick lucknow or first
           setSelectedCityId((prev) => {
             const hasLucknow = res.some((c) => c.city_id === "lucknow");
             return hasLucknow ? "lucknow" : res[0].city_id;
@@ -83,7 +91,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
     };
   }, []);
 
-  // 3. When GPS coords arrive, auto-switch selected city to the closest city
+  // 2. When GPS coords arrive, auto-switch selected city to closest
   useEffect(() => {
     if (!userCoords || cities.length === 0) return;
     let closestCity = cities[0];
@@ -100,9 +108,9 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
     if (closestCity && closestCity.city_id !== selectedCityId) {
       setSelectedCityId(closestCity.city_id);
     }
-  }, [userCoords, cities]);
+  }, [userCoords, cities, selectedCityId]);
 
-  // 3b. Fetch distinct localities for city
+  // 3. Fetch distinct localities for city
   useEffect(() => {
     let active = true;
     (async () => {
@@ -208,6 +216,13 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
     }
   };
 
+  // KPI counts
+  const totalCount = stores.length;
+  const hospitalCount = stores.filter((s) => s.kind === "hospital").length;
+  const kendraCount = stores.filter((s) => s.kind === "kendra" || s.name?.toLowerCase().includes("jan aushadhi")).length;
+  const chemistCount = stores.filter((s) => s.is_neighbourhood).length;
+  const pharmacyCount = stores.filter((s) => s.kind === "pharmacy" || s.opening_hours?.includes("24")).length;
+
   const filteredStores = stores.filter((s) => {
     if (filterKind === "kendra" && s.kind !== "kendra") return false;
     if (filterKind === "hospital" && s.kind !== "hospital") return false;
@@ -237,36 +252,156 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
   const content = (
     <ContainerTag
       {...(hideNavbar ? { "aria-labelledby": "stores-heading" } : {})}
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-7"
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-semibold uppercase tracking-wider text-ui-text">
-          <Compass className="w-3.5 h-3.5 text-brand-orange" />
+          <Compass className="w-3.5 h-3.5 text-ui-blue" />
           <span>Verified Healthcare & Medicine Network</span>
         </div>
         <HeadingTag
           {...(hideNavbar ? { id: "stores-heading" } : {})}
-          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+          className="font-serif font-black text-3xl sm:text-4xl lg:text-5xl text-ui-text tracking-tight leading-tight"
         >
-          Nearby Medical Stores & Hospitals
+          {filterKind === "hospital" ? "Nearby Hospitals & Trauma Centers" : "Nearby Hospitals & Medical Stores"}
         </HeadingTag>
-        <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
-          Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & 24x7 Commercial Pharmacies
+        <p className="font-sans text-sm sm:text-base text-ui-text-muted leading-relaxed">
+          {filterKind === "hospital"
+            ? "Verified Government Hospitals, Trauma Emergency Centers, and Super-Specialty Medical Institutes with 24x7 Casualty Services."
+            : "Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & 24x7 Commercial Pharmacies."}
         </p>
       </div>
+
+      {/* Quick Facility Metric Counters */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <button
+          type="button"
+          onClick={() => setFilterKind("hospital")}
+          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+            filterKind === "hospital"
+              ? "bg-rose-50/80 border-rose-300 ring-2 ring-rose-200 shadow-xs"
+              : "bg-ui-surface border-ui-border-decorative hover:border-ui-blue/40 shadow-xs"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
+              🏥 Hospitals
+            </span>
+            <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">
+              {hospitalCount}
+            </span>
+          </div>
+          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Govt & Super-Specialty</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterKind("kendra")}
+          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+            filterKind === "kendra"
+              ? "bg-amber-50/80 border-amber-300 ring-2 ring-amber-200 shadow-xs"
+              : "bg-ui-surface border-ui-border-decorative hover:border-ui-blue/40 shadow-xs"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+              🟡 Jan Aushadhi
+            </span>
+            <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+              {kendraCount}
+            </span>
+          </div>
+          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Govt PMBJP Generic</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterKind("neighbourhood")}
+          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+            filterKind === "neighbourhood"
+              ? "bg-blue-50/80 border-blue-300 ring-2 ring-blue-200 shadow-xs"
+              : "bg-ui-surface border-ui-border-decorative hover:border-ui-blue/40 shadow-xs"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
+              🏘️ Chemists
+            </span>
+            <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+              {chemistCount}
+            </span>
+          </div>
+          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Local Neighborhood</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterKind("all")}
+          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+            filterKind === "all"
+              ? "bg-ui-surface-subtle border-ui-blue ring-2 ring-ui-blue/20 shadow-xs"
+              : "bg-ui-surface border-ui-border-decorative hover:border-ui-blue/40 shadow-xs"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ui-navy flex items-center gap-1.5">
+              🌐 All Network
+            </span>
+            <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-ui-surface-subtle text-ui-text border border-ui-border-decorative">
+              {totalCount}
+            </span>
+          </div>
+          <p className="text-xs text-ui-text-muted mt-1.5 truncate">All verified centers</p>
+        </button>
+      </div>
+
+      {/* Hospital Emergency Assistance Banner (Visible when Hospital filter is active) */}
+      {filterKind === "hospital" && (
+        <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center shrink-0 text-rose-800">
+              <Hospital className="w-5 h-5 text-rose-700" />
+            </div>
+            <div>
+              <h4 className="font-serif font-bold text-base text-ui-text">
+                Verified Hospitals & Emergency Trauma Directory
+              </h4>
+              <p className="font-sans text-xs text-ui-text-muted mt-0.5 leading-relaxed">
+                Govt Medical Colleges, Trauma Centers, and Super-Specialty Hospitals with 24x7 emergency casualty units.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto">
+            <a
+              href="tel:108"
+              className="flex-1 sm:flex-initial px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center justify-center gap-1.5"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Ambulance: 108</span>
+            </a>
+            <a
+              href="tel:112"
+              className="flex-1 sm:flex-initial px-3.5 py-2 bg-ui-navy hover:bg-ui-navy/90 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors inline-flex items-center justify-center gap-1.5"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Emergency: 112</span>
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* City & Neighborhood Filter Bar */}
       <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-black uppercase tracking-wider text-brand-navy whitespace-nowrap">
+            <label className="text-xs font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
               {t.selectCity}:
             </label>
             <select
               value={selectedCityId}
               onChange={(e) => setSelectedCityId(e.target.value)}
-              className="bg-brand-cream border-2 border-brand-navy px-3 py-2 text-xs font-bold text-brand-navy focus:outline-none w-full sm:w-44"
+              className="bg-ui-surface border border-ui-border-decorative rounded-lg px-3 py-2 text-xs font-semibold text-ui-text focus:outline-none focus:ring-2 focus:ring-ui-blue/30 focus:border-ui-blue transition-all w-full sm:w-44"
             >
               {cities.map((c) => (
                 <option key={c.city_id} value={c.city_id}>
@@ -278,8 +413,8 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
 
           {availableLocalities.length > 0 && (
             <div className="flex items-center gap-2">
-              <label className="text-xs font-black uppercase tracking-wider text-brand-navy whitespace-nowrap">
-                Neighborhood:
+              <label className="text-xs font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
+                Area:
               </label>
               <select
                 value={selectedLocality}
@@ -289,9 +424,9 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                   const coord = LUCKNOW_LOCALITY_COORDS[loc.toLowerCase()];
                   if (coord) setFocusedCenter(coord);
                 }}
-                className="bg-brand-cream border-2 border-brand-navy px-3 py-2 text-xs font-bold text-brand-navy focus:outline-none w-full sm:w-48"
+                className="bg-ui-surface border border-ui-border-decorative rounded-lg px-3 py-2 text-xs font-semibold text-ui-text focus:outline-none focus:ring-2 focus:ring-ui-blue/30 focus:border-ui-blue transition-all w-full sm:w-48"
               >
-                <option value="all">📍 All Neighborhoods ({stores.length})</option>
+                <option value="all">📍 All Areas ({stores.length})</option>
                 {availableLocalities.map((loc) => (
                   <option key={loc} value={loc}>
                     📍 {loc}
@@ -305,10 +440,10 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         <button
           onClick={handleUseLocation}
           disabled={isLocating}
-          className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative text-ui-text text-xs font-semibold rounded-lg shadow-xs transition-colors"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative text-ui-text text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
         >
-          <Navigation className={`w-4 h-4 text-brand-orange ${isLocating ? "animate-spin" : ""}`} />
-          <span>{isLocating ? "Detecting GPS Location…" : (userCoords ? "📍 Location Active (Refresh)" : t.useLocation)}</span>
+          <Navigation className={`w-4 h-4 text-ui-blue ${isLocating ? "animate-spin" : ""}`} />
+          <span>{isLocating ? "Detecting GPS Location…" : userCoords ? "📍 Location Active (Refresh)" : t.useLocation}</span>
         </button>
       </div>
 
@@ -316,12 +451,12 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       {gpsError && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl shadow-xs p-4 text-xs text-amber-900 flex items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <AlertCircle className="w-4 h-4 text-brand-orange flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
             <span className="font-medium">{gpsError}</span>
           </div>
           <button
             onClick={() => setGpsError(null)}
-            className="text-[11px] font-bold text-brand-navy uppercase tracking-wider hover:underline flex-shrink-0"
+            className="text-[11px] font-bold text-ui-navy uppercase tracking-wider hover:underline flex-shrink-0 cursor-pointer"
           >
             Dismiss
           </button>
@@ -331,7 +466,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       {/* Quick Locality Chips */}
       {availableLocalities.length > 0 && (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-gray/80 whitespace-nowrap">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
             Areas:
           </span>
           <button
@@ -339,10 +474,10 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
               setSelectedLocality("all");
               setFocusedCenter(null);
             }}
-            className={`px-2.5 py-1 text-[11px] font-bold rounded whitespace-nowrap border transition-all ${
+            className={`px-2.5 py-1 text-[11px] font-bold rounded-md whitespace-nowrap border transition-all cursor-pointer ${
               selectedLocality === "all"
-                ? "bg-brand-navy text-brand-cream border-brand-navy shadow-sm"
-                : "bg-brand-white text-brand-navy border-brand-navy/30 hover:border-brand-navy"
+                ? "bg-ui-navy text-white border-ui-navy shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
             }`}
           >
             All ({stores.length})
@@ -357,10 +492,10 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                   const coord = LUCKNOW_LOCALITY_COORDS[loc.toLowerCase()];
                   if (coord) setFocusedCenter(coord);
                 }}
-                className={`px-2.5 py-1 text-[11px] font-bold rounded whitespace-nowrap border transition-all ${
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-md whitespace-nowrap border transition-all cursor-pointer ${
                   selectedLocality.toLowerCase() === loc.toLowerCase()
-                    ? "bg-blue-700 text-white border-blue-900 shadow-sm"
-                    : "bg-brand-white text-brand-navy border-brand-navy/30 hover:border-brand-navy"
+                    ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                    : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
                 }`}
               >
                 {loc} {count > 0 ? `(${count})` : ""}
@@ -370,92 +505,92 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         </div>
       )}
 
-      {/* Filter Pills - Facility Category & Ownership */}
-      <div className="space-y-2">
+      {/* Filter Category & Ownership Controls */}
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setFilterKind("all")}
-            className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider border rounded-lg transition-all cursor-pointer ${
               filterKind === "all"
-                ? "bg-ui-blue text-white shadow-xs rounded-lg"
-                : "bg-brand-white text-brand-navy"
+                ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
             }`}
           >
             All Facilities ({stores.length})
           </button>
           <button
-            onClick={() => setFilterKind("neighbourhood")}
-            className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
-              filterKind === "neighbourhood"
-                ? "bg-ui-blue text-white shadow-xs rounded-lg"
-                : "bg-brand-white text-brand-navy"
-            }`}
-          >
-            🏘️ Neighborhood Chemists
-          </button>
-          <button
-            onClick={() => setFilterKind("kendra")}
-            className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
-              filterKind === "kendra"
-                ? "bg-ui-blue text-white shadow-xs rounded-lg"
-                : "bg-brand-white text-brand-navy"
-            }`}
-          >
-            🟡 Jan Aushadhi (Govt)
-          </button>
-          <button
             onClick={() => setFilterKind("hospital")}
-            className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider border rounded-lg transition-all cursor-pointer ${
               filterKind === "hospital"
-                ? "bg-ui-blue text-white shadow-xs rounded-lg"
-                : "bg-brand-white text-brand-navy"
+                ? "bg-rose-700 text-white border-rose-800 shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
             }`}
           >
             🏥 Hospitals (Govt & Pvt)
           </button>
           <button
+            onClick={() => setFilterKind("kendra")}
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider border rounded-lg transition-all cursor-pointer ${
+              filterKind === "kendra"
+                ? "bg-amber-700 text-white border-amber-800 shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
+            }`}
+          >
+            🟡 Jan Aushadhi (Govt)
+          </button>
+          <button
+            onClick={() => setFilterKind("neighbourhood")}
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider border rounded-lg transition-all cursor-pointer ${
+              filterKind === "neighbourhood"
+                ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
+            }`}
+          >
+            🏘️ Neighborhood Chemists
+          </button>
+          <button
             onClick={() => setFilterKind("pharmacy")}
-            className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-brand-navy transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider border rounded-lg transition-all cursor-pointer ${
               filterKind === "pharmacy"
-                ? "bg-ui-blue text-white shadow-xs rounded-lg"
-                : "bg-brand-white text-brand-navy"
+                ? "bg-emerald-700 text-white border-emerald-800 shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
             }`}
           >
             💊 24x7 Commercial Pharmacies
           </button>
         </div>
 
-        {/* Ownership Toggle Pills */}
+        {/* Ownership Toggle */}
         <div className="flex items-center gap-2 text-xs">
-          <span className="font-bold text-[10px] uppercase tracking-wider text-brand-gray/80">
+          <span className="font-bold text-[10px] uppercase tracking-wider text-ui-text-muted">
             Ownership:
           </span>
           <button
             onClick={() => setFilterOwnership("all")}
-            className={`px-2.5 py-1 rounded text-[11px] font-bold border ${
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer ${
               filterOwnership === "all"
-                ? "bg-brand-navy text-brand-cream border-brand-navy"
-                : "bg-brand-white text-brand-navy border-brand-navy/30"
+                ? "bg-ui-navy text-white border-ui-navy shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40"
             }`}
           >
             All
           </button>
           <button
             onClick={() => setFilterOwnership("government")}
-            className={`px-2.5 py-1 rounded text-[11px] font-bold border ${
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer ${
               filterOwnership === "government"
-                ? "bg-amber-800 text-white border-amber-900"
-                : "bg-brand-white text-brand-navy border-brand-navy/30"
+                ? "bg-amber-700 text-white border-amber-800 shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40"
             }`}
           >
             🏛️ Government Only
           </button>
           <button
             onClick={() => setFilterOwnership("private")}
-            className={`px-2.5 py-1 rounded text-[11px] font-bold border ${
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer ${
               filterOwnership === "private"
-                ? "bg-blue-800 text-white border-blue-900"
-                : "bg-brand-white text-brand-navy border-brand-navy/30"
+                ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40"
             }`}
           >
             🏢 Private Only
@@ -464,12 +599,12 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       </div>
 
       {/* Interactive Map Section */}
-      <div className="space-y-2">
-        <div>
-          <h3 className="font-serif font-black text-xl text-brand-navy">
+      <div className="space-y-2.5">
+        <div className="flex items-baseline justify-between">
+          <h3 className="font-serif font-bold text-xl text-ui-text">
             Live Healthcare Facility Map
           </h3>
-          <span className="text-xs font-sans text-brand-gray">
+          <span className="text-xs font-sans text-ui-text-muted">
             OpenStreetMap Data & OSRM Driving Engine
           </span>
         </div>
@@ -494,9 +629,9 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
       {showRouteSteps && (
         <div className="space-y-4">
           {loadingRoute && (
-            <div className="p-6 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card shadow-sketch">
-              <div className="w-6 h-6 border-2 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="font-serif font-bold text-xs uppercase tracking-wider text-brand-navy">
+            <div className="p-6 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
+              <div className="w-6 h-6 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="font-serif font-bold text-xs uppercase tracking-wider text-ui-text">
                 Calculating real-time OSRM driving route…
               </p>
             </div>
@@ -504,19 +639,19 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
 
           {routeError && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl shadow-xs p-5 space-y-3 text-amber-900">
-              <div className="flex items-center gap-2 text-brand-navy">
-                <AlertCircle className="w-5 h-5 text-brand-orange flex-shrink-0" />
-                <h4 className="font-serif font-black text-base">Route Navigation Notice</h4>
+              <div className="flex items-center gap-2 text-ui-text">
+                <AlertCircle className="w-5 h-5 text-amber-700 flex-shrink-0" />
+                <h4 className="font-serif font-bold text-base">Route Navigation Notice</h4>
               </div>
-              <p className="text-xs font-sans text-brand-gray leading-relaxed">{routeError}</p>
+              <p className="text-xs font-sans text-ui-text-muted leading-relaxed">{routeError}</p>
               {selectedStore && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.latitude},${selectedStore.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-bold text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-ui-navy hover:bg-ui-navy/90 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
+                  <ExternalLink className="w-3.5 h-3.5 text-white/90" />
                   <span>Navigate to {selectedStore.name} on Google Maps</span>
                 </a>
               )}
@@ -525,28 +660,28 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
 
           {activeRoute && (
             <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-5 space-y-4 animate-in fade-in duration-150">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-brand-navy/10 pb-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-ui-border-decorative pb-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-sans font-black uppercase tracking-widest bg-brand-orange text-brand-navy px-2 py-0.5 rounded border border-brand-navy">
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-widest bg-ui-blue/10 text-ui-blue px-2 py-0.5 rounded border border-ui-blue/20">
                       Live OSRM Route
                     </span>
                     {activeRoute.provenance?.cached && (
-                      <span className="text-[10px] font-mono text-brand-gray bg-brand-gray/10 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono text-ui-text-muted bg-ui-surface-subtle px-1.5 py-0.5 rounded border border-ui-border-decorative">
                         Cached
                       </span>
                     )}
                   </div>
-                  <h4 className="font-serif font-black text-lg text-brand-navy mt-1">
+                  <h4 className="font-serif font-bold text-lg text-ui-text mt-1">
                     Route to {selectedStore?.name}
                   </h4>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <span className="font-serif font-black text-xl text-brand-navy">
+                    <span className="font-serif font-bold text-xl text-ui-text">
                       {activeRoute.distance_km} km
                     </span>
-                    <span className="text-xs font-sans text-brand-gray block">
+                    <span className="text-xs font-sans text-ui-text-muted block">
                       ≈ {activeRoute.duration_minutes} mins drive
                     </span>
                   </div>
@@ -555,16 +690,16 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.latitude},${selectedStore.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-brand-cream hover:bg-brand-peach/40 border-2 border-brand-navy font-serif font-bold text-xs uppercase tracking-wider sketchy-btn shadow-sketch flex items-center gap-1 text-brand-navy"
+                      className="px-3 py-1.5 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative font-semibold text-xs rounded-lg shadow-xs flex items-center gap-1.5 text-ui-text transition-colors"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
+                      <ExternalLink className="w-3.5 h-3.5 text-ui-blue" />
                       <span>Google Maps</span>
                     </a>
                   )}
                 </div>
               </div>
 
-              <ol className="list-decimal list-inside space-y-2 text-xs font-sans font-medium text-brand-navy">
+              <ol className="list-decimal list-inside space-y-2 text-xs font-sans font-medium text-ui-text">
                 {activeRoute.steps?.map((step, idx) => (
                   <li key={idx} className="leading-relaxed">
                     {step}
@@ -576,19 +711,21 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
         </div>
       )}
 
-      {/* Verified Facilities Cards Grid - Rendered Below the Map */}
-      <div id="verified-facilities" className="space-y-4 pt-4 border-t-2 border-brand-navy/15 scroll-mt-24">
+      {/* Verified Facilities Cards Grid */}
+      <div id="verified-facilities" className="space-y-4 pt-4 border-t border-ui-border-decorative scroll-mt-24">
         <div className="flex items-baseline justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2.5">
-            <h3 className="font-serif font-black text-xl sm:text-2xl text-brand-navy">
-              Verified Facilities in {cities.find((c) => c.city_id === selectedCityId)?.name || "Lucknow"}
+            <h3 className="font-serif font-bold text-xl sm:text-2xl text-ui-text">
+              {filterKind === "hospital"
+                ? `Hospitals in ${cities.find((c) => c.city_id === selectedCityId)?.name || "Lucknow"}`
+                : `Verified Facilities in ${cities.find((c) => c.city_id === selectedCityId)?.name || "Lucknow"}`}
             </h3>
-            <span className="text-xs font-mono font-bold bg-brand-navy text-brand-cream px-2 py-0.5 rounded">
+            <span className="text-xs font-mono font-bold bg-ui-navy text-white px-2 py-0.5 rounded-md">
               {filteredStores.length} Places
             </span>
           </div>
           {userCoords && (
-            <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+            <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
               Sorted by nearest to your GPS
             </span>
           )}
@@ -596,16 +733,16 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
 
         {loadingStores ? (
           <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
-            <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            <p className="font-serif font-bold text-brand-navy">Locating verified medical facilities…</p>
+            <div className="w-8 h-8 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <p className="font-serif font-bold text-ui-text">Locating verified medical facilities…</p>
           </div>
         ) : filteredStores.length === 0 ? (
-          <div className="p-6 text-center bg-brand-white border-2 border-brand-navy sketchy-box">
-            <p className="font-sans text-sm text-brand-gray">No medical facilities found matching this filter.</p>
+          <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
+            <p className="font-sans text-sm text-ui-text-muted">No medical facilities found matching this filter.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredStores.map((store, idx) => {
+            {filteredStores.map((store) => {
               const isSelected = selectedStore?.store_id === store.store_id;
               const isKendra = store.kind === "kendra" || store.name?.toLowerCase().includes("jan aushadhi");
               const isHospital = store.kind === "hospital";
@@ -618,15 +755,15 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
               let badgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-300";
               if (isKendra) {
                 badgeText = "Govt Jan Aushadhi";
-                badgeStyle = "bg-amber-100 text-amber-900 border-amber-400";
+                badgeStyle = "bg-amber-100 text-amber-900 border-amber-300";
               } else if (isHospital) {
                 badgeText = store.ownership === "government" ? "Govt Hospital & Trauma" : "Private Super-Specialty";
                 badgeStyle = store.ownership === "government"
-                  ? "bg-rose-100 text-rose-900 border-rose-400"
-                  : "bg-purple-100 text-purple-900 border-purple-400";
+                  ? "bg-rose-50 text-rose-800 border-rose-300"
+                  : "bg-blue-50 text-blue-800 border-blue-300";
               } else if (isNeighbourhood) {
                 badgeText = "Neighborhood Chemist";
-                badgeStyle = "bg-blue-100 text-blue-900 border-blue-300";
+                badgeStyle = "bg-blue-50 text-blue-800 border-blue-300";
               }
 
               return (
@@ -643,57 +780,57 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                   <div>
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className={`text-[9px] font-sans font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}`}>
+                        <span className={`text-[9px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}`}>
                           {badgeText}
                         </span>
                         {store.locality && (
-                          <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                          <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-ui-surface-subtle text-ui-text border border-ui-border-decorative">
                             📍 {store.locality}
                           </span>
                         )}
                         {isWalkingDistance && (
-                          <span className="text-[9px] font-sans font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-600 text-white animate-pulse">
+                          <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-700 text-white animate-pulse">
                             🚶 Walking (~{Math.round(store.distance_km * 1000)}m)
                           </span>
                         )}
                         {is24x7 && (
-                          <span className="text-[9px] font-sans font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-red-600 text-white">
-                            24x7 Open
+                          <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-600 text-white">
+                            {isHospital ? "🚨 24x7 Emergency" : "24x7 Open"}
                           </span>
                         )}
                       </div>
                       {store.distance_km != null && (
-                        <span className="text-xs font-mono font-bold text-brand-navy whitespace-nowrap bg-brand-cream px-2 py-0.5 rounded border border-brand-navy/20">
+                        <span className="text-xs font-mono font-bold text-ui-text whitespace-nowrap bg-ui-surface-subtle px-2 py-0.5 rounded-md border border-ui-border-decorative">
                           {store.distance_km} km away
                         </span>
                       )}
                     </div>
 
-                    <h4 className="font-serif font-black text-lg text-brand-navy mt-2.5">
+                    <h4 className="font-serif font-bold text-lg text-ui-text mt-2.5">
                       {store.name}
                     </h4>
-                    <p className="font-sans text-xs text-brand-gray mt-1 leading-relaxed">
+                    <p className="font-sans text-xs text-ui-text-muted mt-1 leading-relaxed">
                       {store.address}
                     </p>
 
                     {store.provenance?.source && (
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-brand-gray/80 mt-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-ui-text-muted mt-2">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                         <span className="truncate">{store.provenance.source}</span>
                       </div>
                     )}
 
-                    <div className="mt-3 pt-3 border-t border-brand-navy/10 text-xs space-y-1">
+                    <div className="mt-3 pt-3 border-t border-ui-border-decorative text-xs space-y-1.5">
                       {store.opening_hours && (
-                        <div className="flex items-center gap-1.5 text-brand-navy/80">
-                          <Clock className="w-3.5 h-3.5 text-brand-orange" />
+                        <div className="flex items-center gap-1.5 text-ui-text">
+                          <Clock className="w-3.5 h-3.5 text-ui-blue" />
                           <span>{store.opening_hours}</span>
                         </div>
                       )}
                       {store.phone && (
-                        <div className="flex items-center gap-1.5 text-brand-navy font-bold">
-                          <Phone className="w-3.5 h-3.5 text-brand-orange" />
-                          <a href={`tel:${store.phone}`} className="hover:underline text-brand-navy font-mono">
+                        <div className="flex items-center gap-1.5 text-ui-text font-bold">
+                          <Phone className="w-3.5 h-3.5 text-ui-blue" />
+                          <a href={`tel:${store.phone}`} className="hover:underline text-ui-blue font-mono">
                             {store.phone}
                           </a>
                         </div>
@@ -701,17 +838,27 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-brand-navy/10">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-ui-border-decorative">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleGetRoute(store);
                       }}
-                      className="flex-1 py-2 px-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2 px-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Navigation className="w-3.5 h-3.5 text-brand-orange" />
+                      <Navigation className="w-3.5 h-3.5 text-white/90" />
                       <span>Route Steps</span>
                     </button>
+                    {isHospital && store.phone && (
+                      <a
+                        href={`tel:${store.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="py-2 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 text-rose-800"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-rose-700" />
+                        <span>Call Desk</span>
+                      </a>
+                    )}
                     <a
                       href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
                       target="_blank"
@@ -719,7 +866,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                       onClick={(e) => e.stopPropagation()}
                       className="py-2 px-3 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 text-ui-text"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-brand-orange" />
+                      <ExternalLink className="w-3.5 h-3.5 text-ui-blue" />
                       <span>Google Maps</span>
                     </a>
                   </div>
@@ -739,7 +886,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
   }
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col">
+    <div className="min-h-screen bg-ui-canvas text-ui-text flex flex-col">
       <Navbar activeTab="stores" />
       <div className="flex-1">{content}</div>
     </div>

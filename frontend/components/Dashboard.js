@@ -40,7 +40,7 @@ const ScanView = dynamic(() => import("@/components/views/ScanView"), {
 });
 
 const StoresView = dynamic(() => import("@/components/views/StoresView"), {
-  loading: () => <ModuleLoadingFallback title="Loading Kendra Locator & Map…" sub="Locating nearest Jan Aushadhi Kendras…" />,
+  loading: () => <ModuleLoadingFallback title="Loading Hospitals & Kendra Locator…" sub="Locating nearest hospitals and Jan Aushadhi Kendras…" />,
   ssr: false,
 });
 
@@ -124,11 +124,11 @@ const SECTIONS = [
   },
   {
     key: "stores",
-    label: "Find Kendra",
+    label: "Hospitals & Kendra",
     Icon: MapPin,
     Comp: ({ goto, patient }) => <StoresView hideNavbar={true} onNavigateTab={goto} patient={patient} />,
-    title: "Jan Aushadhi Kendra Locator",
-    sub: "Locate genuine PMBJP Kendras with verified addresses, opening hours, and driving routes.",
+    title: "Nearby Hospitals & Kendra Locator",
+    sub: "Locate verified Government Hospitals, Trauma Emergency Centers, and Jan Aushadhi Kendras.",
     isTool: true,
   },
   {
