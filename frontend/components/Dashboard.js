@@ -4,12 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import dynamic from "next/dynamic";
 
+function ModuleLoadingFallback({ title = "Loading information…", sub = "Please wait while records and data are prepared…" }) {
+  return (
+    <div className="rounded-xl border border-ui-border-decorative bg-ui-surface p-8 text-center max-w-lg mx-auto shadow-ui-card my-6" role="status" aria-live="polite">
+      <div className="w-8 h-8 border-3 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" aria-hidden="true" />
+      <p className="font-serif font-semibold text-ui-text text-base">{title}</p>
+      <p className="text-xs text-ui-text-secondary mt-1">{sub}</p>
+    </div>
+  );
+}
+
 // Keep the workspace shell interactive while the selected clinical module loads.
 // All named imports below share the same deferred sections chunk.
 const sectionFallback = () => (
-  <div className="rounded-xl border border-ui-border-decorative bg-ui-surface p-6 text-sm text-ui-text-secondary" role="status">
-    Loading health information…
-  </div>
+  <ModuleLoadingFallback title="Loading health overview…" sub="Retrieving conditions, schedule and prescriptions…" />
 );
 const Summary = dynamic(() => import("@/components/sections").then((module) => module.Summary), { loading: sectionFallback });
 const Medicines = dynamic(() => import("@/components/sections").then((module) => module.Medicines), { loading: sectionFallback });
@@ -17,54 +25,30 @@ const Interactions = dynamic(() => import("@/components/sections").then((module)
 
 // Code-split heavy tool tabs to guarantee sub-second initial dashboard entry
 const Assistant = dynamic(() => import("@/components/Assistant"), {
-  loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Connecting to Sahayak Voice Assistant…</p>
-    </div>
-  ),
+  loading: () => <ModuleLoadingFallback title="Connecting to Sahayak Voice Assistant…" sub="Establishing secure real-time consultation channel…" />,
   ssr: false,
 });
 
 const SearchView = dynamic(() => import("@/components/views/SearchView"), {
-  loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Loading Price Discovery…</p>
-    </div>
-  ),
+  loading: () => <ModuleLoadingFallback title="Loading Price Discovery…" sub="Accessing verified PMBJP Kendra and NPPA database…" />,
   ssr: false,
 });
 
 const ScanView = dynamic(() => import("@/components/views/ScanView"), {
-  loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Loading Prescription Scanner…</p>
-    </div>
-  ),
+  loading: () => <ModuleLoadingFallback title="Loading Prescription Scanner…" sub="Preparing high-accuracy clinical OCR engine…" />,
   ssr: false,
 });
 
 const StoresView = dynamic(() => import("@/components/views/StoresView"), {
-  loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Loading Kendra Locator & Map…</p>
-    </div>
-  ),
+  loading: () => <ModuleLoadingFallback title="Loading Kendra Locator & Map…" sub="Locating nearest Jan Aushadhi Kendras…" />,
   ssr: false,
 });
 
 const HistoryView = dynamic(() => import("@/components/views/HistoryView"), {
-  loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Loading Saved Records…</p>
-    </div>
-  ),
+  loading: () => <ModuleLoadingFallback title="Loading Saved Records…" sub="Accessing your device-local prescription history…" />,
   ssr: false,
 });
+
 import {
   Activity,
   UploadCloud,
