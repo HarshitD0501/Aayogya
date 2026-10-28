@@ -194,10 +194,10 @@ export default function Dashboard({
     };
   }, [mobileDrawerOpen]);
 
-  // GSAP smooth section entrance
+  // GSAP smooth section entrance (gated for reduced motion)
   useEffect(() => {
     const el = mainRef.current;
-    if (!el) return;
+    if (!el || (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
