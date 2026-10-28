@@ -14,6 +14,7 @@ import {
   Disclaimer,
   Offers,
   PriceVisual,
+  UIError,
 } from "@/components/ui";
 import {
   Sunrise,
@@ -71,15 +72,14 @@ function useData(path, deps = []) {
       })
       .catch((e) => {
         if (alive) {
-          const isAbort =
-            e?.name === "AbortError" ||
-            e?.name === "TimeoutError" ||
-            e?.message?.toLowerCase().includes("abort") ||
-            controller.signal.aborted;
-          if (isAbort) return;
+          const isUserAbort =
+            e?.name === "AbortError" &&
+            !e?.message?.toLowerCase().includes("timeout") &&
+            controller.signal.reason?.name !== "TimeoutError";
+          if (isUserAbort) return;
           setState({
             loading: false,
-            error: e.message || "Failed to load.",
+            error: e.message || "Failed to load data. Please try again.",
             data: null,
           });
         }
@@ -1046,10 +1046,36 @@ function MedCard({ m, onStop, onToggle }) {
   );
 }
 
-export function Medicines() {
+export function Medicines({ pollVersion }) {
   const [version, setVersion] = useState(0);
-  const { loading, error, data } = useData("/medicines", [version]);
+  const [priceMap, setPriceMap] = useState({});
+  const { loading, error, data } = useData("/medicines?include_prices=false", [version, pollVersion]);
   const scope = useReveal([loading, data]);
+
+  // Progressive background enrichment for live pharmacy comparison without blocking active prescription render
+  useEffect(() => {
+    if (!data?.length) return;
+    let alive = true;
+    fetchWithResourceCache(
+      "/medicines?include_prices=true",
+      () => api("/medicines?include_prices=true"),
+      { maxAgeMs: 60000 }
+    )
+      .then((medsWithPrices) => {
+        if (!alive || !Array.isArray(medsWithPrices)) return;
+        const map = {};
+        for (const m of medsWithPrices) {
+          if (m?.prices?.matched) {
+            map[m.id] = m.prices;
+          }
+        }
+        setPriceMap(map);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [data]);
 
   const handleStop = async (id, brand) => {
     if (
@@ -1079,13 +1105,26 @@ export function Medicines() {
   };
 
   if (loading) return <Loader label="Retrieving active prescription list…" />;
-  if (error) return <Note tone="err">{error}</Note>;
-  if (!data.length)
+  if (error) {
+    return (
+      <UIError
+        title="Could not retrieve prescription list"
+        message={error}
+        onRetry={() => setVersion((v) => v + 1)}
+      />
+    );
+  }
+  if (!data?.length)
     return <Empty icon="💊">No active medicines found. Upload a prescription to get started.</Empty>;
   return (
     <div ref={scope} className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((m) => (
-        <MedCard key={m.id} m={m} onStop={handleStop} onToggle={handleToggle} />
+        <MedCard
+          key={m.id}
+          m={{ ...m, prices: priceMap[m.id] || m.prices }}
+          onStop={handleStop}
+          onToggle={handleToggle}
+        />
       ))}
     </div>
   );
@@ -1164,8 +1203,8 @@ export function Interactions() {
   if (loading) return <Loader label="Scanning medicine interactions…" />;
   if (error) return <Note tone="err">{error}</Note>;
   return (
-    <div ref={scope} className="grid">
-      <div className="grid cols-3">
+    <div ref={scope} className="flex flex-col gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Stat
           icon={<Search size={20} />}
           label="Drug pairs checked"
@@ -1208,7 +1247,7 @@ export function Prices() {
   if (error) return <Note tone="err">{error}</Note>;
   if (!data.length) return <Empty icon="🏷️">Upload a prescription to compare medicine prices.</Empty>;
   return (
-    <div ref={scope} className="grid cols-2">
+    <div ref={scope} className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((m) => (
         <Card key={m.id} title={m.brand} sub={medLine(m)}>
           <Offers prices={m.prices} />
@@ -1247,7 +1286,7 @@ export function Reports() {
   const paginatedReports = reportsList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div ref={scope} className="grid">
+    <div ref={scope} className="flex flex-col gap-4">
       {paginatedReports.map((r) => (
         <Card
           key={r.id}
@@ -1400,7 +1439,7 @@ export function Upload({ goto }) {
   };
 
   return (
-    <div ref={scope} className="grid cols-2">
+    <div ref={scope} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <Card
         title="Upload Medical Prescription"
         sub="Supported formats: JPG, PNG · Ensure doctor's handwritten notes are legible"
