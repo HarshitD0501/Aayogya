@@ -635,8 +635,9 @@ export default function StoresView({ hideNavbar = false, onNavigateTab }) {
                   id={`store-card-${store.store_id}`}
                   onClick={() => setSelectedStore(store)}
                   className={`p-5 bg-ui-surface border rounded-xl shadow-ui-card transition-all cursor-pointer flex flex-col justify-between gap-4 ${
-                  selectedStore?.store_id === s.store_id ? "border-ui-blue ring-2 ring-ui-blue/30" : "border-ui-border-decorative hover:border-ui-blue/50"
-                    isSelected ? "shadow-sketch ring-2 ring-brand-orange" : "shadow-sketch-hover"
+                    isSelected
+                      ? "border-ui-blue ring-2 ring-ui-blue/30 shadow-md -translate-y-0.5"
+                      : "border-ui-border-decorative hover:border-ui-blue/50 hover:shadow-md hover:-translate-y-0.5"
                   }`}
                 >
                   <div>
