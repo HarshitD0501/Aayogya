@@ -50,6 +50,38 @@ console.log("Running resource cache and deduplication verification tests...");
   console.log("PASS: Test 2 - Concurrent in-flight requests deduplicated to a single execution.");
 }
 
+// Test 2b: One subscriber aborting must not cancel another subscriber's shared request
+{
+  clearResourceCache();
+  let fetchCallCount = 0;
+  let resolveFetch;
+  const mockFetch = () => {
+    fetchCallCount++;
+    return new Promise((resolve) => {
+      resolveFetch = resolve;
+    });
+  };
+
+  const firstController = new AbortController();
+  const first = fetchWithResourceCache("/summary", mockFetch, {
+    actorToken: "tok-abort",
+    patientId: "pid-abort",
+    signal: firstController.signal,
+  });
+  const second = fetchWithResourceCache("/summary", mockFetch, {
+    actorToken: "tok-abort",
+    patientId: "pid-abort",
+  });
+
+  firstController.abort(new DOMException("Effect cleanup", "AbortError"));
+  await assert.rejects(first, { name: "AbortError" });
+  resolveFetch({ status: "ok" });
+
+  assert.deepStrictEqual(await second, { status: "ok" });
+  assert.strictEqual(fetchCallCount, 1, "Aborting one consumer must not restart or cancel the shared fetch");
+  console.log("PASS: Test 2b - Consumer cancellation does not abort a shared in-flight request.");
+}
+
 // Test 3: Cache hit within freshness TTL
 {
   let fetchCallCount = 0;

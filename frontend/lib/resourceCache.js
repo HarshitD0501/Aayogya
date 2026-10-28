@@ -85,25 +85,53 @@ export async function fetchWithResourceCache(path, fetchFn, options = {}) {
     }
   }
 
-  // Deduplicate in-flight promises
-  if (inFlightPromises.has(key)) {
-    return inFlightPromises.get(key);
+  // The network request is shared across consumers, so a component's
+  // AbortSignal must not own/cancel that shared request. Otherwise an effect
+  // cleanup (for example React Strict Mode's setup -> cleanup -> setup check)
+  // can abort the promise that the next mounted consumer is waiting on.
+  let sharedPromise = inFlightPromises.get(key);
+  if (!sharedPromise) {
+    sharedPromise = (async () => {
+      try {
+        const data = await fetchFn();
+        if (!skipCache && data !== null && data !== undefined) {
+          setCachedResource(key, data);
+        }
+        return data;
+      } finally {
+        // Do not delete a newer request started after cache clearing.
+        if (inFlightPromises.get(key) === sharedPromise) {
+          inFlightPromises.delete(key);
+        }
+      }
+    })();
+    inFlightPromises.set(key, sharedPromise);
   }
 
-  const promise = (async () => {
-    try {
-      const data = await fetchFn(signal);
-      if (!skipCache && data !== null && data !== undefined) {
-        setCachedResource(key, data);
+  // Cancellation is local to this consumer; other consumers continue to
+  // receive the shared result. The underlying request has its own API timeout.
+  if (!signal) return sharedPromise;
+  if (signal.aborted) {
+    throw signal.reason || new DOMException("The operation was aborted", "AbortError");
+  }
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      cleanup();
+      reject(signal.reason || new DOMException("The operation was aborted", "AbortError"));
+    };
+    const cleanup = () => signal.removeEventListener("abort", onAbort);
+    signal.addEventListener("abort", onAbort, { once: true });
+    sharedPromise.then(
+      (data) => {
+        cleanup();
+        resolve(data);
+      },
+      (error) => {
+        cleanup();
+        reject(error);
       }
-      return data;
-    } finally {
-      inFlightPromises.delete(key);
-    }
-  })();
-
-  inFlightPromises.set(key, promise);
-  return promise;
+    );
+  });
 }
 
 // Auto-register cache flush on logout and patient-switch events

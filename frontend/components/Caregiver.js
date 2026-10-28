@@ -202,7 +202,7 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
     try {
       const result = await updatePatientContact(patientCard.id, phone);
       setPhone(result.phone);
-      setSaveMsg("Contact number saved. Calls and WhatsApp now use this number.");
+      setSaveMsg(result.message || "Contact number saved. Calls and WhatsApp now use this number.");
       onContactSaved(patientCard.id, result.phone);
     } catch (e) {
       setSaveMsg(e.message);
@@ -297,26 +297,53 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
       </div>
 
       <div className="cg-contact">
-        <label htmlFor="cg-phone">Patient contact number</label>
-        <p className="cg-contact-help">This also updates the patient’s registered phone number.</p>
+        <label htmlFor="cg-phone" className="font-semibold text-xs text-ui-text">Patient contact number</label>
+        <p className="cg-contact-help text-xs text-ui-text-secondary">Official phone used for reminders, calls, and WhatsApp notifications.</p>
         <div className="cg-contact-row">
           <input
             id="cg-phone"
-            className="cg-phone-input"
+            className="cg-phone-input focus:outline-none focus:ring-2 focus:ring-ui-blue"
             type="tel"
             autoComplete="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+91 98765 43210"
           />
-          <button type="button" className="cg-save-button" onClick={saveContact} disabled={busy === "save" || !phone.trim()}>
+          <button
+            type="button"
+            className="cg-save-button"
+            onClick={saveContact}
+            disabled={busy === "save" || !phone.trim() || phone.trim() === (patientCard?.phone || "").trim()}
+            title={phone.trim() === (patientCard?.phone || "").trim() ? "Number already saved" : "Save updated phone number"}
+          >
             {busy === "save" ? <Loader2 size={13} className="spin" /> : <CheckCircle2 size={13} />}
             <span>Save</span>
           </button>
         </div>
-        {!patientCard.phone && <p className="cg-msg">Save a contact number to enable phone and WhatsApp reminders.</p>}
-        {saveMsg && <div className="cg-msg" role="status">{saveMsg}</div>}
-        {callMsg && <div className="cg-msg" role="status">{callMsg}</div>}
+        {phone.trim() !== (patientCard?.phone || "").trim() && phone.trim() !== "" && (
+          <p className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-lg mt-2 flex items-center gap-1.5" role="note">
+            <AlertCircle size={14} className="shrink-0 text-amber-700" />
+            <span>Note: Saving will update {patientCard.name?.split(" ")[0]}&apos;s registered phone number across Ayogya.</span>
+          </p>
+        )}
+        {!patientCard.phone && !saveMsg && (
+          <p className="cg-msg text-xs text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-lg flex items-center gap-1.5 mt-2">
+            <AlertCircle size={14} className="shrink-0 text-amber-700" />
+            <span>Save a contact number to enable phone and WhatsApp reminders.</span>
+          </p>
+        )}
+        {saveMsg && (
+          <div className="cg-msg text-xs text-emerald-900 bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg flex items-center gap-1.5 mt-2" role="status">
+            <CheckCircle2 size={14} className="shrink-0 text-emerald-700" />
+            <span>{saveMsg}</span>
+          </div>
+        )}
+        {callMsg && (
+          <div className="cg-msg text-xs text-ui-blue bg-blue-50 border border-blue-200 p-2.5 rounded-lg flex items-center gap-1.5 mt-2" role="status">
+            <BotIcon size={14} className="shrink-0" />
+            <span>{callMsg}</span>
+          </div>
+        )}
       </div>
     </div>
   );
