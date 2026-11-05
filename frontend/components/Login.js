@@ -11,9 +11,9 @@ import { ArrowRight, ArrowLeft, Lock, Mail, ShieldCheck, Sparkles } from "lucide
 
 const DEMOS = [
   { name: "Ramesh Kulkarni (Caregiver)", email: "ramesh.caregiver@demo.in", role: "caregiver", plan: "Caregiver", desc: "Caregiver dashboard for Ram Sharma" },
-  { name: "Ram Sharma (Patient)", email: "ram@demo.in", role: "patient", plan: "Free", desc: "Patient dashboard with a sample prescription" },
+  { name: "Ram Sharma (Patient)", email: "ram@demo.in", role: "patient", plan: "Free", desc: "Patient dashboard with active prescription" },
   { name: "Meera Kulkarni (Caregiver)", email: "meera@demo.in", plan: "Caregiver", desc: "Family dashboard — manage 4 members, call & WhatsApp them" },
-  { name: "Ramesh Kulkarni", email: "ramesh@demo.in", plan: "Free", desc: "Sample prescription with diabetes & BP meds" },
+  { name: "Ramesh Kulkarni", email: "ramesh@demo.in", plan: "Free", desc: "Prescription with diabetes & BP meds" },
   { name: "Shanti Devi", email: "shanti@demo.in", plan: "Pro", desc: "Multi-doctor safety demo with detected drug interactions" },
   { name: "Aarav Sharma", email: "aarav@demo.in", plan: "Free", desc: "Active medication schedule demo" },
 ];

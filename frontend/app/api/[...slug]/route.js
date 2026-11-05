@@ -33,14 +33,16 @@ async function handleRequest(request, params, method) {
   }
 
   // Forward to real FastAPI backend
+  let controller;
+  let timeout;
   try {
     const isHeavyEndpoint =
       path.includes("/upload") ||
       path.includes("/chat") ||
       path.includes("/trigger");
     const timeoutMs = isHeavyEndpoint ? 90000 : 45000;
-    const controller = new AbortController();
-    const timeout = setTimeout(
+    controller = new AbortController();
+    timeout = setTimeout(
       () => controller.abort(new DOMException(`Upstream request timed out after ${timeoutMs}ms`, "TimeoutError")),
       timeoutMs
     );
@@ -109,5 +111,7 @@ async function handleRequest(request, params, method) {
       },
       { status: isTimeout ? 504 : 503 }
     );
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
 }

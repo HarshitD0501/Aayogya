@@ -485,7 +485,12 @@ def list_medicines(
         )
         .all()
     )
-    return [_med_out(m, include_prices=include_prices) for m in rows]
+    if not include_prices or not rows:
+        return [_med_out(m, include_prices=False) for m in rows]
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=min(8, len(rows))) as pool:
+        return list(pool.map(lambda m: _med_out(m, include_prices=True), rows))
 
 
 @app.get("/api/interactions")

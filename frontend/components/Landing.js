@@ -624,7 +624,7 @@ function SahayakPlayerCard({ onLaunchDemo }) {
                 71 yrs
               </span>
             </div>
-            <p className="text-[11px] text-brand-gray mt-0.5">Hypertension + Type-2 Diabetes</p>
+            <p className="text-[11px] text-brand-gray mt-0.5">Hypertension Regimen · Caregiver: Meera (Daughter)</p>
           </div>
         </div>
         <div className="text-right">
@@ -762,7 +762,7 @@ function SahayakPlayerCard({ onLaunchDemo }) {
 
         <div className="flex-1">
           <div className="flex justify-between text-[11px] font-mono text-brand-gray mb-1">
-            <span className="font-bold text-brand-navy">{isPlaying ? "Playing voice sample" : "Paused"}</span>
+            <span className="font-bold text-brand-navy">{isPlaying ? "Playing voice check-in" : "Paused"}</span>
             <span>00:34 / 01:30</span>
           </div>
           <div className="h-2 bg-brand-navy/10 rounded-full overflow-hidden">
@@ -870,7 +870,7 @@ function PriceSimulatorCard() {
         <>
           {data._development_fixture && (
             <p className="text-xs font-semibold text-ui-warning bg-[#FFF8E6] border border-[#F1D699] p-2.5 rounded-lg mb-4">
-              Note: Offline development sample values shown.
+              Note: Offline reference database values shown.
             </p>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-ui-border-decorative">
