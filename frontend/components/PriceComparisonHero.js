@@ -27,7 +27,7 @@ export default function PriceComparisonHero({
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="text-[10px] font-sans font-black uppercase tracking-widest bg-brand-orange text-brand-navy px-2.5 py-0.5 rounded-full border border-brand-navy">
-              PMBJP Code: {item.pmbjp_product_code || "PMBJP-GEN"}
+              PMBJP Code: {item.pmbjp_product_code || "Not verified"}
             </span>
             {item.release_type && (
               <span className="text-[10px] font-sans font-bold bg-brand-navy/5 text-brand-navy px-2 py-0.5 rounded">
@@ -94,11 +94,13 @@ export default function PriceComparisonHero({
           <div className="mt-4 pt-3 border-t border-brand-navy/10 text-[10px] text-brand-gray space-y-0.5">
             <div className="flex justify-between">
               <span>Source:</span>
-              <span className="font-semibold text-brand-navy">PMBJP Portal</span>
+              <span className="font-semibold text-brand-navy">
+                {item.pmbjp_price?.source || "PMBJP Official Catalogue"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Verified On:</span>
-              <span>{item.pmbjp_price?.checked_on || "2026-03-01"}</span>
+              <span>{item.pmbjp_price?.checked_on || "Not provided"}</span>
             </div>
           </div>
         </div>
@@ -126,11 +128,13 @@ export default function PriceComparisonHero({
           <div className="mt-4 pt-3 border-t border-brand-navy/10 text-[10px] text-brand-gray space-y-0.5">
             <div className="flex justify-between">
               <span>Source:</span>
-              <span className="font-semibold text-brand-navy">Pharma Sahi Daam (NPPA)</span>
+              <span className="font-semibold text-brand-navy">
+                {item.market_price?.source || "Retail Reference Database"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Verified On:</span>
-              <span>{item.market_price?.checked_on || "2026-03-01"}</span>
+              <span>{item.market_price?.checked_on || "Not provided"}</span>
             </div>
           </div>
         </div>

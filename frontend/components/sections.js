@@ -472,14 +472,14 @@ export function Summary() {
   const handleStopMedicine = async (medId, brand) => {
     if (
       !confirm(
-        `Are you feeling healthy and want to stop taking ${brand}?\n\nThis will halt all upcoming WhatsApp and call reminders for this medicine so you are not disturbed.`
+        `Are you stopping or pausing reminders for ${brand}?\n\nThis records reminders as inactive for this medicine course without deleting past records.`
       )
     )
       return;
     try {
       await api(`/medicines/${medId}/stop`, {
         method: "POST",
-        json: { reason: "Patient feeling healthy / completed course" },
+        json: { reason: "Course completed or reminders paused" },
       });
       setAdhVersion((v) => v + 1);
     } catch (e) {
@@ -818,7 +818,7 @@ export function Summary() {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 py-1 px-2.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors"
-                        onClick={() => onSimulateReply(m.adherence_id, "taken")}
+                        onClick={() => handleSimulateReply(m.adherence_id, "taken")}
                         title="Record taking this SOS dose today"
                       >
                         <Check size={12} />
@@ -827,7 +827,7 @@ export function Summary() {
                       <button
                         type="button"
                         className="text-[11px] text-teal-800 hover:text-teal-900 hover:underline transition-colors font-medium"
-                        onClick={() => onStopMedicine(m.id, m.brand)}
+                        onClick={() => handleStopMedicine(m.id, m.brand)}
                       >
                         Stop
                       </button>
@@ -844,7 +844,7 @@ export function Summary() {
       {data.stopped_medicines && data.stopped_medicines.length > 0 && (
         <Card
           title="Completed & Stopped Prescriptions"
-          sub="Medicines you finished or stopped taking because you felt healthy (Reminders inactive)"
+          sub="Medicines marked complete or paused (Reminders inactive)"
         >
           <div className="flex flex-col gap-2.5">
             {data.stopped_medicines.map((sm) => (

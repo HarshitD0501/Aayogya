@@ -91,45 +91,94 @@ export async function searchOfflineCatalogue(query) {
 }
 
 // Prescription report functions
+export function isReportAccessible(report, patientId = null, options = {}) {
+  if (!report) return false;
+  if (options.ignoreScope) return true;
+
+  const resolvedPid =
+    patientId !== null && patientId !== undefined
+      ? patientId
+      : (typeof window !== "undefined"
+          ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+          : null);
+
+  if (report.patient_id) {
+    return report.patient_id === resolvedPid;
+  }
+  // Report is guest (no patient_id)
+  if (resolvedPid) {
+    return Boolean(options.allowGuest);
+  }
+  return true; // Guest session accessing guest report
+}
+
+export function filterPrescriptionReports(allReports, resolvedPid, includeGuest = false) {
+  if (resolvedPid) {
+    // Only exact patient match; include guest only if explicitly requested
+    return allReports.filter((r) => r.patient_id === resolvedPid || (includeGuest && !r.patient_id));
+  }
+  // When unauthenticated / guest, NEVER leak records belonging to authenticated accounts
+  return allReports.filter((r) => !r.patient_id);
+}
+
 export async function savePrescriptionReport(report, patientId = null) {
   const resolvedPid =
-    patientId ||
-    report.patient_id ||
-    (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
-  if (resolvedPid) {
+    patientId !== null && patientId !== undefined
+      ? patientId
+      : (report.patient_id ||
+        (typeof window !== "undefined"
+          ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+          : null));
+
+  if (resolvedPid && !report.patient_id) {
     report.patient_id = resolvedPid;
   }
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('prescriptions', 'readwrite');
     const store = tx.objectStore('prescriptions');
-    const req = store.put(report);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+    const getReq = store.get(report.report_id);
+    getReq.onsuccess = () => {
+      const existing = getReq.result;
+      if (existing && existing.patient_id && resolvedPid && existing.patient_id !== resolvedPid) {
+        return reject(new Error("Unauthorized: cannot overwrite report belonging to another patient"));
+      }
+      const putReq = store.put(report);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
   });
 }
 
-export async function getPrescriptionReport(reportId) {
+export async function getPrescriptionReport(reportId, patientId = null, options = {}) {
+  const resolvedPid =
+    patientId !== null && patientId !== undefined
+      ? patientId
+      : (typeof window !== "undefined"
+          ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+          : null);
+
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('prescriptions', 'readonly');
     const store = tx.objectStore('prescriptions');
     const req = store.get(reportId);
-    req.onsuccess = () => resolve(req.result || null);
+    req.onsuccess = () => {
+      const report = req.result || null;
+      if (!report) {
+        return resolve(null);
+      }
+      if (!isReportAccessible(report, resolvedPid, options)) {
+        return resolve(null);
+      }
+      resolve(report);
+    };
     req.onerror = () => reject(req.error);
   });
 }
 
-export function filterPrescriptionReports(allReports, resolvedPid) {
-  if (resolvedPid) {
-    // Only exact patient match or unassigned guest reports. Reject loose substring matching.
-    return allReports.filter((r) => !r.patient_id || r.patient_id === resolvedPid);
-  }
-  // When unauthenticated / guest, NEVER leak records belonging to authenticated accounts
-  return allReports.filter((r) => !r.patient_id);
-}
-
-export async function getAllPrescriptionReports(patientId = null) {
+export async function getAllPrescriptionReports(patientId = null, includeGuest = false) {
   const resolvedPid =
     patientId ||
     (typeof window !== "undefined"
@@ -143,7 +192,7 @@ export async function getAllPrescriptionReports(patientId = null) {
     const req = store.getAll();
     req.onsuccess = () => {
       const allReports = req.result || [];
-      const reports = filterPrescriptionReports(allReports, resolvedPid);
+      const reports = filterPrescriptionReports(allReports, resolvedPid, includeGuest);
       // Sort newest first
       reports.sort(
         (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
@@ -154,14 +203,32 @@ export async function getAllPrescriptionReports(patientId = null) {
   });
 }
 
-export async function deletePrescriptionReport(reportId) {
+export async function deletePrescriptionReport(reportId, patientId = null) {
+  const resolvedPid =
+    patientId !== null && patientId !== undefined
+      ? patientId
+      : (typeof window !== "undefined"
+          ? window.localStorage.getItem("aushadh_patient_id") || window.localStorage.getItem("aayogya_patient_id")
+          : null);
+
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('prescriptions', 'readwrite');
     const store = tx.objectStore('prescriptions');
-    const req = store.delete(reportId);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+    const getReq = store.get(reportId);
+    getReq.onsuccess = () => {
+      const report = getReq.result;
+      if (!report) {
+        return resolve();
+      }
+      if (!isReportAccessible(report, resolvedPid)) {
+        return reject(new Error("Unauthorized: cannot delete report belonging to another scope"));
+      }
+      const delReq = store.delete(reportId);
+      delReq.onsuccess = () => resolve();
+      delReq.onerror = () => reject(delReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
   });
 }
 
@@ -241,7 +308,7 @@ export async function addOrUpdateReportWithItem(
   const reportId =
     existingReportId ||
     `rep-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
-  let existing = await getPrescriptionReport(reportId);
+  let existing = await getPrescriptionReport(reportId, resolvedPid);
 
   const marketPrice = item.market_price || item.comparison_snapshot?.market_price || null;
   const pmbjpPrice = item.pmbjp_price || item.comparison_snapshot?.pmbjp_price || null;

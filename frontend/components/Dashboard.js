@@ -22,6 +22,7 @@ const sectionFallback = () => (
 const Summary = dynamic(() => import("@/components/sections").then((module) => module.Summary), { loading: sectionFallback });
 const Medicines = dynamic(() => import("@/components/sections").then((module) => module.Medicines), { loading: sectionFallback });
 const Interactions = dynamic(() => import("@/components/sections").then((module) => module.Interactions), { loading: sectionFallback });
+const Reports = dynamic(() => import("@/components/sections").then((module) => module.Reports), { loading: sectionFallback });
 
 // Code-split heavy tool tabs to guarantee sub-second initial dashboard entry
 const Assistant = dynamic(() => import("@/components/Assistant"), {
@@ -68,6 +69,7 @@ import {
   Menu,
   X,
   CheckCircle2,
+  ClipboardList,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -113,6 +115,14 @@ const SECTIONS = [
     Comp: Medicines,
     title: "Your Active Medicines",
     sub: "Consolidated list across all your treating physicians.",
+  },
+  {
+    key: "records",
+    label: "Health Records",
+    Icon: ClipboardList,
+    Comp: Reports,
+    title: "Clinical Prescriptions & Records",
+    sub: "Archived doctor prescriptions, diagnostic notes, and confirmed course activations.",
   },
   {
     key: "interactions",

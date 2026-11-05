@@ -10,209 +10,6 @@ export class ApiClientError extends Error {
   }
 }
 
-// Development catalogue fixtures for fallback
-const DEV_CATALOGUE = [
-  {
-    medicine_id: "pmbjp-001-paracetamol-500",
-    matched_text: "Paracetamol Tablets IP 500mg",
-    molecule_label: "Paracetamol",
-    strength_label: "500 mg",
-    form: "Tablet",
-    release_type: "Immediate Release",
-    pack_label: "10 Tablets Strip",
-    pmbjp_product_code: "PMBJP-001",
-    brands: [
-      { brand_id: "brand-dolo-500", name: "Dolo 500" },
-      { brand_id: "brand-calpol-500", name: "Calpol 500" }
-    ],
-    market_prices: {
-      "brand-dolo-500": {
-        amount_paise: 1650,
-        currency: "INR",
-        unit: "10 tablets",
-        source_url: "https://nppaipdms.gov.in/NPPA/PharmaSahiDaam/searchMedicine",
-        checked_on: "2026-03-01"
-      },
-      "brand-calpol-500": {
-        amount_paise: 1720,
-        currency: "INR",
-        unit: "10 tablets",
-        source_url: "https://nppaipdms.gov.in/NPPA/PharmaSahiDaam/searchMedicine",
-        checked_on: "2026-03-01"
-      }
-    },
-    pmbjp_price: {
-      amount_paise: 980,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "http://janaushadhi.gov.in/ProductList.aspx",
-      checked_on: "2026-03-01"
-    },
-    nppa_ceiling_price: {
-      amount_paise: 1800,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://www.nppaindia.nic.in/ceiling-prices",
-      checked_on: "2026-03-01"
-    }
-  },
-  {
-    medicine_id: "pmbjp-023-metformin-500",
-    matched_text: "Metformin Hydrochloride Tablets IP 500mg",
-    molecule_label: "Metformin HCl",
-    strength_label: "500 mg",
-    form: "Tablet",
-    release_type: "Sustained Release",
-    pack_label: "10 Tablets Strip",
-    pmbjp_product_code: "PMBJP-023",
-    brands: [
-      { brand_id: "brand-glycomet-500", name: "Glycomet 500 SR" },
-      { brand_id: "brand-obimet-500", name: "Obimet 500 SR" }
-    ],
-    market_prices: {
-      "brand-glycomet-500": {
-        amount_paise: 2450,
-        currency: "INR",
-        unit: "10 tablets",
-        source_url: "https://nppaipdms.gov.in",
-        checked_on: "2026-03-01"
-      }
-    },
-    pmbjp_price: {
-      amount_paise: 1120,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
-      checked_on: "2026-03-01"
-    },
-    nppa_ceiling_price: {
-      amount_paise: 2700,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://www.nppaindia.nic.in",
-      checked_on: "2026-03-01"
-    }
-  },
-  {
-    medicine_id: "pmbjp-045-atorvastatin-10",
-    matched_text: "Atorvastatin Tablets IP 10mg",
-    molecule_label: "Atorvastatin Calcium",
-    strength_label: "10 mg",
-    form: "Tablet",
-    release_type: "Immediate Release",
-    pack_label: "10 Tablets Strip",
-    pmbjp_product_code: "PMBJP-045",
-    brands: [
-      { brand_id: "brand-atorva-10", name: "Atorva 10" },
-      { brand_id: "brand-lipitor-10", name: "Lipitor 10" }
-    ],
-    market_prices: {
-      "brand-atorva-10": {
-        amount_paise: 7850,
-        currency: "INR",
-        unit: "10 tablets",
-        source_url: "https://nppaipdms.gov.in",
-        checked_on: "2026-03-01"
-      }
-    },
-    pmbjp_price: {
-      amount_paise: 1840,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
-      checked_on: "2026-03-01"
-    },
-    nppa_ceiling_price: {
-      amount_paise: 8200,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://www.nppaindia.nic.in",
-      checked_on: "2026-03-01"
-    }
-  },
-  {
-    medicine_id: "pmbjp-012-amlodipine-5",
-    matched_text: "Amlodipine Tablets IP 5mg",
-    molecule_label: "Amlodipine Besylate",
-    strength_label: "5 mg",
-    form: "Tablet",
-    release_type: "Immediate Release",
-    pack_label: "10 Tablets Strip",
-    pmbjp_product_code: "PMBJP-012",
-    brands: [
-      { brand_id: "brand-amlong-5", name: "Amlong 5" },
-      { brand_id: "brand-norvasc-5", name: "Norvasc 5" }
-    ],
-    market_prices: {
-      "brand-amlong-5": {
-        amount_paise: 3820,
-        currency: "INR",
-        unit: "10 tablets",
-        source_url: "https://nppaipdms.gov.in",
-        checked_on: "2026-03-01"
-      }
-    },
-    pmbjp_price: {
-      amount_paise: 750,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
-      checked_on: "2026-03-01"
-    },
-    nppa_ceiling_price: {
-      amount_paise: 4200,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://www.nppaindia.nic.in",
-      checked_on: "2026-03-01"
-    }
-  },
-  {
-    medicine_id: "med-calcium-vitamin-d3-500mg-250iu",
-    matched_text: "Calcium + Vitamin D3 500Mg/250Iu",
-    molecule_label: "Calcium + Vitamin D3",
-    strength_label: "500 mg / 250 IU",
-    form: "Tablet",
-    release_type: "Immediate Release",
-    pack_label: "10 Tablets Strip",
-    pmbjp_product_code: "PMBJP-030",
-    brands: [
-      { brand_id: "brand-shelcal", name: "Shelcal" },
-      { brand_id: "brand-cipcal", name: "Cipcal" }
-    ],
-    market_prices: {
-      "brand-shelcal": {
-        amount_paise: 15528,
-        currency: "INR",
-        unit: "10 tablets (1 pack)",
-        source_url: "https://pharmeasy.in",
-        checked_on: "2026-10-26"
-      },
-      "brand-cipcal": {
-        amount_paise: 14850,
-        currency: "INR",
-        unit: "10 tablets (1 pack)",
-        source_url: "https://pharmeasy.in",
-        checked_on: "2026-10-26"
-      }
-    },
-    pmbjp_price: {
-      amount_paise: 850,
-      currency: "INR",
-      unit: "10 tablets (1 pack)",
-      source_url: "https://janaushadhi.gov.in/product-portfolio/product-view-list",
-      checked_on: "2026-10-26"
-    },
-    nppa_ceiling_price: {
-      amount_paise: 750,
-      currency: "INR",
-      unit: "10 tablets",
-      source_url: "https://nppa.gov.in/en/view_more?id=4",
-      checked_on: "2026-10-26"
-    }
-  }
-];
-
 // In-memory TTL cache for public data to eliminate redundant request waterfalls (Batch 8)
 const _MEM_CACHE = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -297,7 +94,7 @@ class Client {
   }
 
   // 3. OCR Prescription parse
-  async ocr(file, signal) {
+  async ocr(file, patientId = null, signal = null) {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -307,6 +104,9 @@ class Client {
           window.localStorage.getItem("aushadh_token") ||
           window.localStorage.getItem("aayogya_token");
         if (token) headers["Authorization"] = `Bearer ${token}`;
+      }
+      if (patientId) {
+        headers["X-Patient-Id"] = String(patientId);
       }
       const res = await this.fetchWithTimeout(`/api/reports/upload`, {
         method: "POST",
@@ -345,6 +145,34 @@ class Client {
       if (e instanceof ApiClientError) throw e;
       throw new ApiClientError(500, e.message || "Failed to process prescription image.");
     }
+  }
+
+  // 3b. Confirm Prescription Report to activate in clinical health records
+  async confirmReport(reportId, patientId = null, signal = null) {
+    const headers = {};
+    if (typeof window !== "undefined") {
+      const token =
+        window.localStorage.getItem("aushadh_token") ||
+        window.localStorage.getItem("aayogya_token");
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (patientId) {
+      headers["X-Patient-Id"] = String(patientId);
+    }
+    const res = await this.fetchWithTimeout(`/api/reports/${encodeURIComponent(reportId)}/confirm`, {
+      method: "POST",
+      headers,
+      signal,
+    });
+    if (!res.ok) {
+      let errDetail = "Failed to confirm prescription report.";
+      try {
+        const errData = await res.json();
+        errDetail = errData.detail || errDetail;
+      } catch {}
+      throw new ApiClientError(res.status, errDetail);
+    }
+    return await res.json();
   }
 
   // 4. Cities
@@ -446,82 +274,54 @@ class Client {
 
   // 7. Public Catalogue ETag
   async getPublicCatalogue(etag) {
-    try {
-      const headers = etag ? { "If-None-Match": etag } : {};
-      const res = await this.fetchWithTimeout(`/api/v1/catalogue/public`, { headers });
-      if (res.status === 304) return { notModified: true };
-      if (res.ok) {
-        return {
-          data: await res.json(),
-          etag: res.headers.get("ETag")
-        };
-      }
-    } catch {}
+    const headers = etag ? { "If-None-Match": etag } : {};
+    const res = await this.fetchWithTimeout(`/api/v1/catalogue/public`, { headers });
+    if (res.status === 304) return { notModified: true };
+    if (!res.ok) {
+      throw new ApiClientError(res.status, "Unable to fetch public catalogue.", "SERVICE_UNAVAILABLE");
+    }
     return {
-      data: {
-        version: "2026.03-dev-fixtures",
-        checked_on: "2026-03-01",
-        records: DEV_CATALOGUE.map(c => ({
-          medicine_id: c.medicine_id,
-          name: c.matched_text,
-          molecule_label: c.molecule_label,
-          strength_label: c.strength_label,
-          form: c.form
-        }))
-      },
-      etag: 'W/"dev-catalogue-etag"'
+      data: await res.json(),
+      etag: res.headers.get("ETag")
     };
   }
 
   // 8. Reminders
   async createReminder(payload, idempotencyKey) {
-    const headers = { "Content-Type": "application/json" };
-    if (idempotencyKey) {
-      headers["Idempotency-Key"] = idempotencyKey;
-    }
-
-    const res = await this.fetchWithTimeout(`/api/v1/reminders`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      throw new ApiClientError(res.status, "The public reminder scheduling endpoint is currently unavailable on this server.", "SERVICE_UNAVAILABLE");
-    }
-    return await res.json();
+    throw new ApiClientError(
+      501,
+      "Standalone reminder scheduling is not available for local dossiers. Please manage reminders inside the Patient Workspace for your confirmed active medicines.",
+      "UNSUPPORTED_LOCAL_ACTION"
+    );
   }
 
   async getReminderStatus(reminderId, managementToken) {
-    const headers = {};
-    if (managementToken) {
-      headers["Authorization"] = `Bearer ${managementToken}`;
-    }
-
-    const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, { headers });
-    if (!res.ok) {
-      throw new ApiClientError(res.status, "The reminder status service is currently unavailable.", "SERVICE_UNAVAILABLE");
-    }
-    return await res.json();
+    throw new ApiClientError(
+      501,
+      "Standalone reminder status endpoint is unavailable.",
+      "UNSUPPORTED_LOCAL_ACTION"
+    );
   }
 
   async cancelReminder(reminderId, managementToken) {
-    const headers = {};
-    if (managementToken) {
-      headers["Authorization"] = `Bearer ${managementToken}`;
-    }
-
-    const res = await this.fetchWithTimeout(`/api/v1/reminders/${encodeURIComponent(reminderId)}`, {
-      method: "DELETE",
-      headers
-    });
-    if (!res.ok) {
-      throw new ApiClientError(res.status, "The reminder cancellation service is currently unavailable.", "SERVICE_UNAVAILABLE");
-    }
-    return await res.json();
+    throw new ApiClientError(
+      501,
+      "Standalone reminder cancellation is unavailable.",
+      "UNSUPPORTED_LOCAL_ACTION"
+    );
   }
 
   // 9. Calls
   async createCall(payload, idempotencyKey) {
+    const numericReportId = Number(payload?.report_id);
+    if (!payload?.report_id || isNaN(numericReportId) || numericReportId <= 0) {
+      throw new ApiClientError(
+        400,
+        "Telephony checkup calls require a confirmed clinical record in your account with a verified backend ID. Local comparison dossiers cannot initiate cloud calls.",
+        "UNSUPPORTED_LOCAL_ACTION"
+      );
+    }
+
     const headers = { "Content-Type": "application/json" };
     if (idempotencyKey) {
       headers["Idempotency-Key"] = idempotencyKey;
@@ -532,18 +332,11 @@ class Client {
         method: "POST",
         headers,
         body: JSON.stringify({
-          report_id: Number(payload.report_id),
-          force: true
+          report_id: numericReportId,
         })
       });
       if (res.ok) {
-        const data = await res.json();
-        return {
-          ...data,
-          call_id: data.call_id || data.room_name || `call-${payload.report_id}`,
-          management_token: data.call_id || data.room_name || `call-${payload.report_id}`,
-          status: data.status === "simulated" ? "simulated" : (data.mode === "live" ? "dispatched" : data.status)
-        };
+        return await res.json();
       }
       let errDetail = "Call request failed";
       try {
@@ -558,17 +351,22 @@ class Client {
   }
 
   async getCallStatus(callId, managementToken) {
-    const reportId = String(callId).replace(/^call-|^sim-/, "").split("-")[0];
+    const numericCallId = Number(callId);
+    if (!callId || isNaN(numericCallId) || numericCallId <= 0) {
+      throw new ApiClientError(
+        400,
+        "Invalid call identifier.",
+        "INVALID_CALL_ID"
+      );
+    }
     try {
-      const res = await this.fetchWithTimeout(`/api/telephony/status/${encodeURIComponent(reportId)}`);
+      const headers = {};
+      if (managementToken) {
+        headers["Authorization"] = `Bearer ${managementToken}`;
+      }
+      const res = await this.fetchWithTimeout(`/api/telephony/status/${encodeURIComponent(callId)}`, { headers });
       if (res.ok) {
-        const data = await res.json();
-        const latestCall = data.recent_calls && data.recent_calls[0];
-        const status = latestCall ? (latestCall.call_status || latestCall.status) : (data.status || "idle");
-        return {
-          ...data,
-          status
-        };
+        return await res.json();
       }
       let errDetail = "Failed to fetch call status";
       try {

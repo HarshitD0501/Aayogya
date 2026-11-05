@@ -31,6 +31,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
   const [comparisonItem, setComparisonItem] = useState(null);
   const [isComparing, setIsComparing] = useState(false);
   const [compareError, setCompareError] = useState(null);
+  const [noResultsQuery, setNoResultsQuery] = useState(null);
 
   const [addedSuccess, setAddedSuccess] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -49,16 +50,19 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       try {
         const cached = await getCatalogueCache();
         const res = await apiClient.getPublicCatalogue(cached?.etag || null);
-        if (active && res.data && res.data.records) {
+        if (active && res && res.data && res.data.records) {
           await saveCatalogueCache(res.data, res.etag);
         }
       } catch (err) {
-        console.warn("Public catalogue cache sync skipped:", err);
+        // Network failure / offline: do not seed synthetic catalogue
       }
     };
     syncCatalogue();
     return () => {
       active = false;
+      if (searchAbortRef.current) searchAbortRef.current.abort();
+      if (compareAbortRef.current) compareAbortRef.current.abort();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, []);
 
@@ -70,6 +74,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       setSearchError(null);
       setIsSearching(false);
       setShowSuggestions(false);
+      setNoResultsQuery(null);
       return;
     }
 
@@ -85,9 +90,15 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
     try {
       const response = await apiClient.search(trimmed, 8, controller.signal);
-      setCandidates(response.candidates || []);
+      const items = response.candidates || [];
+      setCandidates(items);
       setIsOfflineMode(false);
-      setShowSuggestions((response.candidates || []).length > 0);
+      setShowSuggestions(items.length > 0);
+      if (items.length === 0) {
+        setNoResultsQuery(trimmed);
+      } else {
+        setNoResultsQuery(null);
+      }
     } catch (err) {
       if (
         err?.name === "AbortError" ||
@@ -108,18 +119,20 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
             release_type: null,
             pack_label: "Standard Pack",
             brands: [],
-            match_score: 80,
+            match_score: null,
             requires_confirmation: true,
           }));
           setCandidates(offlineCandidates);
           setIsOfflineMode(true);
           setShowSuggestions(true);
+          setNoResultsQuery(null);
           return;
         }
       } catch {}
 
       setSearchError("Unable to reach medicine search service. Please check your connection.");
       setCandidates([]);
+      setNoResultsQuery(null);
     } finally {
       if (!controller.signal.aborted) {
         setIsSearching(false);
@@ -150,6 +163,28 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
     const val = e.target.value;
     setQuery(val);
 
+    if (!val.trim()) {
+      if (searchAbortRef.current) {
+        searchAbortRef.current.abort(new DOMException("Search cleared", "AbortError"));
+      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      setCandidates([]);
+      setSearchError(null);
+      setIsSearching(false);
+      setShowSuggestions(false);
+      setSelectedCandidate(null);
+      setComparisonItem(null);
+      setCompareError(null);
+      setNoResultsQuery(null);
+      return;
+    }
+
+    // Invalidate stale comparison results immediately when user modifies search query (U16)
+    setSelectedCandidate(null);
+    setComparisonItem(null);
+    setCompareError(null);
+    setNoResultsQuery(null);
+
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
       executeSearch(val);
@@ -158,6 +193,13 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
   // Compare on selection
   const executeCompare = useCallback(async (candidate, brandId, count) => {
+    if (isOfflineMode) {
+      setCompareError("Real-time PMBJP price comparison requires an internet connection. Stored offline catalogue provides medicine names only.");
+      setComparisonItem(null);
+      setIsComparing(false);
+      return;
+    }
+
     if (compareAbortRef.current) {
       compareAbortRef.current.abort(new DOMException("New compare dispatched", "AbortError"));
     }
@@ -203,7 +245,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
         setIsComparing(false);
       }
     }
-  }, []);
+  }, [isOfflineMode]);
 
   const handleSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
@@ -319,6 +361,21 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
         )}
       </div>
 
+      {/* Dedicated No-Results State (U16) */}
+      {noResultsQuery && !isSearching && candidates.length === 0 && !searchError && (
+        <div
+          role="status"
+          className="max-w-3xl mx-auto p-6 bg-ui-surface border border-ui-border-decorative rounded-xl text-center space-y-2 shadow-xs"
+        >
+          <p className="font-serif font-bold text-base text-ui-text">
+            No exact matches found for "{noResultsQuery}"
+          </p>
+          <p className="text-xs text-ui-text-secondary max-w-md mx-auto">
+            Try searching by active salt or generic molecule name (e.g. Paracetamol, Metformin, Amlodipine) or check spelling.
+          </p>
+        </div>
+      )}
+
       {/* Visible Error Alerts (F22) */}
       {searchError && (
         <div
@@ -372,6 +429,34 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
       {comparisonItem && !isComparing && (
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* Brand Selection Selector (U15) */}
+          {selectedCandidate && selectedCandidate.brands && selectedCandidate.brands.length > 1 && (
+            <div className="p-4 bg-ui-surface border border-ui-border-decorative rounded-xl space-y-2 shadow-xs">
+              <span className="text-xs font-semibold text-ui-text block">
+                Select Branded Reference for Comparison:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {selectedCandidate.brands.map((b) => (
+                  <button
+                    key={b.brand_id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBrandId(b.brand_id);
+                      executeCompare(selectedCandidate, b.brand_id, packCount);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                      selectedBrandId === b.brand_id
+                        ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                        : "bg-ui-surface-subtle text-ui-text border-ui-border-decorative hover:border-ui-blue/50"
+                    }`}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <PriceComparisonHero
             item={comparisonItem}
             packCount={packCount}

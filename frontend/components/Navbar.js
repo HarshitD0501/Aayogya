@@ -98,7 +98,9 @@ export default function Navbar({
           <img
             src="/aayogya-logo.png"
             alt="Ayogya"
-            className="h-9 sm:h-10 w-auto object-contain"
+            width="130"
+            height="36"
+            className="h-9 sm:h-10 w-auto object-contain max-h-10"
           />
         </Link>
 

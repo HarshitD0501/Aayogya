@@ -81,9 +81,15 @@ export default function SearchSuggestions({
               </div>
 
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-[10px] font-mono font-bold bg-ui-surface-subtle border border-ui-border-decorative px-2 py-1 rounded text-ui-blue">
-                  Match: {cand.match_score ?? 85}%
-                </span>
+                {cand.match_score != null ? (
+                  <span className="text-[10px] font-mono font-bold bg-ui-surface-subtle border border-ui-border-decorative px-2 py-1 rounded text-ui-blue">
+                    Match: {Math.round(cand.match_score)}%
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono font-medium text-ui-text-secondary bg-ui-surface-subtle border border-ui-border-decorative px-2 py-1 rounded">
+                    Candidate
+                  </span>
+                )}
                 <ChevronRight className="w-4 h-4 text-ui-text-secondary" />
               </div>
             </li>

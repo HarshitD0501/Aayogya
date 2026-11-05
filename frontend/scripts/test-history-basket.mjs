@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { computeReportTotals, filterPrescriptionReports } from "../lib/indexedDb.js";
+import { computeReportTotals, filterPrescriptionReports, isReportAccessible } from "../lib/indexedDb.js";
 
 console.log("Running prescription basket and history totals verification tests...");
 
@@ -79,7 +79,7 @@ assert.strictEqual(totals3.pmbjp_total_paise, 1200);
 assert.strictEqual(totals3.saving_total_paise, 3300);
 console.log("PASS: Test 3 - Backward compatible snapshot-only item totals match.");
 
-// Test 4: Tenant isolation matching logic (Fixes F26 & F38)
+// Test 4: Strict Tenant Isolation & Browser Segregation (Fixes U07, F26 & F38)
 const testReports = [
   { report_id: "rep-1", patient_id: "ramesh" },
   { report_id: "rep-2", patient_id: "shanti" },
@@ -87,23 +87,37 @@ const testReports = [
   { report_id: "rep-4", patient_id: "rameshkumar" }, // substring check
 ];
 
+// Authenticated user 'ramesh': only exact patient reports returned; guest reports separate
 const rameshReports = filterPrescriptionReports(testReports, "ramesh");
-assert.strictEqual(rameshReports.length, 2); // ramesh + unassigned guest
-assert.ok(rameshReports.some((r) => r.report_id === "rep-1"));
-assert.ok(rameshReports.some((r) => r.report_id === "rep-3"));
-assert.ok(!rameshReports.some((r) => r.report_id === "rep-2"));
-assert.ok(!rameshReports.some((r) => r.report_id === "rep-4")); // no substring leakage!
+assert.strictEqual(rameshReports.length, 1);
+assert.strictEqual(rameshReports[0].report_id, "rep-1");
+assert.ok(!rameshReports.some((r) => r.report_id === "rep-3"), "Guest report must not leak into patient account");
+assert.ok(!rameshReports.some((r) => r.report_id === "rep-2"), "Foreign patient report must not leak");
+assert.ok(!rameshReports.some((r) => r.report_id === "rep-4"), "Substring match must not leak");
 
-// Substring check: querying "ram" must NOT leak "ramesh" or "rameshkumar"
+// Explicit import flag: user explicitly chooses to include unassigned guest history
+const rameshWithGuest = filterPrescriptionReports(testReports, "ramesh", true);
+assert.strictEqual(rameshWithGuest.length, 2);
+assert.ok(rameshWithGuest.some((r) => r.report_id === "rep-1"));
+assert.ok(rameshWithGuest.some((r) => r.report_id === "rep-3"));
+
+// Substring check: querying "ram" must NOT match "ramesh" or "rameshkumar"
 const ramReports = filterPrescriptionReports(testReports, "ram");
-assert.strictEqual(ramReports.length, 1); // only unassigned guest
-assert.strictEqual(ramReports[0].report_id, "rep-3");
+assert.strictEqual(ramReports.length, 0);
 
-// Logged out / unauthenticated: must NEVER leak authenticated patient reports
-const unauthenticatedReports = filterPrescriptionReports(testReports, null);
-assert.strictEqual(unauthenticatedReports.length, 1); // only guest unassigned report
-assert.strictEqual(unauthenticatedReports[0].report_id, "rep-3");
+// Unauthenticated / guest session: only unassigned guest reports returned
+const guestReports = filterPrescriptionReports(testReports, null);
+assert.strictEqual(guestReports.length, 1);
+assert.strictEqual(guestReports[0].report_id, "rep-3");
 
-console.log("PASS: Test 4 - Strict tenant isolation and substring leakage prevention verified.");
+// Test 5: isReportAccessible direct permission checks
+assert.strictEqual(isReportAccessible(testReports[0], "ramesh"), true);
+assert.strictEqual(isReportAccessible(testReports[0], "shanti"), false);
+assert.strictEqual(isReportAccessible(testReports[0], null), false);
+assert.strictEqual(isReportAccessible(testReports[2], "ramesh"), false); // guest report not leaked to signed-in user
+assert.strictEqual(isReportAccessible(testReports[2], "ramesh", { allowGuest: true }), true);
+assert.strictEqual(isReportAccessible(testReports[2], null), true); // guest session accessing guest report
 
-console.log("\nALL 4 PRESCRIPTION BASKET & HISTORY TESTS PASSED SUCCESSFULLY!");
+console.log("PASS: Test 4 & 5 - Strict tenant isolation, segregation, and ownership checks verified.");
+
+console.log("\nALL PRESCRIPTION BASKET & HISTORY TESTS PASSED SUCCESSFULLY!");

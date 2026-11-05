@@ -36,12 +36,16 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
   const [isProcessing, setIsProcessing] = useState(false);
   const [ocrResponse, setOcrResponse] = useState(null);
   const [ocrError, setOcrError] = useState(null);
+  const [isConfirmingReport, setIsConfirmingReport] = useState(false);
+  const [confirmSuccess, setConfirmSuccess] = useState(false);
+  const [confirmError, setConfirmError] = useState(null);
 
   // Manual search fallback
   const [correctionQuery, setCorrectionQuery] = useState("");
   const [candidates, setCandidates] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
+  const [compareError, setCompareError] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [packCount, setPackCount] = useState(1);
   const [comparisonItem, setComparisonItem] = useState(null);
@@ -97,14 +101,30 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
 
     setIsProcessing(true);
     setOcrError(null);
+    setConfirmSuccess(false);
+    setConfirmError(null);
 
     try {
-      const res = await apiClient.ocr(selectedFile);
+      const res = await apiClient.ocr(selectedFile, patient?.id);
       setOcrResponse(res);
     } catch (err) {
-      setOcrError("Prescription scanning service could not extract text. Please use manual search below.");
+      setOcrError(err?.message || "Prescription scanning service could not extract text. Please use manual search below.");
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleConfirmReport = async () => {
+    if (!ocrResponse?.report_id) return;
+    setIsConfirmingReport(true);
+    setConfirmError(null);
+    try {
+      await apiClient.confirmReport(ocrResponse.report_id, patient?.id);
+      setConfirmSuccess(true);
+    } catch (err) {
+      setConfirmError(err?.message || "Failed to confirm prescription with health records.");
+    } finally {
+      setIsConfirmingReport(false);
     }
   };
 
@@ -128,6 +148,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
   const handleSelectCandidate = async (candidate) => {
     setSelectedCandidate(candidate);
     setIsSearching(true);
+    setCompareError(null);
     try {
       const res = await apiClient.compare({
         items: [
@@ -140,11 +161,41 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
       });
       if (res.items && res.items.length > 0) {
         setComparisonItem(res.items[0]);
+      } else {
+        setCompareError("No comparison data available for this candidate.");
+        setComparisonItem(null);
       }
     } catch (err) {
-      alert("Failed to compare candidate.");
+      setCompareError("Unable to calculate price comparison for this candidate. Please check your connection.");
+      setComparisonItem(null);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handlePackCountChange = async (newCount) => {
+    setPackCount(newCount);
+    if (selectedCandidate) {
+      setIsSearching(true);
+      setCompareError(null);
+      try {
+        const res = await apiClient.compare({
+          items: [
+            {
+              medicine_id: selectedCandidate.medicine_id,
+              brand_id: selectedCandidate.brands?.[0]?.brand_id || null,
+              pack_count: newCount,
+            },
+          ],
+        });
+        if (res.items && res.items.length > 0) {
+          setComparisonItem(res.items[0]);
+        }
+      } catch (err) {
+        setCompareError("Failed to update price comparison for the selected pack quantity.");
+      } finally {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -319,24 +370,86 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
         {/* OCR Result View */}
         {ocrResponse && (
           <div className="space-y-5 pt-4 border-t-2 border-brand-navy/10 animate-in fade-in-50">
-            <div className="p-3.5 bg-brand-peach/40 border-2 border-brand-navy flex items-start gap-3">
-              <ShieldAlert className="w-5 h-5 text-brand-navy flex-shrink-0 mt-0.5" />
-              <div className="text-xs font-sans">
-                <span className="font-black uppercase tracking-wider block text-brand-navy mb-0.5">
-                  HUMAN CONFIRMATION REQUIRED (LOCAL PREVIEW ONLY)
-                </span>
-                <p className="text-brand-navy/80 font-medium">
-                  {t.ocrNotice}
-                </p>
-                <p className="text-brand-gray text-[11px] mt-1.5 italic border-t border-brand-navy/10 pt-1">
-                  Note: Text extracted here is for local review and generic comparison only. It has not been clinically confirmed or saved to your medical records on the server.
-                </p>
+            {/* Backend Confirmation Gateway (U05) */}
+            {ocrResponse.report_id ? (
+              <div className="p-4 bg-ui-surface border-2 border-ui-blue/30 rounded-xl space-y-3 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif font-bold text-sm text-ui-text">
+                        Prescription Staged in Health Records
+                      </span>
+                      <span className="text-[10px] font-mono font-bold bg-ui-blue/10 text-ui-blue px-2 py-0.5 rounded">
+                        Report #{ocrResponse.report_id}
+                      </span>
+                    </div>
+                    <p className="text-xs text-ui-text-secondary mt-1">
+                      {ocrResponse.prescriber_name ? `Doctor: ${ocrResponse.prescriber_name}` : "Extracted Prescription"}
+                      {ocrResponse.prescriber_specialty ? ` · ${ocrResponse.prescriber_specialty}` : ""}
+                    </p>
+                  </div>
+
+                  {confirmSuccess ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold">
+                      <CheckCircle className="w-4 h-4 text-emerald-700" />
+                      <span>Confirmed & Regimen Active</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isConfirmingReport}
+                      onClick={handleConfirmReport}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex-shrink-0 disabled:opacity-60"
+                    >
+                      {isConfirmingReport ? "Activating Regimen…" : "Confirm & Save to Health Records"}
+                    </button>
+                  )}
+                </div>
+
+                {confirmSuccess && (
+                  <div className="pt-2 flex items-center justify-between border-t border-ui-border-decorative/60">
+                    <span className="text-xs text-emerald-800 font-medium">
+                      ✓ Regimen successfully activated. Doses and reminders are now tracked.
+                    </span>
+                    {onNavigateTab && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateTab("medicines")}
+                        className="text-xs font-semibold text-ui-blue hover:underline flex items-center gap-1"
+                      >
+                        <span>View Active Medicines</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {confirmError && (
+                  <div role="alert" className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg">
+                    {confirmError}
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              <div className="p-3.5 bg-brand-peach/40 border-2 border-brand-navy flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 text-brand-navy flex-shrink-0 mt-0.5" />
+                <div className="text-xs font-sans">
+                  <span className="font-black uppercase tracking-wider block text-brand-navy mb-0.5">
+                    GUEST LOCAL PREVIEW (NOT SAVED TO HEALTH RECORDS)
+                  </span>
+                  <p className="text-brand-navy/80 font-medium">
+                    {t.ocrNotice}
+                  </p>
+                  <p className="text-brand-gray text-[11px] mt-1.5 italic border-t border-brand-navy/10 pt-1">
+                    Sign in to your patient account to confirm this prescription and activate automated WhatsApp dose reminders.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div>
               <h4 className="font-serif font-black text-sm text-brand-navy uppercase tracking-wider mb-2">
-                Observed Medicine Candidates (Unconfirmed)
+                Observed Medicine Candidates (Review Before Activation)
               </h4>
               <div className="space-y-2">
                 {ocrResponse.suggestions?.map((sug, idx) => (
@@ -353,6 +466,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
                       </span>
                     </div>
                     <button
+                      type="button"
                       onClick={() => handleManualSearch(sug.query_tokens.join(" "))}
                       className="px-3.5 py-1.5 bg-ui-amber hover:bg-ui-amber-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
                     >
@@ -384,21 +498,28 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
             If handwriting or box scan was unclear, type the medicine name directly:
           </p>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={correctionQuery}
-              onChange={(e) => setCorrectionQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleManualSearch(correctionQuery)}
-              placeholder="Type medicine name (e.g. Dolo 500, Metformin)…"
-              className="flex-1 bg-brand-white border-2 border-brand-navy px-3 py-2 text-sm font-sans font-medium text-brand-navy placeholder:text-brand-gray/60 focus:outline-none"
-            />
-            <button
-              onClick={() => handleManualSearch(correctionQuery)}
-              className="px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg font-semibold text-xs shadow-xs transition-colors"
-            >
-              Search
-            </button>
+          <div>
+            <label htmlFor="manual-correction-query" className="sr-only">
+              Medicine name to verify or correct
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="manual-correction-query"
+                type="text"
+                value={correctionQuery}
+                onChange={(e) => setCorrectionQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleManualSearch(correctionQuery)}
+                placeholder="Type medicine name (e.g. Dolo 500, Metformin)…"
+                className="flex-1 bg-brand-white border-2 border-brand-navy px-3 py-2 text-sm font-sans font-medium text-brand-navy placeholder:text-brand-gray/60 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => handleManualSearch(correctionQuery)}
+                className="px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg font-semibold text-xs shadow-xs transition-colors"
+              >
+                Search
+              </button>
+            </div>
           </div>
 
           {/* Manual Search Error Alert (F22) */}
@@ -413,6 +534,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
               </div>
               {correctionQuery.trim() && (
                 <button
+                  type="button"
                   onClick={() => handleManualSearch(correctionQuery)}
                   className="px-2 py-0.5 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[10px]"
                 >
@@ -425,28 +547,51 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           {candidates.length > 0 && (
             <div className="border-2 border-brand-navy divide-y divide-brand-navy/10 bg-brand-white mt-3">
               {candidates.map((cand) => (
-                <div
+                <button
+                  type="button"
                   key={cand.medicine_id}
                   onClick={() => handleSelectCandidate(cand)}
-                  className="p-3 hover:bg-brand-cream cursor-pointer flex justify-between items-center"
+                  className="w-full p-3 hover:bg-brand-cream text-left flex justify-between items-center transition-colors focus:outline-none focus:bg-brand-cream"
                 >
                   <div>
-                    <span className="font-serif font-bold text-sm text-brand-navy">
+                    <span className="font-serif font-bold text-sm text-brand-navy block">
                       {cand.matched_text || cand.molecule_label}
                     </span>
-                    <span className="text-xs text-brand-gray block">
+                    <span className="text-xs text-brand-gray block mt-0.5">
                       {cand.strength_label} • {cand.form}
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-brand-orange uppercase tracking-wider">
+                  <span className="text-xs font-bold text-brand-orange uppercase tracking-wider flex-shrink-0">
                     Select →
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Comparison Inline Error (U15) */}
+      {compareError && (
+        <div
+          role="alert"
+          className="max-w-4xl mx-auto p-3.5 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-700 flex-shrink-0" />
+            <span>{compareError}</span>
+          </div>
+          {selectedCandidate && (
+            <button
+              type="button"
+              onClick={() => handleSelectCandidate(selectedCandidate)}
+              className="px-2.5 py-1 bg-rose-800 text-white hover:bg-rose-900 rounded font-bold uppercase tracking-wider text-[11px]"
+            >
+              Retry Compare
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Selected Candidate Price Hero */}
       {comparisonItem && (
@@ -454,7 +599,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           <PriceComparisonHero
             item={comparisonItem}
             packCount={packCount}
-            onPackCountChange={setPackCount}
+            onPackCountChange={handlePackCountChange}
             onAddToReport={handleAddToReport}
             isAdding={isAdding}
             addedSuccess={addedSuccess}
