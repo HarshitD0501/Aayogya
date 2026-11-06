@@ -97,8 +97,8 @@ export function Pill({ tone, dot = true, children }) {
 
 export function Loader({ label }) {
   return (
-    <div className="empty">
-      <div className="spinner" style={{ margin: "0 auto 14px" }} />
+    <div className="empty" role="status" aria-live="polite">
+      <div className="spinner" style={{ margin: "0 auto 14px" }} aria-hidden="true" />
       {label && <div className="small muted" style={{ fontWeight: 500 }}>{label}</div>}
     </div>
   );

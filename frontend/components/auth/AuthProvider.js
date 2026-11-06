@@ -87,8 +87,11 @@ export function AuthProvider({ children }) {
     }
 
     const destination = returnPathRef.current || "/app";
-    if (typeof window !== "undefined" && window.location.pathname !== destination) {
-      router.push(destination);
+    if (typeof window !== "undefined") {
+      const currentFull = window.location.pathname + window.location.search;
+      if (currentFull !== destination) {
+        router.push(destination);
+      }
     }
   }, [router]);
 
@@ -174,7 +177,9 @@ export function AuthProvider({ children }) {
       clearWorkspaceRoleHint();
       setUser(null);
       setSessionError("");
-      const currentPath = typeof window !== "undefined" ? window.location.pathname : "/app";
+      const currentPath = typeof window !== "undefined"
+        ? (window.location.pathname + window.location.search)
+        : "/app";
       openLogin(currentPath, {
         message: "Your session has expired. Please sign in again.",
       });

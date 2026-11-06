@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/components/auth/AuthProvider";
 import {
   Search,
   Camera,
@@ -26,6 +27,8 @@ export default function Navbar({
 }) {
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
+  const auth = useAuth();
+  const user = auth?.user;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const toggleBtnRef = useRef(null);
@@ -212,16 +215,28 @@ export default function Navbar({
 
           {/* Action Button: Sign In on Landing, or Back to Home / App */}
           {isLanding ? (
-            <button
-              onClick={() => {
-                if (onOpenAuth) onOpenAuth();
-                else window.location.href = "/app";
-              }}
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] bg-ui-blue hover:bg-ui-blue-hover text-white text-xs font-semibold rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
-            >
-              <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Sign in</span>
-            </button>
+            user ? (
+              <Link
+                href="/app"
+                prefetch={true}
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] bg-ui-blue hover:bg-ui-blue-hover text-white text-xs font-semibold rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+                <span>{user.role === "caregiver" ? "Caregiver Hub" : "Workspace"}</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenAuth) onOpenAuth();
+                  else window.location.href = "/app";
+                }}
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] bg-ui-blue hover:bg-ui-blue-hover text-white text-xs font-semibold rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-2"
+              >
+                <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Sign in</span>
+              </button>
+            )
           ) : isShell ? (
             <Link
               href="/"
@@ -321,17 +336,30 @@ export default function Navbar({
           })}
           
           {isLanding ? (
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenAuth) onOpenAuth();
-                else window.location.href = "/app";
-              }}
-              className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-sm rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
-            >
-              <LogIn className="w-4 h-4" aria-hidden="true" />
-              <span>Sign in</span>
-            </button>
+            user ? (
+              <Link
+                href="/app"
+                prefetch={true}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-sm rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+              >
+                <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
+                <span>{user.role === "caregiver" ? "Caregiver Hub" : "Workspace"}</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onOpenAuth) onOpenAuth();
+                  else window.location.href = "/app";
+                }}
+                className="flex items-center justify-center gap-2 w-full min-h-[44px] px-4 py-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-sm rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+              >
+                <LogIn className="w-4 h-4" aria-hidden="true" />
+                <span>Sign in</span>
+              </button>
+            )
           ) : isShell ? (
             <Link
               href="/"

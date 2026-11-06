@@ -41,6 +41,18 @@ export default function LoginDialog({
   const firstInputRef = useRef(null);
   const googleButton = useRef(null);
   const googleHandler = useRef(null);
+  const reqIdRef = useRef(0);
+
+  // Invalidate in-flight auth requests if modal closes or unmounts
+  useEffect(() => {
+    if (!isOpen) {
+      reqIdRef.current += 1;
+      setBusy(false);
+    }
+    return () => {
+      reqIdRef.current += 1;
+    };
+  }, [isOpen]);
 
   // Focus trap and Escape key listener
   useEffect(() => {
@@ -62,7 +74,7 @@ export default function LoginDialog({
       }
       if (e.key === "Tab" && dialogRef.current) {
         const focusable = dialogRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
         );
         if (focusable.length > 0) {
           const first = focusable[0];
@@ -88,6 +100,7 @@ export default function LoginDialog({
 
   // Google OAuth handler
   googleHandler.current = async (credential) => {
+    const curReq = ++reqIdRef.current;
     setBusy(true);
     setErr("");
     void preloadWorkspace(role).catch(() => {});
@@ -97,11 +110,17 @@ export default function LoginDialog({
         mode: isRegister ? "register" : "login",
         role,
       });
-      onSuccess(user);
+      if (reqIdRef.current === curReq) {
+        onSuccess(user);
+      }
     } catch (e) {
-      setErr(e.message || "Google authentication failed");
+      if (reqIdRef.current === curReq) {
+        setErr(e.message || "Google authentication failed");
+      }
     } finally {
-      setBusy(false);
+      if (reqIdRef.current === curReq) {
+        setBusy(false);
+      }
     }
   };
 
@@ -132,6 +151,7 @@ export default function LoginDialog({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const curReq = ++reqIdRef.current;
     setBusy(true);
     setErr("");
     void preloadWorkspace(role).catch(() => {});
@@ -145,15 +165,23 @@ export default function LoginDialog({
           password: pw,
           role,
         });
-        onSuccess(user);
+        if (reqIdRef.current === curReq) {
+          onSuccess(user);
+        }
       } else {
         const user = await login(id.trim(), pw, role);
-        onSuccess(user);
+        if (reqIdRef.current === curReq) {
+          onSuccess(user);
+        }
       }
     } catch (e) {
-      setErr(e.message || "Authentication failed. Please check your credentials.");
+      if (reqIdRef.current === curReq) {
+        setErr(e.message || "Authentication failed. Please check your credentials.");
+      }
     } finally {
-      setBusy(false);
+      if (reqIdRef.current === curReq) {
+        setBusy(false);
+      }
     }
   };
 

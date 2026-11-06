@@ -57,12 +57,20 @@ function AppContent() {
   useEffect(() => {
     if (ready && !user && !sessionError && !promptShownRef.current) {
       promptShownRef.current = true;
-      openLogin("/app");
+      const queryStr = searchParams?.toString();
+      const returnUrl = queryStr ? `/app?${queryStr}` : "/app";
+      openLogin(returnUrl);
     }
-  }, [ready, user, sessionError, openLogin]);
+  }, [ready, user, sessionError, openLogin, searchParams]);
 
   const handleGoHome = () => {
     router.push("/");
+  };
+
+  const handleSignIn = () => {
+    const queryStr = searchParams?.toString();
+    const returnUrl = queryStr ? `/app?${queryStr}` : "/app";
+    openLogin(returnUrl);
   };
 
   if (!ready) {
@@ -99,7 +107,7 @@ function AppContent() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               type="button"
-              onClick={() => openLogin("/app")}
+              onClick={handleSignIn}
               className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-6 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white text-sm font-semibold rounded-lg transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
             >
               Sign In

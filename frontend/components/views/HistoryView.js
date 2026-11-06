@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Disclaimer from "@/components/Disclaimer";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -47,6 +47,10 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
     }
   }, [patient?.id]);
 
+  const deleteDialogRef = useRef(null);
+  const deleteCancelBtnRef = useRef(null);
+  const deleteTriggerRef = useRef(null);
+
   useEffect(() => {
     loadReports();
     const handleReportUpdate = () => loadReports();
@@ -56,16 +60,51 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
     }
   }, [loadReports]);
 
-  // Escape key handler for delete modal (F36)
+  // Modal lifecycle, focus containment and Escape key handler for delete modal (F36/U14)
   useEffect(() => {
     if (!deleteTargetId) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // Set initial focus to safe default action (Cancel)
+    const timer = setTimeout(() => {
+      deleteCancelBtnRef.current?.focus();
+    }, 50);
+
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         setDeleteTargetId(null);
       }
+      if (e.key === "Tab" && deleteDialogRef.current) {
+        const focusable = deleteDialogRef.current.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"]):not([disabled])'
+        );
+        if (focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      if (deleteTriggerRef.current && typeof deleteTriggerRef.current.focus === "function") {
+        try {
+          deleteTriggerRef.current.focus();
+        } catch {}
+      }
+    };
   }, [deleteTargetId]);
 
   const handleConfirmDelete = async () => {
@@ -73,7 +112,14 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
     setIsDeleting(true);
     try {
       await deletePrescriptionReport(deleteTargetId);
-      setReports((prev) => prev.filter((r) => r.report_id !== deleteTargetId));
+      setReports((prev) => {
+        const updated = prev.filter((r) => r.report_id !== deleteTargetId);
+        const maxPage = Math.max(1, Math.ceil(updated.length / PAGE_SIZE));
+        if (currentPage > maxPage) {
+          setCurrentPage(maxPage);
+        }
+        return updated;
+      });
       setDeleteTargetId(null);
     } catch (err) {
       alert("Failed to delete local report.");
@@ -267,10 +313,13 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                       </Link>
 
                       <button
-                        onClick={() => setDeleteTargetId(rep.report_id)}
-                        className="p-2.5 bg-ui-surface hover:bg-rose-50 border border-ui-border-decorative hover:border-rose-300 text-ui-text-secondary hover:text-rose-700 rounded-lg shadow-xs transition-colors"
+                        onClick={(e) => {
+                          deleteTriggerRef.current = e.currentTarget;
+                          setDeleteTargetId(rep.report_id);
+                        }}
+                        className="p-2.5 bg-ui-surface hover:bg-rose-50 border border-ui-border-decorative hover:border-rose-300 text-ui-text-secondary hover:text-rose-700 rounded-lg shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-danger"
                         title="Delete from local device"
-                        aria-label="Delete report"
+                        aria-label={`Delete report ${rep.report_id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -320,7 +369,10 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
             if (e.target === e.currentTarget) setDeleteTargetId(null);
           }}
         >
-          <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-modal max-w-md w-full p-6 space-y-4">
+          <div
+            ref={deleteDialogRef}
+            className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-modal max-w-md w-full p-6 space-y-4"
+          >
             <div className="flex items-center gap-2.5 text-ui-danger">
               <AlertTriangle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
               <h4 id="delete-report-title" className="font-serif font-semibold text-lg text-ui-text">
@@ -332,9 +384,9 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
             </p>
             <div className="flex justify-end gap-3 pt-2">
               <button
+                ref={deleteCancelBtnRef}
                 type="button"
                 onClick={() => setDeleteTargetId(null)}
-                autoFocus
                 className="px-4 py-2 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text font-semibold text-xs rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
               >
                 Cancel

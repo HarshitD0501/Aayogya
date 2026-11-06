@@ -352,12 +352,46 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
 // --- Patient detail (sections + action panel) -------------------------------
 
 function PatientDetail({ patientCard, onBack, onContactSaved }) {
-  const [active, setActive] = useState("summary");
+  const [active, setActive] = useState(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      const t = p.get("tab");
+      if (t && SECTIONS.some((s) => s.key === t)) return t;
+    }
+    return "summary";
+  });
   const [sectionVersion, setSectionVersion] = useState(0);
   const [medsList, setMedsList] = useState(null);
   const mainRef = useRef(null);
   const current = SECTIONS.find((s) => s.key === active) || SECTIONS[0];
   const Comp = current.Comp;
+
+  // Listen to browser Back/Forward for tab switching
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || "summary";
+      if (SECTIONS.some((s) => s.key === tab)) {
+        setActive(tab);
+      } else {
+        setActive("summary");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleSelectTab = (key) => {
+    setActive(key);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("tab") !== key) {
+        url.searchParams.set("tab", key);
+        window.history.pushState({ patient: patientCard.id, tab: key }, "", url.toString());
+      }
+    }
+  };
 
   // Med list for the WhatsApp prefilled text (and for the Medicines tab reuse).
   // Fix F09: Use ?include_prices=false to avoid expensive price provider lookup on text prefetch
@@ -422,7 +456,7 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
               type="button"
               className={`cg-tab ${isActive ? "active" : ""}`}
               aria-current={isActive ? "page" : undefined}
-              onClick={() => setActive(s.key)}
+              onClick={() => handleSelectTab(s.key)}
             >
               <Icon size={14} />
               <span>{s.label}</span>
@@ -433,7 +467,7 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
 
       {/* Fix F07 & F08: Key by actor/patient identity and active tab only. Never include sectionVersion in key to prevent destroying active chat/forms/voice */}
       <div ref={mainRef} key={`${patientCard.id}-${active}`}>
-        <Comp patient={patientCard} goto={setActive} pollVersion={sectionVersion} />
+        <Comp patient={patientCard} goto={handleSelectTab} pollVersion={sectionVersion} />
       </div>
     </div>
   );
@@ -510,7 +544,25 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     };
   }, [version]);
 
-  const handleOpen = (pid) => {
+  // Listen to browser Back/Forward for patient selection
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const requested = params.get("patient");
+      if (requested && cards?.some((p) => p.id === requested)) {
+        setActivePatientId(requested);
+        setOpenId(requested);
+      } else {
+        setActivePatientId(null);
+        setOpenId(null);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [cards]);
+
+  const handleOpen = (pid, tab = "summary") => {
     if (!cards?.some((card) => card.id === pid)) return;
     setActivePatientId(pid);
     setOpenId(pid);
@@ -519,7 +571,8 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("patient", pid);
-      window.history.replaceState({}, "", url.toString());
+      if (tab) url.searchParams.set("tab", tab);
+      window.history.pushState({ patient: pid, tab }, "", url.toString());
     }
   };
 
@@ -532,7 +585,8 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("patient");
-      window.history.replaceState({}, "", url.toString());
+      url.searchParams.delete("tab");
+      window.history.pushState({}, "", url.toString());
     }
   };
 

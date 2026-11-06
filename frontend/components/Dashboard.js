@@ -164,6 +164,7 @@ export default function Dashboard({
   const mainRef = useRef(null);
   const menuButtonRef = useRef(null);
   const drawerRef = useRef(null);
+  const drawerCloseBtnRef = useRef(null);
 
   const current = SECTIONS.find((s) => s.key === active) || SECTIONS[0];
   const Comp = current.Comp;
@@ -174,31 +175,72 @@ export default function Dashboard({
     }
   }, [initialSection]);
 
+  // Synchronize Back/Forward browser navigation with active tab
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || "summary";
+      if (SECTIONS.some((s) => s.key === tab)) {
+        setActive(tab);
+      } else {
+        setActive("summary");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Handle section selection and sync to URL query parameter (?tab=)
   const handleSelectSection = (key) => {
     setActive(key);
     setMobileDrawerOpen(false);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.searchParams.set("tab", key);
-      window.history.replaceState({}, "", url.toString());
+      if (url.searchParams.get("tab") !== key) {
+        url.searchParams.set("tab", key);
+        window.history.pushState({ tab: key }, "", url.toString());
+      }
     }
   };
 
-  // Escape key close and focus return for mobile drawer
+  // Escape key close, focus containment, and focus return for mobile drawer
   useEffect(() => {
     if (!mobileDrawerOpen) return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    // Set initial focus to close button
+    const timer = setTimeout(() => {
+      drawerCloseBtnRef.current?.focus();
+    }, 50);
+
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         setMobileDrawerOpen(false);
         menuButtonRef.current?.focus();
+      }
+      if (e.key === "Tab" && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        );
+        if (focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
+      clearTimeout(timer);
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -282,6 +324,7 @@ export default function Dashboard({
                 key={s.key}
                 type="button"
                 onClick={() => handleSelectSection(s.key)}
+                aria-current={isActive ? "page" : undefined}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 min-h-[40px] text-xs font-semibold rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                   isActive
                     ? "bg-ui-blue text-white shadow-sm"
@@ -377,6 +420,7 @@ export default function Dashboard({
             <div className="flex items-center justify-between pb-4 border-b border-ui-border-decorative">
               <img src="/aayogya-logo.png" alt="Ayogya" className="h-8 w-auto object-contain" />
               <button
+                ref={drawerCloseBtnRef}
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
                 aria-label="Close navigation drawer"
@@ -404,7 +448,7 @@ export default function Dashboard({
             </div>
 
             {/* Navigation Links in Drawer */}
-            <nav className="space-y-1.5 flex-1 min-h-0">
+            <nav className="space-y-1.5 flex-1 min-h-0" aria-label="Workspace navigation">
               {SECTIONS.map((s) => {
                 const Icon = s.Icon;
                 const isActive = s.key === active;
@@ -413,6 +457,7 @@ export default function Dashboard({
                     key={s.key}
                     type="button"
                     onClick={() => handleSelectSection(s.key)}
+                    aria-current={isActive ? "page" : undefined}
                     className={`w-full flex items-center gap-3 px-3.5 py-2.5 min-h-[44px] text-sm font-semibold rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
                       isActive
                         ? "bg-ui-blue text-white shadow-sm"
