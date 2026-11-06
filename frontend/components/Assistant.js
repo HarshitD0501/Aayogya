@@ -9,9 +9,9 @@ import dynamic from "next/dynamic";
 const LiveVoiceAgent = dynamic(() => import("@/components/LiveVoiceAgent"), {
   ssr: false,
   loading: () => (
-    <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box max-w-lg mx-auto my-6">
-      <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-      <p className="font-serif font-bold text-brand-navy">Initializing Live Voice System…</p>
+    <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card max-w-lg mx-auto my-6">
+      <div className="w-8 h-8 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <p className="font-serif font-semibold text-ui-text">Initializing Live Voice System…</p>
     </div>
   ),
 });

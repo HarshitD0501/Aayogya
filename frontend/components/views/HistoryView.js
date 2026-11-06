@@ -97,41 +97,41 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
   const content = (
     <ContainerTag
-      {...(hideNavbar ? { "aria-labelledby": "history-heading" } : {})}
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+      {...(hideNavbar ? { "aria-labelledby": "history-heading" } : { id: "main-content", tabIndex: -1 })}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8 focus:outline-none"
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch-hover text-xs font-bold uppercase tracking-wider text-brand-navy">
-          <History className="w-3.5 h-3.5 text-brand-orange" />
-          <span>Zero-Cloud Device Vault</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-semibold uppercase tracking-wider text-ui-text">
+          <History className="w-3.5 h-3.5 text-ui-blue" />
+          <span>Local Device Storage Vault</span>
         </div>
         <HeadingTag
           {...(hideNavbar ? { id: "history-heading" } : {})}
-          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+          className="font-serif font-semibold text-3xl sm:text-5xl text-ui-text tracking-tight leading-tight"
         >
           {t.historyTitle}
         </HeadingTag>
-        <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
+        <p className="font-sans text-sm sm:text-base text-ui-text-secondary">
           {t.historySubtitle}
         </p>
       </div>
 
       {/* Aggregate Savings Hero */}
-      <div className="p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="p-6 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card flex flex-col sm:flex-row items-center justify-between gap-6">
         <div>
-          <span className="text-xs font-sans font-black uppercase tracking-wider text-brand-navy">
+          <span className="text-xs font-sans font-semibold uppercase tracking-wider text-ui-text-secondary">
             Estimated Total Potential Savings (Cumulative)
           </span>
           <div className="flex items-baseline gap-3 mt-1">
-            <span className="font-serif font-black text-4xl sm:text-5xl text-brand-navy">
+            <span className="font-serif font-bold text-4xl sm:text-5xl text-ui-text">
               {formatPaise(totalSavingsPaise)}
             </span>
-            <span className="text-xs font-bold bg-brand-peach/40 text-brand-navy px-2.5 py-1 rounded border border-brand-navy/30 uppercase tracking-wider">
+            <span className="text-xs font-semibold bg-ui-surface-subtle text-ui-text px-2.5 py-1 rounded border border-ui-border-decorative uppercase tracking-wider">
               Across {reports.length} Saved {reports.length === 1 ? "Report" : "Reports"}
             </span>
           </div>
-          <p className="text-xs font-sans text-brand-gray mt-2">
+          <p className="text-xs font-sans text-ui-text-secondary mt-2">
             Based on verified PMBJP substitutions for {totalMedicinesCount} total medicine lines.
           </p>
         </div>
@@ -139,36 +139,28 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
         {onNavigateTab ? (
           <button
             onClick={() => onNavigateTab("search")}
-            className={
-              hideNavbar
-                ? "w-full sm:w-auto px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
-                : "w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
-            }
+            className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
           >
             + New Prescription Compare
           </button>
         ) : (
           <Link
             href="/search"
-            className={
-              hideNavbar
-                ? "w-full sm:w-auto px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
-                : "w-full sm:w-auto px-5 py-3 bg-brand-orange text-brand-navy border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover text-center"
-            }
+            className="w-full sm:w-auto inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors text-center"
           >
             + New Prescription Compare
           </Link>
         )}
       </div>
 
-      {/* Local Storage Privacy Notice */}
-      <div className="p-4 bg-brand-peach/30 border-2 border-brand-navy sketchy-box text-xs font-sans text-brand-navy flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-brand-navy flex-shrink-0 mt-0.5" />
+      {/* Local Storage Privacy Notice (U04) */}
+      <div className="p-4 bg-ui-surface border border-ui-border-decorative rounded-xl text-xs font-sans text-ui-text flex items-start gap-3 shadow-ui-card">
+        <ShieldCheck className="w-5 h-5 text-ui-blue flex-shrink-0 mt-0.5" />
         <div>
           <span className="font-bold uppercase tracking-wider block mb-0.5">
-            100% Privacy & Local Storage Law
+            Local Device Storage Notice
           </span>
-          <p className="text-brand-navy/80 leading-relaxed">
+          <p className="text-ui-text-secondary leading-relaxed">
             {t.localOnlyWarning}
           </p>
         </div>
@@ -176,35 +168,35 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
       {/* Reports List */}
       <div className="space-y-4">
-        <h3 className="font-serif font-black text-xl text-brand-navy">
+        <h3 className="font-serif font-semibold text-xl text-ui-text">
           Saved Prescription Dossiers ({reports.length})
         </h3>
 
         {loading ? (
-          <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box">
-            <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            <p className="font-serif font-bold text-brand-navy">Loading local vault…</p>
+          <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
+            <div className="w-8 h-8 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <p className="font-serif font-semibold text-ui-text">Loading local vault…</p>
           </div>
         ) : reports.length === 0 ? (
-          <div className="p-10 text-center bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch space-y-4">
-            <FileText className="w-12 h-12 text-brand-orange mx-auto stroke-[1.5]" />
-            <h4 className="font-serif font-black text-xl text-brand-navy">
+          <div className="p-10 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card space-y-4">
+            <FileText className="w-12 h-12 text-ui-blue mx-auto stroke-[1.5]" />
+            <h4 className="font-serif font-semibold text-xl text-ui-text">
               {t.emptyHistoryTitle}
             </h4>
-            <p className="font-sans text-sm text-brand-gray max-w-md mx-auto">
+            <p className="font-sans text-sm text-ui-text-secondary max-w-md mx-auto">
               {t.emptyHistoryDesc}
             </p>
             {onNavigateTab ? (
               <button
                 onClick={() => onNavigateTab("search")}
-                className="inline-block px-5 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors"
               >
                 Start First Comparison
               </button>
             ) : (
               <Link
                 href="/search"
-                className="inline-block px-5 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-colors"
               >
                 Start First Comparison
               </Link>
@@ -221,25 +213,21 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                 return (
                   <div
                     key={rep.report_id}
-                    className={
-                      hideNavbar
-                        ? "p-5 sm:p-6 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-md transition-shadow"
-                        : "p-5 sm:p-6 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-sketch-hover transition-shadow"
-                    }
+                    className="p-5 sm:p-6 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:shadow-md transition-shadow"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`font-serif ${hideNavbar ? "font-bold text-lg sm:text-xl text-ui-text" : "font-black text-lg sm:text-xl text-brand-navy"}`}>
+                        <span className="font-serif font-semibold text-lg sm:text-xl text-ui-text">
                           {rep.patient_label || "Prescription Report"}
                         </span>
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${hideNavbar ? "bg-ui-surface-subtle border border-ui-border-decorative text-ui-text" : "bg-brand-navy/5 border border-brand-navy/20 text-brand-navy"}`}>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-ui-surface-subtle border border-ui-border-decorative text-ui-text">
                           {rep.report_id}
                         </span>
                       </div>
 
-                      <p className={`font-sans text-xs ${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"}`}>
+                      <p className="font-sans text-xs text-ui-text-secondary">
                         Created:{" "}
-                        <span className={`font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
+                        <span className="font-semibold text-ui-text">
                           {new Date(rep.created_at).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
@@ -251,18 +239,18 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
                       <div className="flex items-center gap-4 text-xs font-sans pt-1">
                         <div>
-                          <span className={`${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"} block text-[10px] uppercase font-bold`}>
+                          <span className="text-ui-text-secondary block text-[10px] uppercase font-bold">
                             Generic Total:
                           </span>
-                          <span className={`font-serif font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
+                          <span className="font-serif font-bold text-ui-text">
                             {pmbjpTotal ? formatPaise(pmbjpTotal) : "₹--"}
                           </span>
                         </div>
                         <div>
-                          <span className={`${hideNavbar ? "text-ui-text-secondary" : "text-brand-gray"} block text-[10px] uppercase font-bold`}>
+                          <span className="text-ui-text-secondary block text-[10px] uppercase font-bold">
                             Potential Saving:
                           </span>
-                          <span className="font-serif font-black text-emerald-800">
+                          <span className="font-serif font-bold text-ui-success">
                             {saving ? formatPaise(saving) : "₹0"}
                           </span>
                         </div>
@@ -272,23 +260,15 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                     <div className="flex items-center gap-2.5 w-full sm:w-auto">
                       <Link
                         href={`/prescriptions/${rep.report_id}`}
-                        className={
-                          hideNavbar
-                            ? "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-sm transition-colors"
-                            : "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-navy text-brand-cream border-2 border-brand-navy font-serif font-black text-xs uppercase tracking-wider sketchy-btn shadow-sketch hover:shadow-sketch-hover"
-                        }
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 min-h-[40px] px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-sm transition-colors"
                       >
-                        <ExternalLink className={`w-3.5 h-3.5 ${hideNavbar ? "text-white" : "text-brand-orange"}`} />
+                        <ExternalLink className="w-3.5 h-3.5 text-white" />
                         <span>Open & Print</span>
                       </Link>
 
                       <button
                         onClick={() => setDeleteTargetId(rep.report_id)}
-                        className={
-                          hideNavbar
-                            ? "p-2 bg-ui-surface hover:bg-rose-50 border border-ui-border-decorative hover:border-rose-300 text-ui-text-secondary hover:text-rose-700 rounded-lg shadow-sm transition-colors"
-                            : "p-2.5 bg-brand-cream hover:bg-red-100 border-2 border-brand-navy text-brand-navy hover:text-red-700 rounded transition-colors"
-                        }
+                        className="p-2.5 bg-ui-surface hover:bg-rose-50 border border-ui-border-decorative hover:border-rose-300 text-ui-text-secondary hover:text-rose-700 rounded-lg shadow-xs transition-colors"
                         title="Delete from local device"
                         aria-label="Delete report"
                       >
@@ -301,19 +281,15 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
 
             {/* Pagination Controls */}
             {reports.length > PAGE_SIZE && (
-              <div className={`flex items-center justify-between pt-4 ${hideNavbar ? "border-t border-ui-border-decorative" : "border-t-2 border-brand-navy/10"} text-xs font-sans`}>
+              <div className="flex items-center justify-between pt-4 border-t border-ui-border-decorative text-xs font-sans">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className={
-                    hideNavbar
-                      ? "px-3 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-sm transition-colors disabled:opacity-40"
-                      : "px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
-                  }
+                  className="px-3.5 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-xs transition-colors disabled:opacity-40"
                 >
                   ← Previous
                 </button>
-                <span className={`font-bold ${hideNavbar ? "text-ui-text" : "text-brand-navy"}`}>
+                <span className="font-semibold text-ui-text">
                   Page {currentPage} of {Math.ceil(reports.length / PAGE_SIZE)} ({reports.length} total)
                 </span>
                 <button
@@ -323,11 +299,7 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
                     )
                   }
                   disabled={currentPage >= Math.ceil(reports.length / PAGE_SIZE)}
-                  className={
-                    hideNavbar
-                      ? "px-3 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-sm transition-colors disabled:opacity-40"
-                      : "px-3 py-1.5 border-2 border-brand-navy bg-brand-cream hover:bg-brand-white disabled:opacity-40 font-bold uppercase tracking-wider transition-colors"
-                  }
+                  className="px-3.5 py-1.5 border border-ui-border-decorative bg-ui-surface hover:bg-ui-surface-subtle text-ui-text rounded-lg font-semibold text-xs shadow-xs transition-colors disabled:opacity-40"
                 >
                   Next →
                 </button>
@@ -389,7 +361,7 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
   }
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col">
+    <div className="min-h-screen bg-ui-canvas text-ui-text flex flex-col font-sans">
       <Navbar activeTab="history" />
       <div className="flex-1">{content}</div>
     </div>

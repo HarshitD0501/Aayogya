@@ -32,8 +32,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-brand-peach selection:text-brand-navy" suppressHydrationWarning>
-        {/* Global Paper Texture Overlay */}
-        <div className="fixed inset-0 pointer-events-none z-50 bg-paper-texture mix-blend-multiply" />
         <LanguageProvider>
           <AuthProvider>
             {children}

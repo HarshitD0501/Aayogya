@@ -12,9 +12,9 @@ export default function Disclaimer({ compact = false }) {
       <aside
         role="note"
         aria-label="Medical notice"
-        className="flex items-center gap-2 p-3 bg-brand-peach/20 border border-brand-navy/30 text-xs text-brand-navy/90 rounded-sm"
+        className="flex items-center gap-2.5 p-3 bg-ui-surface border border-ui-border-decorative text-xs text-ui-text rounded-lg shadow-xs"
       >
-        <ShieldAlert className="w-4 h-4 text-brand-orange flex-shrink-0" />
+        <ShieldAlert className="w-4 h-4 text-ui-blue flex-shrink-0" />
         <span className="font-sans font-medium">{t.disclaimerText}</span>
       </aside>
     );
@@ -24,20 +24,20 @@ export default function Disclaimer({ compact = false }) {
     <aside
       role="note"
       aria-label="Medical notice"
-      className="p-4 sm:p-5 bg-brand-peach/30 border-2 border-brand-navy sketchy-box shadow-sketch my-6"
+      className="p-4 sm:p-5 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card my-6"
     >
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-brand-orange/30 border-2 border-brand-navy flex items-center justify-center flex-shrink-0 mt-0.5">
-          <ShieldAlert className="w-5 h-5 text-brand-navy" />
+        <div className="w-8 h-8 rounded-full bg-ui-surface-subtle border border-ui-border-decorative flex items-center justify-center flex-shrink-0 mt-0.5 text-ui-blue">
+          <ShieldAlert className="w-4 h-4" />
         </div>
         <div>
-          <h4 className="font-serif font-black text-sm uppercase tracking-wider text-brand-navy mb-1 flex items-center gap-2">
+          <h4 className="font-serif font-semibold text-sm text-ui-text mb-1 flex items-center gap-2">
             <span>{t.disclaimerTitle}</span>
-            <span className="text-[10px] font-sans font-bold bg-brand-navy text-brand-cream px-2 py-0.5 uppercase tracking-widest rounded-full">
-              Legal Compliance
+            <span className="text-[10px] font-sans font-semibold bg-ui-surface-subtle text-ui-text border border-ui-border-decorative px-2 py-0.5 uppercase tracking-wider rounded-full">
+              Medical Guidance Notice
             </span>
           </h4>
-          <p className="font-sans text-xs sm:text-sm text-brand-navy/80 font-medium leading-relaxed">
+          <p className="font-sans text-xs sm:text-sm text-ui-text-secondary leading-relaxed">
             {t.disclaimerText}
           </p>
         </div>

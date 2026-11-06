@@ -27,9 +27,36 @@ export default function Navbar({
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const toggleBtnRef = useRef(null);
 
   const isShell = inAppShell || pathname === "/app";
+
+  // Active section tracking for landing page anchors (U03)
+  useEffect(() => {
+    if (!isLanding) return;
+    const sectionIds = ["how-it-works", "product", "faq"];
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 140;
+      let current = "";
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            current = `#${id}`;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLanding]);
 
   // Handle Escape key to close mobile drawer and return focus
   useEffect(() => {
@@ -64,6 +91,7 @@ export default function Navbar({
   const navLinks = isLanding ? landingNavLinks : appNavLinks;
 
   const isCurrentActive = (item) => {
+    if (item.isAnchor) return activeSection === item.href;
     if (activeTab) return activeTab === item.tab;
     return pathname === item.href;
   };
@@ -77,13 +105,23 @@ export default function Navbar({
         el.scrollIntoView({ behavior: "smooth" });
         el.focus({ preventScroll: true });
       }
+      setActiveSection(href);
       setMobileMenuOpen(false);
     }
   };
 
   return (
     <header className="sticky top-0 z-40 bg-ui-canvas/95 backdrop-blur-md border-b border-ui-border-decorative transition-colors">
-      <a href="#main-content" className="skip-link">
+      <a
+        href="#main-content"
+        className="skip-link"
+        onClick={(e) => {
+          const el = document.getElementById("main-content");
+          if (el) {
+            el.focus({ preventScroll: true });
+          }
+        }}
+      >
         Skip to main content
       </a>
 
@@ -115,8 +153,13 @@ export default function Navbar({
                 <a
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "true" : undefined}
                   onClick={(e) => handleAnchorClick(e, item.href)}
-                  className="px-3.5 py-2 text-xs font-semibold text-ui-text hover:text-ui-blue hover:bg-ui-surface rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-1"
+                  className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue focus-visible:ring-offset-1 ${
+                    active
+                      ? "bg-ui-surface text-ui-blue border border-ui-border-decorative shadow-sm"
+                      : "text-ui-text hover:text-ui-blue hover:bg-ui-surface/60"
+                  }`}
                 >
                   {item.label}
                 </a>
@@ -231,8 +274,13 @@ export default function Navbar({
                 <a
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "true" : undefined}
                   onClick={(e) => handleAnchorClick(e, item.href)}
-                  className="flex items-center min-h-[44px] px-4 py-2.5 text-sm font-semibold text-ui-text hover:text-ui-blue bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue"
+                  className={`flex items-center min-h-[44px] px-4 py-2.5 text-sm font-semibold rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue ${
+                    active
+                      ? "bg-ui-surface text-ui-blue border-ui-blue shadow-sm"
+                      : "bg-ui-surface text-ui-text border-ui-border-decorative hover:bg-ui-surface-subtle"
+                  }`}
                 >
                   {item.label}
                 </a>

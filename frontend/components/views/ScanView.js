@@ -222,8 +222,8 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
 
   const content = (
     <ContainerTag
-      {...(hideNavbar ? { "aria-labelledby": "scan-heading" } : {})}
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+      {...(hideNavbar ? { "aria-labelledby": "scan-heading" } : { id: "main-content", tabIndex: -1 })}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8 focus:outline-none"
     >
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -248,31 +248,31 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="p-5 border-2 border-dashed border-brand-navy/40 hover:border-brand-navy bg-brand-cream/50 hover:bg-brand-peach/30 transition-all flex flex-col items-center justify-center gap-3 text-center group"
+            className="p-5 border border-dashed border-ui-border-decorative hover:border-ui-blue bg-ui-surface-subtle/40 hover:bg-ui-surface-subtle transition-all rounded-xl flex flex-col items-center justify-center gap-3 text-center group"
           >
-            <div className="w-12 h-12 rounded-full bg-brand-orange/20 border-2 border-brand-navy flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Upload className="w-6 h-6 text-brand-navy" />
+            <div className="w-12 h-12 rounded-full bg-ui-surface border border-ui-border-decorative text-ui-blue flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+              <Upload className="w-6 h-6" />
             </div>
             <div>
-              <span className="font-serif font-black text-base text-brand-navy block">
+              <span className="font-serif font-semibold text-base text-ui-text block">
                 {t.uploadButton}
               </span>
-              <span className="text-[11px] font-sans text-brand-gray">JPEG, PNG, WebP up to 5MB</span>
+              <span className="text-[11px] font-sans text-ui-text-secondary">JPEG, PNG, WebP up to 5MB</span>
             </div>
           </button>
 
           <button
             onClick={() => cameraInputRef.current?.click()}
-            className="p-5 border-2 border-dashed border-brand-navy/40 hover:border-brand-navy bg-brand-cream/50 hover:bg-brand-peach/30 transition-all flex flex-col items-center justify-center gap-3 text-center group"
+            className="p-5 border border-dashed border-ui-border-decorative hover:border-ui-blue bg-ui-surface-subtle/40 hover:bg-ui-surface-subtle transition-all rounded-xl flex flex-col items-center justify-center gap-3 text-center group"
           >
-            <div className="w-12 h-12 rounded-full bg-brand-orange text-brand-navy border-2 border-brand-navy flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Camera className="w-6 h-6 text-brand-navy" />
+            <div className="w-12 h-12 rounded-full bg-ui-surface border border-ui-border-decorative text-ui-blue flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+              <Camera className="w-6 h-6" />
             </div>
             <div>
-              <span className="font-serif font-black text-base text-brand-navy block">
+              <span className="font-serif font-semibold text-base text-ui-text block">
                 {t.cameraButton}
               </span>
-              <span className="text-[11px] font-sans text-brand-gray">Snap directly from mobile</span>
+              <span className="text-[11px] font-sans text-ui-text-secondary">Snap directly from mobile</span>
             </div>
           </button>
         </div>
@@ -296,29 +296,29 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
 
         {/* Validation Error */}
         {validationError && (
-          <div className="p-3 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />
+          <div role="alert" className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-700 flex-shrink-0" />
             <span>{validationError}</span>
           </div>
         )}
 
         {/* Staged Image Preview */}
         {previewUrl && (
-          <div className="border-2 border-brand-navy p-4 bg-brand-cream space-y-4">
+          <div className="border border-ui-border-decorative rounded-xl p-4 bg-ui-surface-subtle/50 space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-black uppercase tracking-wider text-brand-navy">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ui-text">
                 Selected Image Preview
               </span>
               <button
                 onClick={() => handleFileChange(null)}
-                className="text-xs text-red-700 hover:text-red-900 font-bold flex items-center gap-1"
+                className="text-xs text-ui-danger hover:underline font-semibold flex items-center gap-1"
               >
                 <XCircle className="w-4 h-4" />
                 <span>Remove Image</span>
               </button>
             </div>
 
-            <div className="max-h-64 overflow-hidden rounded border border-brand-navy/30 bg-black/5 flex items-center justify-center">
+            <div className="max-h-64 overflow-hidden rounded-lg border border-ui-border-decorative bg-ui-surface flex items-center justify-center">
               <img
                 src={previewUrl}
                 alt="Prescription preview"
@@ -431,16 +431,16 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
                 )}
               </div>
             ) : (
-              <div className="p-3.5 bg-brand-peach/40 border-2 border-brand-navy flex items-start gap-3">
-                <ShieldAlert className="w-5 h-5 text-brand-navy flex-shrink-0 mt-0.5" />
+              <div className="p-4 bg-ui-surface-subtle border border-ui-border-decorative rounded-xl flex items-start gap-3 shadow-xs">
+                <ShieldAlert className="w-5 h-5 text-ui-blue flex-shrink-0 mt-0.5" />
                 <div className="text-xs font-sans">
-                  <span className="font-black uppercase tracking-wider block text-brand-navy mb-0.5">
+                  <span className="font-bold uppercase tracking-wider block text-ui-text mb-0.5">
                     GUEST LOCAL PREVIEW (NOT SAVED TO HEALTH RECORDS)
                   </span>
-                  <p className="text-brand-navy/80 font-medium">
+                  <p className="text-ui-text-secondary font-medium">
                     {t.ocrNotice}
                   </p>
-                  <p className="text-brand-gray text-[11px] mt-1.5 italic border-t border-brand-navy/10 pt-1">
+                  <p className="text-ui-text-secondary text-[11px] mt-1.5 italic border-t border-ui-border-decorative/60 pt-1">
                     Sign in to your patient account to confirm this prescription and activate automated WhatsApp dose reminders.
                   </p>
                 </div>
@@ -448,27 +448,27 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
             )}
 
             <div>
-              <h4 className="font-serif font-black text-sm text-brand-navy uppercase tracking-wider mb-2">
+              <h4 className="font-serif font-semibold text-sm text-ui-text uppercase tracking-wider mb-2">
                 Observed Medicine Candidates (Review Before Activation)
               </h4>
               <div className="space-y-2">
                 {ocrResponse.suggestions?.map((sug, idx) => (
                   <div
                     key={idx}
-                    className="p-3 bg-brand-cream border-2 border-brand-navy flex items-center justify-between gap-4"
+                    className="p-3.5 bg-ui-surface border border-ui-border-decorative rounded-xl flex items-center justify-between gap-4 shadow-xs"
                   >
                     <div>
-                      <span className="font-serif font-bold text-sm text-brand-navy">
+                      <span className="font-serif font-semibold text-sm text-ui-text">
                         "{sug.observed_text}"
                       </span>
-                      <span className="text-[10px] font-sans font-bold text-brand-gray block mt-0.5">
+                      <span className="text-[10px] font-sans font-medium text-ui-text-secondary block mt-0.5">
                         Extracted tokens: {sug.query_tokens.join(", ")}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleManualSearch(sug.query_tokens.join(" "))}
-                      className="px-3.5 py-1.5 bg-ui-amber hover:bg-ui-amber-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                      className="px-3.5 py-1.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
                     >
                       Verify & Match
                     </button>
@@ -477,11 +477,11 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
               </div>
             </div>
 
-            <details className="bg-brand-cream p-3 border border-brand-navy/20 rounded text-xs">
-              <summary className="font-bold text-brand-navy cursor-pointer">
+            <details className="bg-ui-surface-subtle p-3.5 border border-ui-border-decorative rounded-xl text-xs">
+              <summary className="font-semibold text-ui-text cursor-pointer">
                 View Raw OCR Text Dump
               </summary>
-              <pre className="mt-2 font-mono text-[11px] bg-brand-white p-2 border border-brand-navy/10 rounded whitespace-pre-wrap text-brand-gray">
+              <pre className="mt-2 font-mono text-[11px] bg-ui-surface p-2.5 border border-ui-border-decorative rounded-lg whitespace-pre-wrap text-ui-text-secondary">
                 {ocrResponse.ocr_text}
               </pre>
             </details>
@@ -489,12 +489,12 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
         )}
 
         {/* Permanent Manual Correction / Search Fallback */}
-        <div className="pt-6 border-t-2 border-brand-navy/10 space-y-3">
-          <h4 className="font-serif font-black text-base text-brand-navy flex items-center gap-2">
-            <Search className="w-4 h-4 text-brand-orange" />
+        <div className="pt-6 border-t border-ui-border-decorative/60 space-y-3">
+          <h4 className="font-serif font-semibold text-base text-ui-text flex items-center gap-2">
+            <Search className="w-4 h-4 text-ui-blue" />
             <span>Manual Search & Correction Fallback</span>
           </h4>
-          <p className="font-sans text-xs text-brand-gray">
+          <p className="font-sans text-xs text-ui-text-secondary">
             If handwriting or box scan was unclear, type the medicine name directly:
           </p>
 
@@ -510,7 +510,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
                 onChange={(e) => setCorrectionQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleManualSearch(correctionQuery)}
                 placeholder="Type medicine name (e.g. Dolo 500, Metformin)…"
-                className="flex-1 bg-brand-white border-2 border-brand-navy px-3 py-2 text-sm font-sans font-medium text-brand-navy placeholder:text-brand-gray/60 focus:outline-none"
+                className="flex-1 bg-ui-surface border border-ui-control-border rounded-lg px-3.5 py-2.5 text-sm font-sans font-medium text-ui-text placeholder:text-ui-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-ui-blue"
               />
               <button
                 type="button"
@@ -526,17 +526,17 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           {searchError && (
             <div
               role="alert"
-              className="p-3 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center justify-between gap-3 shadow-xs"
+              className="p-3.5 bg-rose-50 border border-rose-200 text-rose-900 text-xs font-medium rounded-xl flex items-center justify-between gap-3 shadow-xs"
             >
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-800 flex-shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-rose-700 flex-shrink-0" />
                 <span>{searchError}</span>
               </div>
               {correctionQuery.trim() && (
                 <button
                   type="button"
                   onClick={() => handleManualSearch(correctionQuery)}
-                  className="px-2 py-0.5 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[10px]"
+                  className="px-2.5 py-1 bg-rose-700 text-white hover:bg-rose-800 rounded font-semibold uppercase tracking-wider text-[10px]"
                 >
                   Retry
                 </button>
@@ -545,23 +545,23 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           )}
 
           {candidates.length > 0 && (
-            <div className="border-2 border-brand-navy divide-y divide-brand-navy/10 bg-brand-white mt-3">
+            <div className="border border-ui-border-decorative rounded-xl divide-y divide-ui-border-decorative/60 bg-ui-surface mt-3 overflow-hidden shadow-xs">
               {candidates.map((cand) => (
                 <button
                   type="button"
                   key={cand.medicine_id}
                   onClick={() => handleSelectCandidate(cand)}
-                  className="w-full p-3 hover:bg-brand-cream text-left flex justify-between items-center transition-colors focus:outline-none focus:bg-brand-cream"
+                  className="w-full p-3.5 hover:bg-ui-surface-subtle text-left flex justify-between items-center transition-colors focus:outline-none focus:bg-ui-surface-subtle"
                 >
                   <div>
-                    <span className="font-serif font-bold text-sm text-brand-navy block">
+                    <span className="font-serif font-semibold text-sm text-ui-text block">
                       {cand.matched_text || cand.molecule_label}
                     </span>
-                    <span className="text-xs text-brand-gray block mt-0.5">
+                    <span className="text-xs text-ui-text-secondary block mt-0.5">
                       {cand.strength_label} • {cand.form}
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-brand-orange uppercase tracking-wider flex-shrink-0">
+                  <span className="text-xs font-semibold text-ui-blue uppercase tracking-wider flex-shrink-0">
                     Select →
                   </span>
                 </button>
@@ -618,7 +618,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
   }
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col">
+    <div className="min-h-screen bg-ui-canvas text-ui-text flex flex-col font-sans">
       <Navbar activeTab="scan" />
       <div className="flex-1">{content}</div>
     </div>

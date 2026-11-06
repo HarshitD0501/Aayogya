@@ -20,47 +20,47 @@ export default function PriceComparisonHero({
   const hasPmbjp = Boolean(item.pmbjp_price);
 
   return (
-    <div className="bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch p-5 sm:p-7 space-y-6 animate-in zoom-in-95 duration-200">
+    <div className="bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card p-5 sm:p-7 space-y-6 animate-in zoom-in-95 duration-200">
       
       {/* Header: Exact Medicine Identity */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-brand-navy/10 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-ui-border-decorative/60 pb-5">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-[10px] font-sans font-black uppercase tracking-widest bg-brand-orange text-brand-navy px-2.5 py-0.5 rounded-full border border-brand-navy">
+            <span className="text-[10px] font-sans font-semibold uppercase tracking-wider bg-ui-surface-subtle text-ui-text px-2.5 py-0.5 rounded-full border border-ui-border-decorative">
               PMBJP Code: {item.pmbjp_product_code || "Not verified"}
             </span>
             {item.release_type && (
-              <span className="text-[10px] font-sans font-bold bg-brand-navy/5 text-brand-navy px-2 py-0.5 rounded">
+              <span className="text-[10px] font-sans font-medium bg-ui-surface-subtle text-ui-text-secondary px-2 py-0.5 rounded border border-ui-border-decorative">
                 {item.release_type}
               </span>
             )}
           </div>
-          <h3 className="font-serif font-black text-2xl sm:text-3xl text-brand-navy tracking-tight">
+          <h3 className="font-serif font-semibold text-2xl sm:text-3xl text-ui-text tracking-tight">
             {item.matched_text || item.molecule_label}
           </h3>
-          <p className="font-sans text-sm text-brand-gray mt-1">
-            <span className="font-bold text-brand-navy">Molecule:</span> {item.molecule_label} •{" "}
-            <span className="font-bold text-brand-navy">Strength:</span> {item.strength_label} •{" "}
-            <span className="font-bold text-brand-navy">Form:</span> {item.form} •{" "}
-            <span className="font-bold text-brand-navy">Pack:</span> {item.pack_label}
+          <p className="font-sans text-sm text-ui-text-secondary mt-1">
+            <span className="font-semibold text-ui-text">Molecule:</span> {item.molecule_label} •{" "}
+            <span className="font-semibold text-ui-text">Strength:</span> {item.strength_label} •{" "}
+            <span className="font-semibold text-ui-text">Form:</span> {item.form} •{" "}
+            <span className="font-semibold text-ui-text">Pack:</span> {item.pack_label}
           </p>
         </div>
 
         {/* Quantity Stepper */}
-        <div className="flex items-center gap-2 self-start bg-brand-cream border-2 border-brand-navy sketchy-box px-3 py-1.5 shadow-sketch-hover">
-          <span className="text-xs font-black uppercase tracking-wider text-brand-navy mr-1">Qty:</span>
+        <div className="flex items-center gap-2 self-start bg-ui-surface border border-ui-control-border rounded-lg px-3 py-1.5 shadow-xs">
+          <span className="text-xs font-semibold uppercase tracking-wider text-ui-text mr-1">Qty:</span>
           <button
             onClick={() => onPackCountChange && onPackCountChange(Math.max(1, packCount - 1))}
-            className="w-6 h-6 bg-brand-white border border-brand-navy rounded flex items-center justify-center font-bold text-brand-navy hover:bg-brand-peach/40"
+            className="w-6 h-6 bg-ui-surface border border-ui-control-border rounded flex items-center justify-center font-bold text-ui-text hover:bg-ui-surface-subtle transition-colors"
             disabled={packCount <= 1}
             aria-label="Decrease pack quantity"
           >
             <Minus className="w-3 h-3" />
           </button>
-          <span className="font-mono font-black text-sm text-brand-navy px-2">{packCount}</span>
+          <span className="font-mono font-bold text-sm text-ui-text px-2">{packCount}</span>
           <button
             onClick={() => onPackCountChange && onPackCountChange(packCount + 1)}
-            className="w-6 h-6 bg-brand-white border border-brand-navy rounded flex items-center justify-center font-bold text-brand-navy hover:bg-brand-peach/40"
+            className="w-6 h-6 bg-ui-surface border border-ui-control-border rounded flex items-center justify-center font-bold text-ui-text hover:bg-ui-surface-subtle transition-colors"
             aria-label="Increase pack quantity"
           >
             <Plus className="w-3 h-3" />
@@ -72,29 +72,29 @@ export default function PriceComparisonHero({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Jan Aushadhi (PMBJP) Price */}
-        <div className="p-4 bg-brand-cream border-2 border-brand-navy sketchy-box shadow-sketch flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-2 right-2">
-            <span className="text-[9px] font-sans font-black bg-brand-orange text-brand-navy px-2 py-0.5 uppercase tracking-widest border border-brand-navy rounded">
+        <div className="p-5 bg-ui-surface-subtle border border-ui-border-decorative rounded-xl flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-3 right-3">
+            <span className="text-[10px] font-sans font-semibold bg-ui-blue text-white px-2 py-0.5 uppercase tracking-wider rounded">
               Govt Generic
             </span>
           </div>
           <div>
-            <span className="text-[11px] font-sans font-black uppercase tracking-wider text-brand-gray">
+            <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-ui-text-secondary">
               Pradhan Mantri Jan Aushadhi
             </span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-serif font-black text-3xl sm:text-4xl text-brand-navy">
+              <span className="font-serif font-bold text-3xl sm:text-4xl text-ui-text">
                 {hasPmbjp ? formatPaise(item.pmbjp_price.amount_paise) : "₹--"}
               </span>
-              <span className="text-xs font-sans text-brand-gray font-medium">
+              <span className="text-xs font-sans text-ui-text-secondary font-medium">
                 /{item.pmbjp_price?.unit || "pack"}
               </span>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-brand-navy/10 text-[10px] text-brand-gray space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-ui-border-decorative/60 text-[11px] text-ui-text-secondary space-y-0.5">
             <div className="flex justify-between">
               <span>Source:</span>
-              <span className="font-semibold text-brand-navy">
+              <span className="font-medium text-ui-text">
                 {item.pmbjp_price?.source || "PMBJP Official Catalogue"}
               </span>
             </div>
@@ -106,29 +106,29 @@ export default function PriceComparisonHero({
         </div>
 
         {/* Branded Market MRP */}
-        <div className="p-4 bg-brand-white border-2 border-brand-navy/60 rounded-sm flex flex-col justify-between">
+        <div className="p-5 bg-ui-surface border border-ui-border-decorative rounded-xl flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-brand-gray">
+            <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-ui-text-secondary">
               Branded Market Price
             </span>
             {item.brand_name && (
-              <span className="text-[9px] font-bold bg-brand-navy/5 text-brand-navy px-1.5 py-0.5 rounded">
+              <span className="text-[9px] font-semibold bg-ui-surface-subtle text-ui-text border border-ui-border-decorative px-1.5 py-0.5 rounded">
                 {item.brand_name}
               </span>
             )}
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-serif font-black text-3xl sm:text-4xl text-brand-navy/70 line-through">
+            <span className="font-serif font-bold text-3xl sm:text-4xl text-ui-text/50 line-through">
               {hasMarket ? formatPaise(item.market_price.amount_paise) : "₹--"}
             </span>
-            <span className="text-xs font-sans text-brand-gray font-medium">
+            <span className="text-xs font-sans text-ui-text-secondary font-medium">
               /{item.market_price?.unit || "pack"}
             </span>
           </div>
-          <div className="mt-4 pt-3 border-t border-brand-navy/10 text-[10px] text-brand-gray space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-ui-border-decorative/60 text-[11px] text-ui-text-secondary space-y-0.5">
             <div className="flex justify-between">
               <span>Source:</span>
-              <span className="font-semibold text-brand-navy">
+              <span className="font-medium text-ui-text">
                 {item.market_price?.source || "Retail Reference Database"}
               </span>
             </div>
@@ -140,28 +140,28 @@ export default function PriceComparisonHero({
         </div>
 
         {/* NPPA Ceiling Price */}
-        <div className="p-4 bg-brand-white border-2 border-brand-navy/30 rounded-sm flex flex-col justify-between">
-          <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-brand-gray">
+        <div className="p-5 bg-ui-surface border border-ui-border-decorative rounded-xl flex flex-col justify-between">
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-ui-text-secondary">
             NPPA Ceiling Cap
           </span>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-serif font-black text-2xl sm:text-3xl text-brand-navy/80">
+            <span className="font-serif font-bold text-2xl sm:text-3xl text-ui-text">
               {item.nppa_ceiling_price ? formatPaise(item.nppa_ceiling_price.amount_paise) : "No Cap Set"}
             </span>
             {item.nppa_ceiling_price && (
-              <span className="text-xs font-sans text-brand-gray">
+              <span className="text-xs font-sans text-ui-text-secondary">
                 /{item.nppa_ceiling_price.unit}
               </span>
             )}
           </div>
-          <div className="mt-4 pt-3 border-t border-brand-navy/10 text-[10px] text-brand-gray space-y-0.5">
+          <div className="mt-4 pt-3 border-t border-ui-border-decorative/60 text-[11px] text-ui-text-secondary space-y-0.5">
             <div className="flex justify-between">
               <span>Regulation:</span>
-              <span className="font-semibold text-brand-navy">DPCO 2013</span>
+              <span className="font-medium text-ui-text">DPCO 2013</span>
             </div>
             <div className="flex justify-between">
               <span>Status:</span>
-              <span className="text-emerald-700 font-bold">Price Regulated</span>
+              <span className="text-ui-success font-semibold">Price Regulated</span>
             </div>
           </div>
         </div>
@@ -169,20 +169,20 @@ export default function PriceComparisonHero({
 
       {/* Verified Savings Callout Hero */}
       {hasSavings ? (
-        <div className="p-4 sm:p-5 bg-brand-orange/20 border-2 border-brand-navy sketchy-box flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 bg-[#EAF5EC] border border-[#BDDDC2] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-brand-orange text-brand-navy border-2 border-brand-navy flex items-center justify-center flex-shrink-0 font-bold">
+            <div className="w-10 h-10 rounded-full bg-ui-success text-white flex items-center justify-center flex-shrink-0 font-bold">
               ✓
             </div>
             <div>
-              <span className="text-xs font-sans font-black uppercase tracking-wider text-brand-navy">
+              <span className="text-xs font-sans font-bold uppercase tracking-wider text-ui-success">
                 Verified Potential Savings
               </span>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="font-serif font-black text-2xl sm:text-3xl text-brand-navy">
+                <span className="font-serif font-bold text-2xl sm:text-3xl text-ui-success">
                   Save {formatPaise(item.saving_paise)}
                 </span>
-                <span className="text-sm font-sans font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-sans font-bold text-ui-success bg-white/70 border border-[#BDDDC2] px-2.5 py-0.5 rounded-full">
                   {formatPercent(item.saving_percent)} Less
                 </span>
               </div>
@@ -195,7 +195,7 @@ export default function PriceComparisonHero({
             disabled={isAdding}
             className={`px-5 py-3 font-semibold text-sm rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 ${
               addedSuccess
-                ? "bg-emerald-600 text-white border border-emerald-700"
+                ? "bg-ui-success text-white border border-ui-success"
                 : "bg-ui-blue hover:bg-ui-blue-hover text-white"
             }`}
           >
@@ -213,8 +213,8 @@ export default function PriceComparisonHero({
           </button>
         </div>
       ) : (
-        <div className="p-4 bg-brand-cream border-2 border-dashed border-brand-navy/30 text-xs text-brand-gray font-medium flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-brand-orange flex-shrink-0" />
+        <div className="p-4 bg-ui-surface-subtle border border-dashed border-ui-border-decorative rounded-xl text-xs text-ui-text-secondary font-medium flex items-center gap-2.5">
+          <AlertTriangle className="w-4 h-4 text-ui-warning flex-shrink-0" />
           <span>No verified comparison available for this exact brand match. Showing individual pricing for transparency.</span>
         </div>
       )}

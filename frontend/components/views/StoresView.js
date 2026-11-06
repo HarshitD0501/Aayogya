@@ -251,8 +251,8 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
 
   const content = (
     <ContainerTag
-      {...(hideNavbar ? { "aria-labelledby": "stores-heading" } : {})}
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-7"
+      {...(hideNavbar ? { "aria-labelledby": "stores-heading" } : { id: "main-content", tabIndex: -1 })}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-7 focus:outline-none"
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">

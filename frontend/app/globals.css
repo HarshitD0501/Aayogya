@@ -3372,8 +3372,8 @@ html { scroll-behavior: smooth; }
    ============================================================== */
 
 body {
-  background-color: #f5f2eb !important;
-  color: #1a2234 !important;
+  background-color: var(--ui-canvas, #F8F5EE);
+  color: var(--ui-text, #172B4D);
 }
 
 /* Hand-drawn organic border radius simulation */
@@ -3430,80 +3430,8 @@ body {
 }
 
 
-/* ==============================================================
-   UNIVERSALITY LAW: PWA & WORKSPACE DOSSIER SYSTEM
-   ============================================================== */
-
-.card, .pwa-card, .dossier-card {
-  background: #ffffff !important;
-  border: 2px solid #1a2234 !important;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  box-shadow: 4px 4px 0px 0px #1a2234 !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-}
-
-.card:hover, .pwa-card:hover, .dossier-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 2px 2px 0px 0px #1a2234 !important;
-}
-
-.btn, .ed-btn, button.btn {
-  border: 2px solid #1a2234 !important;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  font-size: 11px !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-}
-
-.btn-primary, .btn-brand, .btn-gold, .ed-btn-gold {
-  background: #e8a838 !important;
-  color: #1a2234 !important;
-  border: 2px solid #1a2234 !important;
-  box-shadow: 4px 4px 0px 0px #1a2234 !important;
-}
-
-.btn-primary:hover, .btn-brand:hover, .btn-gold:hover, .ed-btn-gold:hover {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 2px 2px 0px 0px #1a2234 !important;
-}
-
-.btn-outline, .btn-ghost {
-  background: transparent !important;
-  color: #1a2234 !important;
-  border: 2px solid #1a2234 !important;
-}
-
-.btn-outline:hover, .btn-ghost:hover {
-  background: #ffffff !important;
-}
-
-.sidebar {
-  background: #f5f2eb !important;
-  border-right: 2px solid #1a2234 !important;
-}
-
-.topbar {
-  background: rgba(245, 242, 235, 0.95) !important;
-  border-bottom: 2px solid #1a2234 !important;
-}
-
-.nav-item.active {
-  background: #e8a838 !important;
-  color: #1a2234 !important;
-  border: 2px solid #1a2234 !important;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  box-shadow: 2px 2px 0px 0px #1a2234 !important;
-}
-
-.who-card {
-  background: #ffffff !important;
-  color: #1a2234 !important;
-  border: 2px solid #1a2234 !important;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  box-shadow: 4px 4px 0px 0px #1a2234 !important;
-}
+/* Legacy sketch rules removed to restore design system hierarchy (U02).
+   Protected hero component SahayakPlayerCard uses .sketchy-box and .sketchy-btn directly. */
 
 /* ==========================================================================
    Scoped Design System Foundations (.landing-v2, .workspace-v2, .ui-modal-root)

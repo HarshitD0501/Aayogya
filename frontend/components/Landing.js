@@ -45,7 +45,7 @@ const FAQS = [
   },
   {
     q: "How do caregivers access a patient's records?",
-    a: "Caregivers can only access a patient's health records after the patient grants explicit linked consent. Access is authenticated server-side on every request, ensuring complete privacy and isolation between family accounts.",
+    a: "Caregivers can only access a patient's health records after the patient grants explicit linked consent. Access is authenticated server-side on every request, ensuring access isolation between family accounts.",
   },
   {
     q: "What are Jan Aushadhi generic medicines?",
@@ -53,7 +53,7 @@ const FAQS = [
   },
   {
     q: "Where is my prescription data stored?",
-    a: "Unconfirmed prescriptions remain temporary until you explicitly confirm and save them. Device-local records stay in your browser's private storage, and authenticated account records are encrypted and protected by strict role-based access control.",
+    a: "Unconfirmed prescriptions remain temporary until you explicitly confirm and save them. Device-local comparison reports stay in your browser's private IndexedDB storage, and confirmed health records in authenticated accounts are stored securely with role-based access control.",
   },
 ];
 
@@ -91,13 +91,14 @@ export default function Landing({
       <Navbar isLanding={true} onOpenAuth={onOpenAuth} />
 
       {/* ==============================================================
-          SECTION 1: HERO (#home)
+          MAIN CONTENT LANDMARK
           ============================================================== */}
-      <header id="home" className="relative py-14 sm:py-16 lg:py-20 overflow-hidden">
-        <div
-          id="main-content"
-          className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 lg:gap-12 items-start relative z-10"
-        >
+      <main id="main-content" tabIndex="-1" className="focus:outline-none">
+        {/* ==============================================================
+            SECTION 1: HERO (#home)
+            ============================================================== */}
+        <header id="home" className="relative py-14 sm:py-16 lg:py-20 overflow-hidden">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 lg:gap-12 items-start relative z-10">
           {/* Left: Verified Value Proposition (5/12 on lg) */}
           <div className="lg:col-span-5 flex flex-col justify-start items-start space-y-6 pt-2">
             {/* Context Badge */}
@@ -149,7 +150,7 @@ export default function Landing({
           </div>
 
           {/* Right: Protected Player Card (7/12 on lg) */}
-          <div className="lg:col-span-7 relative flex items-center justify-center lg:justify-end w-full">
+          <div className="lg:col-span-7 relative flex flex-col items-center justify-center lg:items-end w-full">
             {/* Decorative arrow: visible on tablet/desktop, hidden on small mobile */}
             <svg
               className="absolute -top-10 -left-8 w-20 h-20 text-brand-navy/20 transform rotate-12 z-0 hidden md:block pointer-events-none"
@@ -168,6 +169,9 @@ export default function Landing({
             </svg>
 
             <SahayakPlayerCard onLaunchDemo={onOpenAuth || (() => onSelectDemo("ramesh"))} />
+            <p className="mt-2 text-[11px] font-medium text-ui-text-secondary text-center lg:text-right" aria-label="Illustration notice">
+              * Illustrative preview of Sahayak adherence check-in and caregiver sync.
+            </p>
           </div>
         </div>
       </header>
@@ -303,7 +307,7 @@ export default function Landing({
                     Confirm active schedule and synchronize with family
                   </h3>
                   <p className="text-xs sm:text-sm text-ui-text-secondary leading-relaxed">
-                    Save reviewed records to receive daily adherence check-ins via WhatsApp or automated phone calls, giving distant caregivers peace of mind.
+                    Save confirmed records to receive scheduled adherence check-ins via WhatsApp or voice calls when configured, keeping distant caregivers informed.
                   </p>
                 </div>
               </div>
@@ -459,6 +463,7 @@ export default function Landing({
           </div>
         </div>
       </section>
+      </main>
 
       {/* ==============================================================
           SECTION 8: FOOTER (LANDMARK)

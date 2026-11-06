@@ -28,6 +28,8 @@ module.exports = {
           'border-decorative': 'var(--ui-border-decorative, #E8DFD0)',
           text: 'var(--ui-text, #172B4D)',
           'text-secondary': 'var(--ui-text-secondary, #526174)',
+          'text-muted': 'var(--ui-text-secondary, #526174)',
+          muted: 'var(--ui-text-secondary, #526174)',
           blue: 'var(--ui-blue, #2457A7)',
           'blue-hover': 'var(--ui-blue-hover, #1D478A)',
           'control-border': 'var(--ui-control-border, #7A8796)',

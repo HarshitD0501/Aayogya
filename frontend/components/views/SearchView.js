@@ -286,22 +286,22 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
   const content = (
     <ContainerTag
-      {...(hideNavbar ? { "aria-labelledby": "search-heading" } : {})}
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8"
+      {...(hideNavbar ? { "aria-labelledby": "search-heading" } : { id: "main-content", tabIndex: -1 })}
+      className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full space-y-8 focus:outline-none"
     >
       {/* Editorial Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-bold uppercase tracking-wider text-brand-navy">
-          <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-ui-surface border border-ui-border-decorative rounded-full shadow-xs text-xs font-semibold uppercase tracking-wider text-ui-text">
+          <Sparkles className="w-3.5 h-3.5 text-ui-blue" />
           <span>PMBJP Price Transparency</span>
         </div>
         <HeadingTag
           {...(hideNavbar ? { id: "search-heading" } : {})}
-          className="font-serif font-black text-3xl sm:text-5xl text-brand-navy tracking-tight leading-tight"
+          className="font-serif font-semibold text-3xl sm:text-5xl text-ui-text tracking-tight leading-tight"
         >
           {t.searchTitle}
         </HeadingTag>
-        <p className="font-sans text-sm sm:text-base text-brand-gray font-light">
+        <p className="font-sans text-sm sm:text-base text-ui-text-secondary">
           {t.searchSubtitle}
         </p>
       </div>
@@ -380,18 +380,18 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       {searchError && (
         <div
           role="alert"
-          className="max-w-3xl mx-auto p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+          className="max-w-3xl mx-auto p-4 bg-[#FDF0EE] border border-[#F5B5AE] rounded-xl text-ui-text text-xs flex items-center justify-between gap-3 shadow-xs"
         >
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-800 flex-shrink-0" />
-            <span>{searchError}</span>
+            <AlertCircle className="w-4 h-4 text-ui-danger flex-shrink-0" />
+            <span className="font-medium text-ui-danger">{searchError}</span>
           </div>
           {query.trim() && (
             <button
               onClick={() => executeSearch(query)}
-              className="px-2.5 py-1 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[11px] flex items-center gap-1"
+              className="px-3 py-1.5 bg-ui-danger hover:bg-[#911C13] text-white rounded-lg font-semibold text-xs flex items-center gap-1 transition-colors"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>Retry</span>
             </button>
           )}
@@ -401,18 +401,18 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       {compareError && (
         <div
           role="alert"
-          className="max-w-3xl mx-auto p-3.5 bg-red-100 border-2 border-red-800 text-red-900 text-xs font-bold flex items-center justify-between gap-3 sketchy-box"
+          className="max-w-3xl mx-auto p-4 bg-[#FDF0EE] border border-[#F5B5AE] rounded-xl text-ui-text text-xs flex items-center justify-between gap-3 shadow-xs"
         >
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-800 flex-shrink-0" />
-            <span>{compareError}</span>
+            <AlertCircle className="w-4 h-4 text-ui-danger flex-shrink-0" />
+            <span className="font-medium text-ui-danger">{compareError}</span>
           </div>
           {selectedCandidate && (
             <button
               onClick={() => executeCompare(selectedCandidate, selectedBrandId, packCount)}
-              className="px-2.5 py-1 bg-red-800 text-white hover:bg-red-900 rounded font-bold uppercase tracking-wider text-[11px] flex items-center gap-1"
+              className="px-3 py-1.5 bg-ui-danger hover:bg-[#911C13] text-white rounded-lg font-semibold text-xs flex items-center gap-1 transition-colors"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>Retry</span>
             </button>
           )}
@@ -421,9 +421,9 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
       {/* Comparison Result Hero */}
       {isComparing && (
-        <div className="p-8 text-center bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch max-w-3xl mx-auto">
-          <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="font-serif font-bold text-brand-navy">Verifying exact generic equivalent pricing…</p>
+        <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card max-w-3xl mx-auto">
+          <div className="w-8 h-8 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="font-serif font-semibold text-ui-text">Verifying exact generic equivalent pricing…</p>
         </div>
       )}
 
@@ -471,17 +471,17 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
             {onNavigateTab ? (
               <button
                 onClick={() => onNavigateTab("history")}
-                className="inline-flex items-center gap-2 text-xs font-bold text-brand-navy uppercase tracking-wider hover:text-brand-orange underline underline-offset-4"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-ui-text hover:text-ui-blue transition-colors underline underline-offset-4"
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className="w-4 h-4 text-ui-blue" />
                 <span>View Saved Reports & Basket History</span>
               </button>
             ) : (
               <Link
                 href="/history"
-                className="inline-flex items-center gap-2 text-xs font-bold text-brand-navy uppercase tracking-wider hover:text-brand-orange underline underline-offset-4"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-ui-text hover:text-ui-blue transition-colors underline underline-offset-4"
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className="w-4 h-4 text-ui-blue" />
                 <span>View Saved Reports & Basket History</span>
               </Link>
             )}
@@ -492,20 +492,20 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       {/* Empty State / Initial Guide */}
       {!comparisonItem && !isComparing && (
         <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-          <div className="p-4 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch text-center space-y-2">
-            <span className="text-2xl font-serif font-black text-brand-orange">01</span>
-            <h4 className="font-serif font-black text-sm text-brand-navy">Search Brand</h4>
-            <p className="text-xs text-brand-gray">Type any prescribed Indian brand or salt to discover equivalents.</p>
+          <div className="p-5 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card text-center space-y-2">
+            <span className="text-2xl font-serif font-bold text-ui-blue">01</span>
+            <h4 className="font-serif font-semibold text-sm text-ui-text">Search Brand</h4>
+            <p className="text-xs text-ui-text-secondary">Type any prescribed Indian brand or salt to discover equivalents.</p>
           </div>
-          <div className="p-4 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch text-center space-y-2">
-            <span className="text-2xl font-serif font-black text-brand-orange">02</span>
-            <h4 className="font-serif font-black text-sm text-brand-navy">Inspect PMBJP</h4>
-            <p className="text-xs text-brand-gray">Compare verified Jan Aushadhi MRP against NPPA regulated ceiling caps.</p>
+          <div className="p-5 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card text-center space-y-2">
+            <span className="text-2xl font-serif font-bold text-ui-blue">02</span>
+            <h4 className="font-serif font-semibold text-sm text-ui-text">Inspect PMBJP</h4>
+            <p className="text-xs text-ui-text-secondary">Compare verified Jan Aushadhi MRP against NPPA regulated ceiling caps.</p>
           </div>
-          <div className="p-4 bg-brand-white border-2 border-brand-navy sketchy-box shadow-sketch text-center space-y-2">
-            <span className="text-2xl font-serif font-black text-brand-orange">03</span>
-            <h4 className="font-serif font-black text-sm text-brand-navy">Confirm & Save</h4>
-            <p className="text-xs text-brand-gray">Generate a counter slip to consult your pharmacist or doctor.</p>
+          <div className="p-5 bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card text-center space-y-2">
+            <span className="text-2xl font-serif font-bold text-ui-blue">03</span>
+            <h4 className="font-serif font-semibold text-sm text-ui-text">Confirm & Save</h4>
+            <p className="text-xs text-ui-text-secondary">Generate a counter slip to consult your pharmacist or doctor.</p>
           </div>
         </div>
       )}
@@ -522,7 +522,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
   }
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-navy flex flex-col">
+    <div className="min-h-screen bg-ui-canvas text-ui-text flex flex-col font-sans">
       <Navbar activeTab="search" />
       <div className="flex-1">{content}</div>
     </div>
