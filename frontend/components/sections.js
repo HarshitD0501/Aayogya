@@ -56,11 +56,24 @@ import {
 
 // Shared GET-with-loading/error helper with deduplication & scoped caching. Re-fetches when `deps` change.
 function useData(path, deps = []) {
-  const [state, setState] = useState({ loading: true, error: "", data: null });
+  const [state, setState] = useState({
+    loading: true,
+    isRefreshing: false,
+    error: "",
+    data: null,
+    lastUpdated: null,
+  });
+
   useEffect(() => {
     let alive = true;
     const controller = new AbortController();
-    setState((prev) => ({ ...prev, loading: true, error: "" }));
+
+    setState((prev) => ({
+      ...prev,
+      loading: !prev.data,
+      isRefreshing: !!prev.data,
+      error: prev.data ? prev.error : "",
+    }));
 
     fetchWithResourceCache(
       path,
@@ -68,7 +81,15 @@ function useData(path, deps = []) {
       { signal: controller.signal }
     )
       .then((d) => {
-        if (alive) setState({ loading: false, error: "", data: d });
+        if (alive) {
+          setState({
+            loading: false,
+            isRefreshing: false,
+            error: "",
+            data: d,
+            lastUpdated: new Date(),
+          });
+        }
       })
       .catch((e) => {
         if (alive) {
@@ -77,11 +98,14 @@ function useData(path, deps = []) {
             !e?.message?.toLowerCase().includes("timeout") &&
             controller.signal.reason?.name !== "TimeoutError";
           if (isUserAbort) return;
-          setState({
+
+          setState((prev) => ({
+            ...prev,
             loading: false,
+            isRefreshing: false,
             error: e.message || "Failed to load data. Please try again.",
-            data: null,
-          });
+            data: prev.data,
+          }));
         }
       });
 
@@ -91,6 +115,7 @@ function useData(path, deps = []) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, ...deps]);
+
   return state;
 }
 
@@ -387,14 +412,14 @@ function timeTo12h(t) {
   return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-export function Summary() {
+export function Summary({ pollVersion = 0, patient }) {
   const [sendingId, setSendingId] = useState(null);
   const [testingScheduler, setTestingScheduler] = useState(false);
   const [editingTimes, setEditingTimes] = useState(false);
   const [slotTimes, setSlotTimes] = useState({ morning: "08:00", afternoon: "13:00", night: "20:00" });
   const [savingTimes, setSavingTimes] = useState(false);
   const [adhVersion, setAdhVersion] = useState(0);
-  const { loading, error, data } = useData("/summary", [adhVersion]);
+  const { loading, isRefreshing, error, data, lastUpdated } = useData("/summary", [adhVersion, pollVersion]);
   const scope = useReveal([loading, data]);
 
   useEffect(() => {
@@ -533,8 +558,9 @@ export function Summary() {
     }
   };
 
-  if (loading) return <Loader label="Loading your clinical overview…" />;
-  if (error) return <Note tone="err">{error}</Note>;
+  if (loading && !data) return <Loader label="Loading your clinical overview…" />;
+  if (error && !data) return <Note tone="err">{error}</Note>;
+  if (!data) return null;
 
   const t = data.tracking;
   const s = data.schedule;
@@ -542,6 +568,13 @@ export function Summary() {
 
   return (
     <div ref={scope} className="flex flex-col gap-6">
+      {/* Background refresh / sync telemetry badge */}
+      {isRefreshing && (
+        <div className="flex items-center gap-1.5 text-xs text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1.5 rounded-lg w-fit shadow-xs animate-in fade-in duration-150" role="status">
+          <RefreshCw size={13} className="animate-spin" />
+          <span>Refreshing schedule and adherence status…</span>
+        </div>
+      )}
       {/* 1. At-A-Glance Health Telemetry */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat
@@ -933,7 +966,7 @@ export function Summary() {
                 </div>
                 {data.next_followup.follow_up_status === "reschedule_requested" ? (
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shadow-xs">
-                    🔄 Reschedule Requested
+                    🔄 Reschedule Requested (Pending Confirmation)
                   </span>
                 ) : data.next_followup.follow_up_status === "confirmed" ? (
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shadow-xs">
@@ -1035,21 +1068,21 @@ function MedCard({ m, onStop, onToggle }) {
         </button>
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors shadow-xs"
+          className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 text-ui-text-secondary hover:text-ui-text bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative rounded-lg transition-colors shadow-xs"
           onClick={() => onStop(m.id, m.brand)}
-          title="Patient feeling healthy / completed course. Stops all upcoming reminders."
+          title="Record medication course as stopped and pause scheduled reminders."
         >
-          ✋ I&apos;m Fit / Stop Medicine
+          🛑 Stop Course & Reminders
         </button>
       </div>
     </Card>
   );
 }
 
-export function Medicines({ pollVersion }) {
+export function Medicines({ pollVersion = 0, patient }) {
   const [version, setVersion] = useState(0);
   const [priceMap, setPriceMap] = useState({});
-  const { loading, error, data } = useData("/medicines?include_prices=false", [version, pollVersion]);
+  const { loading, isRefreshing, error, data, lastUpdated } = useData("/medicines?include_prices=false", [version, pollVersion]);
   const scope = useReveal([loading, data]);
 
   // Progressive background enrichment for live pharmacy comparison without blocking active prescription render
@@ -1080,14 +1113,14 @@ export function Medicines({ pollVersion }) {
   const handleStop = async (id, brand) => {
     if (
       !confirm(
-        `Are you feeling healthy and want to stop taking ${brand}?\n\nThis will halt all upcoming WhatsApp and call reminders for this medicine so you are not disturbed.`
+        `Stop dosage reminders for ${brand}?\n\nThis records this medication course as stopped and pauses scheduled check-ins. Please confirm this change with your prescribing doctor.`
       )
     )
       return;
     try {
       await api(`/medicines/${id}/stop`, {
         method: "POST",
-        json: { reason: "Patient feeling healthy / completed course" },
+        json: { reason: "Course stopped / reminders paused" },
       });
       setVersion((v) => v + 1);
     } catch (e) {
@@ -1104,8 +1137,8 @@ export function Medicines({ pollVersion }) {
     }
   };
 
-  if (loading) return <Loader label="Retrieving active prescription list…" />;
-  if (error) {
+  if (loading && !data) return <Loader label="Retrieving active prescription list…" />;
+  if (error && !data) {
     return (
       <UIError
         title="Could not retrieve prescription list"
@@ -1117,7 +1150,14 @@ export function Medicines({ pollVersion }) {
   if (!data?.length)
     return <Empty icon="💊">No active medicines found. Upload a prescription to get started.</Empty>;
   return (
-    <div ref={scope} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div ref={scope} className="space-y-4">
+      {isRefreshing && (
+        <div className="flex items-center gap-1.5 text-xs text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1.5 rounded-lg w-fit shadow-xs animate-in fade-in duration-150" role="status">
+          <RefreshCw size={13} className="animate-spin" />
+          <span>Synchronizing active medicines…</span>
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((m) => (
         <MedCard
           key={m.id}
@@ -1126,6 +1166,7 @@ export function Medicines({ pollVersion }) {
           onToggle={handleToggle}
         />
       ))}
+    </div>
     </div>
   );
 }
@@ -1197,13 +1238,19 @@ function FindingCard({ f }) {
   );
 }
 
-export function Interactions() {
-  const { loading, error, data } = useData("/interactions");
+export function Interactions({ pollVersion = 0, patient }) {
+  const { loading, isRefreshing, error, data, lastUpdated } = useData("/interactions", [pollVersion]);
   const scope = useReveal([loading, data]);
-  if (loading) return <Loader label="Scanning medicine interactions…" />;
-  if (error) return <Note tone="err">{error}</Note>;
+  if (loading && !data) return <Loader label="Scanning medicine interactions…" />;
+  if (error && !data) return <Note tone="err">{error}</Note>;
   return (
     <div ref={scope} className="flex flex-col gap-5">
+      {isRefreshing && (
+        <div className="flex items-center gap-1.5 text-xs text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1.5 rounded-lg w-fit shadow-xs animate-in fade-in duration-150" role="status">
+          <RefreshCw size={13} className="animate-spin" />
+          <span>Scanning medicine interactions…</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Stat
           icon={<Search size={20} />}
@@ -1240,29 +1287,37 @@ export function Interactions() {
   );
 }
 
-export function Prices() {
-  const { loading, error, data } = useData("/medicines");
+export function Prices({ pollVersion = 0, patient }) {
+  const { loading, isRefreshing, error, data, lastUpdated } = useData("/medicines", [pollVersion]);
   const scope = useReveal([loading, data]);
-  if (loading) return <Loader label="Querying partner pharmacy catalogues…" />;
-  if (error) return <Note tone="err">{error}</Note>;
-  if (!data.length) return <Empty icon="🏷️">Upload a prescription to compare medicine prices.</Empty>;
+  if (loading && !data) return <Loader label="Querying partner pharmacy catalogues…" />;
+  if (error && !data) return <Note tone="err">{error}</Note>;
+  if (!data?.length) return <Empty icon="🏷️">Upload a prescription to compare medicine prices.</Empty>;
   return (
-    <div ref={scope} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {data.map((m) => (
-        <Card key={m.id} title={m.brand} sub={medLine(m)}>
-          <Offers prices={m.prices} />
-        </Card>
-      ))}
+    <div ref={scope} className="space-y-4">
+      {isRefreshing && (
+        <div className="flex items-center gap-1.5 text-xs text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1.5 rounded-lg w-fit shadow-xs animate-in fade-in duration-150" role="status">
+          <RefreshCw size={13} className="animate-spin" />
+          <span>Synchronizing medicine prices…</span>
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((m) => (
+          <Card key={m.id} title={m.brand} sub={medLine(m)}>
+            <Offers prices={m.prices} />
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
 
-export function Reports() {
+export function Reports({ pollVersion = 0, patient }) {
   const [refresh, setRefresh] = useState(0);
   const [busyId, setBusyId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 5;
-  const { loading, error, data } = useData("/reports", [refresh]);
+  const { loading, isRefreshing, error, data, lastUpdated } = useData("/reports", [refresh, pollVersion]);
   const scope = useReveal([loading, data, currentPage]);
 
   const confirm = async (id) => {
@@ -1277,8 +1332,8 @@ export function Reports() {
     }
   };
 
-  if (loading) return <Loader label="Loading archival records…" />;
-  if (error) return <Note tone="err">{error}</Note>;
+  if (loading && !data) return <Loader label="Loading archival records…" />;
+  if (error && !data) return <Note tone="err">{error}</Note>;
   const reportsList = data || [];
   if (!reportsList.length) return <Empty icon="📄">No archived prescriptions found.</Empty>;
 
@@ -1287,6 +1342,12 @@ export function Reports() {
 
   return (
     <div ref={scope} className="flex flex-col gap-4">
+      {isRefreshing && (
+        <div className="flex items-center gap-1.5 text-xs text-ui-blue bg-ui-surface-subtle border border-ui-border-decorative px-3 py-1.5 rounded-lg w-fit shadow-xs animate-in fade-in duration-150" role="status">
+          <RefreshCw size={13} className="animate-spin" />
+          <span>Synchronizing health records…</span>
+        </div>
+      )}
       {paginatedReports.map((r) => (
         <Card
           key={r.id}
@@ -1337,7 +1398,7 @@ export function Reports() {
               </div>
               {r.follow_up_status === "reschedule_requested" && (
                 <span className="text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-semibold">
-                  🔄 Rescheduled: {r.reschedule_preferred_date}
+                  🔄 Reschedule Requested: {r.reschedule_preferred_date} (Pending Confirmation)
                 </span>
               )}
               {r.follow_up_status === "confirmed" && (
@@ -1430,7 +1491,9 @@ export function Upload({ goto }) {
     setConfirming(true);
     try {
       await confirmReport(report.id);
-      goto?.("reports");
+      if (goto) {
+        goto("records") || goto("reports");
+      }
     } catch (e) {
       setErr(e.message);
     } finally {

@@ -160,6 +160,7 @@ export default function Dashboard({
   initialSection = "summary",
 }) {
   const [active, setActive] = useState(initialSection);
+  const [pollVersion, setPollVersion] = useState(0);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const mainRef = useRef(null);
   const menuButtonRef = useRef(null);
@@ -174,6 +175,46 @@ export default function Dashboard({
       setActive(initialSection);
     }
   }, [initialSection]);
+
+  // Background polling for adherence & regimen updates while dashboard is visible
+  useEffect(() => {
+    let timer = null;
+    const startPolling = () => {
+      if (!timer) {
+        timer = setInterval(() => {
+          if (typeof document !== "undefined" && document.visibilityState === "visible") {
+            setPollVersion((v) => v + 1);
+          }
+        }, 15000);
+      }
+    };
+    const stopPolling = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        setPollVersion((v) => v + 1);
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+    startPolling();
+
+    return () => {
+      stopPolling();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibility);
+      }
+    };
+  }, []);
 
   // Synchronize Back/Forward browser navigation with active tab
   useEffect(() => {
@@ -530,7 +571,7 @@ export default function Dashboard({
 
         {/* Section View Container */}
         <div className="p-4 sm:p-6 lg:p-8 flex-1 max-w-[1440px] w-full mx-auto">
-          <Comp patient={patient} goto={handleSelectSection} />
+          <Comp patient={patient} goto={handleSelectSection} pollVersion={pollVersion} />
         </div>
       </main>
     </div>

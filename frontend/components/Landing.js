@@ -329,7 +329,7 @@ export default function Landing({
               Action Engine
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-ui-text tracking-tight">
-              Live Jan Aushadhi generic price discovery
+              Jan Aushadhi generic price discovery
             </h2>
             <p className="mt-2 text-sm text-ui-text-secondary leading-relaxed">
               Search any Indian medicine brand below to check verified active salt matches, NPPA price ceilings, and generic savings.

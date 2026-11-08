@@ -227,8 +227,8 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
       const res = await dispatchAiCall(fu?.report_id, true);
       setCallMsg(
         res.mode === "simulated"
-          ? "AI call logged in simulation mode (no Twilio/LiveKit keys) — the full telephony flow ran."
-          : `AI call dispatched to ${res.patient_phone}. Room: ${res.room_name}`
+          ? "Simulated call request recorded (telephony provider not configured). Full flow simulated successfully."
+          : `Call request accepted by server. (Dispatched to ${res.patient_phone}, room: ${res.room_name}). Awaiting handset answer.`
       );
     } catch (e) {
       setCallMsg(e.message);
@@ -279,6 +279,7 @@ function ActionPanel({ patientCard, medsList, onContactSaved }) {
           target="_blank"
           rel="noopener noreferrer"
           key={`wa-${patientCard.phone}`}
+          title="Opens WhatsApp with prefilled dosage reminder. Caregiver reviews before sending."
         >
           <MessageCircle size={15} />
           <span>WhatsApp reminder</span>
@@ -418,10 +419,42 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
     return () => ctx.revert();
   }, [active]);
 
-  // Adherence polls so a WhatsApp "Taken" tap reflects here within seconds.
+  // Adherence polls so a WhatsApp "Taken" tap reflects here within seconds when visible
   useEffect(() => {
-    const t = setInterval(() => setSectionVersion((v) => v + 1), 15000);
-    return () => clearInterval(t);
+    let t = null;
+    const startPolling = () => {
+      if (!t) {
+        t = setInterval(() => {
+          if (typeof document !== "undefined" && document.visibilityState === "visible") {
+            setSectionVersion((v) => v + 1);
+          }
+        }, 15000);
+      }
+    };
+    const stopPolling = () => {
+      if (t) {
+        clearInterval(t);
+        t = null;
+      }
+    };
+    const onVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        setSectionVersion((v) => v + 1);
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibilityChange);
+    }
+    startPolling();
+    return () => {
+      stopPolling();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      }
+    };
   }, []);
 
   return (
@@ -510,39 +543,74 @@ export default function Caregiver({ caregiver, onLogout, onGoHome }) {
     return () => { document.body.style.overflow = priorOverflow; document.removeEventListener("keydown", onKeyDown); desktopQuery.removeEventListener("change", onDesktop); };
   }, [mobileDrawerOpen]);
 
-  // Single fetch point for the family cards.
+  // Single fetch point for the family cards with background polling when visible
   useEffect(() => {
     let alive = true;
     setGridErr("");
-    getFamilyOverview()
-      .then((d) => {
-        if (!alive) return;
-        const pts = d.patients || [];
-        setCards(pts);
+    const loadOverview = () => {
+      getFamilyOverview()
+        .then((d) => {
+          if (!alive) return;
+          const pts = d.patients || [];
+          setCards(pts);
 
-        // Restore only patients confirmed by the caregiver's current links.
-        if (typeof window !== "undefined") {
-          const params = new URLSearchParams(window.location.search);
-          const requested = params.get("patient") || getActivePatientId();
-          if (requested && pts.some((p) => p.id === requested)) {
-            setActivePatientId(requested);
-            setOpenId(requested);
-          } else if (requested) {
-            setActivePatientId(null);
-            setOpenId(null);
-            if (params.has("patient")) {
-              const url = new URL(window.location.href);
-              url.searchParams.delete("patient");
-              window.history.replaceState({}, "", url.toString());
+          // Restore only patients confirmed by the caregiver's current links.
+          if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const requested = params.get("patient") || getActivePatientId();
+            if (requested && pts.some((p) => p.id === requested)) {
+              setActivePatientId(requested);
+              setOpenId(requested);
+            } else if (requested && !params.has("patient")) {
+              setActivePatientId(null);
+              setOpenId(null);
             }
           }
-        }
-      })
-      .catch((e) => alive && setGridErr(e.message));
+        })
+        .catch((e) => alive && !cards && setGridErr(e.message));
+    };
+
+    loadOverview();
+
+    // Background poll for adherence telemetry updates when on family grid
+    let pollTimer = null;
+    const startFamilyPoll = () => {
+      if (!pollTimer) {
+        pollTimer = setInterval(() => {
+          if (typeof document !== "undefined" && document.visibilityState === "visible" && !openId) {
+            loadOverview();
+          }
+        }, 20000);
+      }
+    };
+    const stopFamilyPoll = () => {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    };
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible" && !openId) {
+        loadOverview();
+        startFamilyPoll();
+      } else {
+        stopFamilyPoll();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+    startFamilyPoll();
+
     return () => {
       alive = false;
+      stopFamilyPoll();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibility);
+      }
     };
-  }, [version]);
+  }, [version, openId]);
 
   // Listen to browser Back/Forward for patient selection
   useEffect(() => {

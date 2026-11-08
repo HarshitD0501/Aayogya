@@ -269,7 +269,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
         <p className="font-sans text-sm sm:text-base text-ui-text-muted leading-relaxed">
           {filterKind === "hospital"
             ? "Verified Government Hospitals, Trauma Emergency Centers, and Super-Specialty Medical Institutes with 24x7 Casualty Services."
-            : "Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & 24x7 Commercial Pharmacies."}
+            : "Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & Commercial Pharmacies."}
         </p>
       </div>
 
@@ -556,7 +556,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                 : "bg-ui-surface text-ui-text border-ui-border-decorative hover:border-ui-blue/40 hover:bg-ui-surface-subtle"
             }`}
           >
-            💊 24x7 Commercial Pharmacies
+            💊 Commercial Pharmacies
           </button>
         </div>
 
@@ -746,12 +746,12 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               const isSelected = selectedStore?.store_id === store.store_id;
               const isKendra = store.kind === "kendra" || store.name?.toLowerCase().includes("jan aushadhi");
               const isHospital = store.kind === "hospital";
-              const is24x7 = store.opening_hours?.includes("24") || isHospital;
+              const is24x7 = Boolean(store.opening_hours?.includes("24") || (isHospital && store.ownership === "government"));
 
               const isNeighbourhood = Boolean(store.is_neighbourhood);
               const isWalkingDistance = store.distance_km != null && store.distance_km <= 1.0;
 
-              let badgeText = "24x7 Pharmacy";
+              let badgeText = store.opening_hours?.includes("24") ? "24x7 Pharmacy" : "Retail Pharmacy";
               let badgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-300";
               if (isKendra) {
                 badgeText = "Govt Jan Aushadhi";
