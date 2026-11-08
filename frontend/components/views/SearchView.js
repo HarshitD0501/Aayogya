@@ -35,6 +35,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
   const [addedSuccess, setAddedSuccess] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [addError, setAddError] = useState(null);
   const [activeReportId, setActiveReportId] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -265,6 +266,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
 
   const handleAddToReport = async (item, count) => {
     setIsAdding(true);
+    setAddError(null);
     try {
       const pid = patient?.id || (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
       const repId = await addOrUpdateReportWithItem(item, count, activeReportId, null, pid);
@@ -275,7 +277,7 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
       setTimeout(() => setAddedSuccess(false), 3000);
     } catch (err) {
       console.error("Failed to add to report:", err);
-      alert("Could not save to local report.");
+      setAddError("Could not save item to local device storage. Please check browser permissions.");
     } finally {
       setIsAdding(false);
     }
@@ -457,6 +459,12 @@ export default function SearchView({ hideNavbar = false, onNavigateTab, patient 
             </div>
           )}
 
+          {addError && (
+            <div role="alert" className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center justify-between shadow-xs">
+              <span>{addError}</span>
+              <button type="button" onClick={() => setAddError(null)} className="font-semibold text-rose-900 underline ml-2">Dismiss</button>
+            </div>
+          )}
           <PriceComparisonHero
             item={comparisonItem}
             packCount={packCount}

@@ -287,9 +287,16 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
       console.error("LiveKit connection error:", err);
       cleanupCall();
       setCallState("error");
+      const isMicDenied =
+        err?.name === "NotAllowedError" ||
+        err?.name === "PermissionDeniedError" ||
+        err?.message?.toLowerCase().includes("permission") ||
+        err?.message?.toLowerCase().includes("denied");
       setErrorMsg(
-        err.message ||
-          "Could not establish live audio connection. Please verify LiveKit service is reachable."
+        isMicDenied
+          ? "Microphone access was denied. Please allow microphone permissions in your browser to speak with Sahayak, or use Text Mode."
+          : err.message ||
+            "Could not establish live audio connection. Please verify LiveKit service is reachable."
       );
     }
   };
@@ -519,6 +526,10 @@ export default function LiveVoiceAgent({ patient, onSwitchToChat }) {
             <span>Murf Falcon Realtime TTS</span>
           </div>
         </div>
+
+        <p className="text-[11px] text-ui-text-secondary text-center pt-2 border-t border-ui-border-decorative/50 mt-3 font-sans">
+          Clinical decisions stay with your doctor. Sahayak provides schedule, dosage, and medication navigation.
+        </p>
       </div>
     </div>
   );

@@ -240,8 +240,8 @@ export default function Assistant({ patient }) {
         title={mode === "voice" ? "Sahayak Live Voice Agent" : "Sahayak Assistant"}
         sub={
           mode === "voice"
-            ? "Two-way live interactive voice call with sub-second latency and instant interruption."
-            : "Ask about your medicines, safety checks, prices or next visit — type or talk."
+            ? "Two-way live interactive voice call for dosage timing, schedule check-in, and safety reminders."
+            : "Ask about your medicines, dosage timing, safety checks or prices — clinical decisions stay with your doctor."
         }
         actions={actions}
       >
@@ -255,51 +255,28 @@ export default function Assistant({ patient }) {
 
             {/* Quick Starters & Recent Context */}
             {messages.length > 0 && (
-              <div
-                style={{
-                  marginTop: 16,
-                  paddingTop: 16,
-                  borderTop: "1px solid var(--line-light)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 10,
-                  }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--muted)" }}>
+              <div className="mt-4 pt-4 border-t border-ui-border-decorative space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-ui-text-secondary">
                     Recent Text History ({messages.length} messages)
                   </span>
                   <button
-                    className="btn btn-sm btn-ghost"
+                    type="button"
+                    className="text-xs font-semibold text-ui-blue hover:underline"
                     onClick={() => setMode("chat")}
-                    style={{ fontSize: 12 }}
                   >
                     Open Full Chat
                   </button>
                 </div>
-                <div
-                  style={{
-                    maxHeight: 140,
-                    overflowY: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                  }}
-                >
+                <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                   {messages.slice(-3).map((m, i) => (
                     <div
                       key={i}
-                      style={{
-                        fontSize: 12.5,
-                        padding: "6px 10px",
-                        borderRadius: 8,
-                        background: m.role === "user" ? "var(--brand-soft)" : "var(--surface-2)",
-                        color: m.role === "user" ? "var(--brand-strong)" : "var(--ink)",
-                      }}
+                      className={`text-xs p-2 rounded-lg border ${
+                        m.role === "user"
+                          ? "bg-ui-surface-subtle text-ui-blue font-medium border-ui-border-decorative"
+                          : "bg-ui-surface text-ui-text font-normal border-ui-border-decorative"
+                      }`}
                     >
                       <strong>{m.role === "user" ? "You: " : "Sahayak: "}</strong>
                       {m.text}
@@ -312,28 +289,17 @@ export default function Assistant({ patient }) {
         ) : (
           <div className="chat">
             {/* Quick switch banner in chat mode */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "10px 14px",
-                background: "var(--brand-soft)",
-                borderRadius: 12,
-                border: "1px solid rgba(176, 127, 20, 0.15)",
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Sparkles size={16} color="#b07f14" />
-                <span style={{ fontSize: 13, color: "var(--brand-strong)", fontWeight: 500 }}>
+            <div className="flex items-center justify-between p-3 bg-ui-surface-subtle border border-ui-border-decorative rounded-xl mb-3 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-ui-blue" />
+                <span className="text-xs font-semibold text-ui-text">
                   Want real-time two-way voice conversation?
                 </span>
               </div>
               <button
-                className="btn btn-sm btn-primary"
+                type="button"
+                className="px-3 py-1.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
                 onClick={() => setMode("voice")}
-                style={{ padding: "4px 10px", fontSize: 12, display: "inline-flex", gap: 5 }}
               >
                 <PhoneCall size={12} />
                 <span>Start Live Call</span>
@@ -378,24 +344,14 @@ export default function Assistant({ patient }) {
               <div
                 role="status"
                 aria-live="polite"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  marginTop: 10,
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  background: "var(--danger-soft, #fef2f2)",
-                  color: "var(--danger, #991b1b)",
-                }}
+                className="flex items-center justify-between gap-3 p-3 mt-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs shadow-xs"
               >
-                <span style={{ fontSize: 13 }}>
+                <span className="font-medium">
                   Text assistant is temporarily unavailable. Try again shortly or switch to Live Voice.
                 </span>
                 <button
                   type="button"
-                  className="btn btn-sm"
+                  className="px-3 py-1.5 bg-rose-800 hover:bg-rose-900 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex-shrink-0"
                   onClick={() => setHealthCheckNonce((n) => n + 1)}
                 >
                   Retry
@@ -410,7 +366,7 @@ export default function Assistant({ patient }) {
             )}
 
             <form
-              className="chat-input"
+              className="flex items-center gap-2 pt-3 border-t border-ui-border-decorative mt-3"
               onSubmit={(e) => {
                 e.preventDefault();
                 send();
@@ -419,7 +375,11 @@ export default function Assistant({ patient }) {
               {srSupported && (
                 <button
                   type="button"
-                  className={`chat-mic ${listening ? "on" : ""}`.trim()}
+                  className={`p-2.5 rounded-lg border transition-colors ${
+                    listening
+                      ? "bg-rose-600 text-white border-rose-600 animate-pulse"
+                      : "bg-ui-surface-subtle text-ui-text hover:text-ui-blue border-ui-border-decorative"
+                  }`}
                   onClick={toggleListen}
                   title="Speak your question"
                   disabled={busy}
@@ -428,7 +388,7 @@ export default function Assistant({ patient }) {
                 </button>
               )}
               <input
-                className="input"
+                className="flex-1 bg-ui-surface border border-ui-control-border rounded-lg px-3.5 py-2 text-sm text-ui-text placeholder:text-ui-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-ui-blue"
                 placeholder={listening ? "Listening…" : "Type your question…"}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -436,7 +396,7 @@ export default function Assistant({ patient }) {
               />
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 disabled={busy || !input.trim()}
                 title="Send"
               >

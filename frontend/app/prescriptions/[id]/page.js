@@ -34,6 +34,7 @@ export default function PrescriptionDetailPage() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [storageError, setStorageError] = useState(null);
   const [showSlip, setShowSlip] = useState(false);
 
   // Load report from IndexedDB
@@ -42,6 +43,7 @@ export default function PrescriptionDetailPage() {
     setLoading(true);
     setNotFound(false);
 
+    setStorageError(null);
     try {
       const stored = await getPrescriptionReport(id);
       if (!stored) {
@@ -50,7 +52,8 @@ export default function PrescriptionDetailPage() {
         setReport(stored);
       }
     } catch (err) {
-      setNotFound(true);
+      console.error("Failed to read report from IndexedDB:", err);
+      setStorageError("Failed to read prescription report from browser storage. IndexedDB may be blocked or unavailable.");
     } finally {
       setLoading(false);
     }
@@ -67,6 +70,30 @@ export default function PrescriptionDetailPage() {
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-8 h-8 border-3 border-brand-orange border-t-transparent rounded-full animate-spin" />
         </div>
+      </div>
+    );
+  }
+
+  if (storageError) {
+    return (
+      <div className="min-h-screen bg-ui-canvas text-ui-text flex flex-col font-sans">
+        <Navbar />
+        <main id="main-content" tabIndex={-1} className="flex-1 flex items-center justify-center p-8 focus:outline-none">
+          <div className="max-w-md w-full bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card p-8 text-center space-y-4">
+            <AlertTriangle className="w-12 h-12 text-ui-danger mx-auto" />
+            <h2 className="font-serif font-semibold text-2xl text-ui-text">Storage Access Error</h2>
+            <p className="font-sans text-sm text-ui-text-secondary">
+              {storageError}
+            </p>
+            <button
+              type="button"
+              onClick={loadReport}
+              className="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            >
+              Retry Reading Report
+            </button>
+          </div>
+        </main>
       </div>
     );
   }
@@ -206,7 +233,7 @@ export default function PrescriptionDetailPage() {
                           {item.molecule_label || item.matched_text}
                         </div>
                         <div className="text-[11px] text-ui-text-secondary font-normal">
-                          {item.strength_label} • {item.form} • {item.pack_label || "10 tablets"}
+                          {item.strength_label} • {item.form} • {item.pack_label || "Standard unit"}
                         </div>
                       </td>
                       <td className="p-3.5 font-mono font-medium text-ui-text">

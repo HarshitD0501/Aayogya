@@ -46,6 +46,8 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [compareError, setCompareError] = useState(null);
+  const [selectedBrandId, setSelectedBrandId] = useState(null);
+  const [addError, setAddError] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [packCount, setPackCount] = useState(1);
   const [comparisonItem, setComparisonItem] = useState(null);
@@ -145,8 +147,10 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
     }
   };
 
-  const handleSelectCandidate = async (candidate) => {
+  const handleSelectCandidate = async (candidate, brandIdOverride = null) => {
     setSelectedCandidate(candidate);
+    const brandId = brandIdOverride !== null ? brandIdOverride : (candidate.brands?.[0]?.brand_id || null);
+    setSelectedBrandId(brandId);
     setIsSearching(true);
     setCompareError(null);
     try {
@@ -154,7 +158,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
         items: [
           {
             medicine_id: candidate.medicine_id,
-            brand_id: candidate.brands?.[0]?.brand_id || null,
+            brand_id: brandId,
             pack_count: packCount,
           },
         ],
@@ -183,7 +187,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
           items: [
             {
               medicine_id: selectedCandidate.medicine_id,
-              brand_id: selectedCandidate.brands?.[0]?.brand_id || null,
+              brand_id: selectedBrandId || selectedCandidate.brands?.[0]?.brand_id || null,
               pack_count: newCount,
             },
           ],
@@ -201,6 +205,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
 
   const handleAddToReport = async (item, count) => {
     setIsAdding(true);
+    setAddError(null);
     try {
       const pid = patient?.id || (typeof window !== "undefined" ? window.localStorage.getItem("aushadh_patient_id") : null);
       const repId = await addOrUpdateReportWithItem(item, count, activeReportId, null, pid);
@@ -211,7 +216,7 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
       setTimeout(() => setAddedSuccess(false), 3000);
     } catch (err) {
       console.error("Failed to add to report:", err);
-      alert("Could not save to local report.");
+      setAddError("Could not save item to local device storage. Please check browser permissions.");
     } finally {
       setIsAdding(false);
     }
@@ -596,6 +601,38 @@ export default function ScanView({ hideNavbar = false, onNavigateTab, patient })
       {/* Selected Candidate Price Hero */}
       {comparisonItem && (
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* Brand Selection Selector (U15) */}
+          {selectedCandidate && selectedCandidate.brands && selectedCandidate.brands.length > 1 && (
+            <div className="p-4 bg-ui-surface border border-ui-border-decorative rounded-xl space-y-2 shadow-xs">
+              <span className="text-xs font-semibold text-ui-text block">
+                Select Branded Reference for Comparison:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {selectedCandidate.brands.map((b) => (
+                  <button
+                    key={b.brand_id}
+                    type="button"
+                    onClick={() => handleSelectCandidate(selectedCandidate, b.brand_id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                      selectedBrandId === b.brand_id
+                        ? "bg-ui-blue text-white border-ui-blue shadow-xs"
+                        : "bg-ui-surface-subtle text-ui-text border-ui-border-decorative hover:border-ui-blue/50"
+                    }`}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {addError && (
+            <div role="alert" className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center justify-between shadow-xs">
+              <span>{addError}</span>
+              <button type="button" onClick={() => setAddError(null)} className="font-semibold text-rose-900 underline ml-2">Dismiss</button>
+            </div>
+          )}
+
           <PriceComparisonHero
             item={comparisonItem}
             packCount={packCount}

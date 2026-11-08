@@ -31,6 +31,8 @@ export default function HistoryView({ hideNavbar = false, onNavigateTab, patient
   const [loading, setLoading] = useState(true);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [storageError, setStorageError] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 5;
 

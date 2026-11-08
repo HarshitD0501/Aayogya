@@ -62,6 +62,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
   const [showRouteSteps, setShowRouteSteps] = useState(false);
   const [gpsError, setGpsError] = useState(null);
   const [routeError, setRouteError] = useState(null);
+  const [storeError, setStoreError] = useState(null);
 
   useEffect(() => {
     if (initialKind) {
@@ -128,37 +129,45 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
     };
   }, [selectedCityId]);
 
-  // 4. Fetch stores & medical facilities
-  useEffect(() => {
-    let active = true;
-    const fetchStores = async () => {
-      setLoadingStores(true);
-      try {
-        const lat = userCoords?.lat;
-        const lng = userCoords?.lng;
-        const res = await apiClient.getStores(
-          selectedCityId,
-          lat,
-          lng,
-          "all",
-          "all",
-          selectedLocality !== "all" ? selectedLocality : null
-        );
-        if (active) {
-          setStores(res || []);
-          setSelectedStore(res?.[0] || null);
-        }
-      } catch (err) {
-        console.error("Failed to fetch stores:", err);
-      } finally {
-        if (active) setLoadingStores(false);
-      }
-    };
-    fetchStores();
-    return () => {
-      active = false;
-    };
+  // 4. Fetch stores & medical facilities with explicit error handling & retry (U17)
+  const fetchStores = React.useCallback(async () => {
+    setLoadingStores(true);
+    setStoreError(null);
+    try {
+      const lat = userCoords?.lat;
+      const lng = userCoords?.lng;
+      const res = await apiClient.getStores(
+        selectedCityId,
+        lat,
+        lng,
+        "all",
+        "all",
+        selectedLocality !== "all" ? selectedLocality : null
+      );
+      setStores(res || []);
+      setSelectedStore(res?.[0] || null);
+    } catch (err) {
+      console.error("Failed to fetch stores:", err);
+      setStoreError("Unable to retrieve verified facilities for this location. Please check your network or retry.");
+      setStores([]);
+      setSelectedStore(null);
+    } finally {
+      setLoadingStores(false);
+    }
   }, [selectedCityId, userCoords, selectedLocality]);
+
+  useEffect(() => {
+    fetchStores();
+  }, [fetchStores]);
+
+  // Clear obsolete selection, route and errors when city or locality changes (U17)
+  useEffect(() => {
+    setSelectedStore(null);
+    setActiveRoute(null);
+    setRouteError(null);
+    setShowRouteSteps(false);
+    setStoreError(null);
+  }, [selectedCityId, selectedLocality]);
 
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
@@ -266,7 +275,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
         >
           {filterKind === "hospital" ? "Nearby Hospitals & Trauma Centers" : "Nearby Hospitals & Medical Stores"}
         </HeadingTag>
-        <p className="font-sans text-sm sm:text-base text-ui-text-muted leading-relaxed">
+        <p className="font-sans text-sm sm:text-base text-ui-text-secondary leading-relaxed">
           {filterKind === "hospital"
             ? "Verified Government Hospitals, Trauma Emergency Centers, and Super-Specialty Medical Institutes with 24x7 Casualty Services."
             : "Jan Aushadhi Kendras, Government Hospitals, Emergency Trauma Centers & Commercial Pharmacies."}
@@ -292,7 +301,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               {hospitalCount}
             </span>
           </div>
-          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Govt & Super-Specialty</p>
+          <p className="text-xs text-ui-text-secondary mt-1.5 truncate">Govt & Super-Specialty</p>
         </button>
 
         <button
@@ -312,7 +321,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               {kendraCount}
             </span>
           </div>
-          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Govt PMBJP Generic</p>
+          <p className="text-xs text-ui-text-secondary mt-1.5 truncate">Govt PMBJP Generic</p>
         </button>
 
         <button
@@ -332,7 +341,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               {chemistCount}
             </span>
           </div>
-          <p className="text-xs text-ui-text-muted mt-1.5 truncate">Local Neighborhood</p>
+          <p className="text-xs text-ui-text-secondary mt-1.5 truncate">Local Neighborhood</p>
         </button>
 
         <button
@@ -352,7 +361,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               {totalCount}
             </span>
           </div>
-          <p className="text-xs text-ui-text-muted mt-1.5 truncate">All verified centers</p>
+          <p className="text-xs text-ui-text-secondary mt-1.5 truncate">All verified centers</p>
         </button>
       </div>
 
@@ -367,7 +376,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
               <h4 className="font-serif font-bold text-base text-ui-text">
                 Verified Hospitals & Emergency Trauma Directory
               </h4>
-              <p className="font-sans text-xs text-ui-text-muted mt-0.5 leading-relaxed">
+              <p className="font-sans text-xs text-ui-text-secondary mt-0.5 leading-relaxed">
                 Govt Medical Colleges, Trauma Centers, and Super-Specialty Hospitals with 24x7 emergency casualty units.
               </p>
             </div>
@@ -395,7 +404,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
       <div className="bg-ui-surface border border-ui-border-decorative rounded-2xl shadow-ui-card p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
+            <label className="text-xs font-bold uppercase tracking-wider text-ui-text-secondary whitespace-nowrap">
               {t.selectCity}:
             </label>
             <select
@@ -413,7 +422,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
 
           {availableLocalities.length > 0 && (
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
+              <label className="text-xs font-bold uppercase tracking-wider text-ui-text-secondary whitespace-nowrap">
                 Area:
               </label>
               <select
@@ -466,7 +475,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
       {/* Quick Locality Chips */}
       {availableLocalities.length > 0 && (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-ui-text-muted whitespace-nowrap">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-ui-text-secondary whitespace-nowrap">
             Areas:
           </span>
           <button
@@ -562,7 +571,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
 
         {/* Ownership Toggle */}
         <div className="flex items-center gap-2 text-xs">
-          <span className="font-bold text-[10px] uppercase tracking-wider text-ui-text-muted">
+          <span className="font-bold text-[10px] uppercase tracking-wider text-ui-text-secondary">
             Ownership:
           </span>
           <button
@@ -604,7 +613,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
           <h3 className="font-serif font-bold text-xl text-ui-text">
             Live Healthcare Facility Map
           </h3>
-          <span className="text-xs font-sans text-ui-text-muted">
+          <span className="text-xs font-sans text-ui-text-secondary">
             OpenStreetMap Data & OSRM Driving Engine
           </span>
         </div>
@@ -643,7 +652,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                 <AlertCircle className="w-5 h-5 text-amber-700 flex-shrink-0" />
                 <h4 className="font-serif font-bold text-base">Route Navigation Notice</h4>
               </div>
-              <p className="text-xs font-sans text-ui-text-muted leading-relaxed">{routeError}</p>
+              <p className="text-xs font-sans text-ui-text-secondary leading-relaxed">{routeError}</p>
               {selectedStore && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.latitude},${selectedStore.longitude}`}
@@ -667,7 +676,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                       Live OSRM Route
                     </span>
                     {activeRoute.provenance?.cached && (
-                      <span className="text-[10px] font-mono text-ui-text-muted bg-ui-surface-subtle px-1.5 py-0.5 rounded border border-ui-border-decorative">
+                      <span className="text-[10px] font-mono text-ui-text-secondary bg-ui-surface-subtle px-1.5 py-0.5 rounded border border-ui-border-decorative">
                         Cached
                       </span>
                     )}
@@ -681,7 +690,7 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                     <span className="font-serif font-bold text-xl text-ui-text">
                       {activeRoute.distance_km} km
                     </span>
-                    <span className="text-xs font-sans text-ui-text-muted block">
+                    <span className="text-xs font-sans text-ui-text-secondary block">
                       ≈ {activeRoute.duration_minutes} mins drive
                     </span>
                   </div>
@@ -731,14 +740,26 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
           )}
         </div>
 
-        {loadingStores ? (
+        {storeError ? (
+          <div role="alert" className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card space-y-3">
+            <AlertCircle className="w-8 h-8 text-ui-danger mx-auto" />
+            <p className="font-serif font-bold text-ui-text">{storeError}</p>
+            <button
+              type="button"
+              onClick={fetchStores}
+              className="px-4 py-2 bg-ui-blue hover:bg-ui-blue-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+            >
+              Retry Facilities Search
+            </button>
+          </div>
+        ) : loadingStores ? (
           <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
             <div className="w-8 h-8 border-2 border-ui-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="font-serif font-bold text-ui-text">Locating verified medical facilities…</p>
           </div>
         ) : filteredStores.length === 0 ? (
           <div className="p-8 text-center bg-ui-surface border border-ui-border-decorative rounded-xl shadow-ui-card">
-            <p className="font-sans text-sm text-ui-text-muted">No medical facilities found matching this filter.</p>
+            <p className="font-sans text-sm text-ui-text-secondary">No medical facilities found matching this filter.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -770,14 +791,18 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                 <div
                   key={store.store_id}
                   id={`store-card-${store.store_id}`}
-                  onClick={() => setSelectedStore(store)}
-                  className={`p-5 bg-ui-surface border rounded-xl shadow-ui-card transition-all cursor-pointer flex flex-col justify-between gap-4 ${
+                  className={`p-5 bg-ui-surface border rounded-xl shadow-ui-card transition-all flex flex-col justify-between gap-4 ${
                     isSelected
                       ? "border-ui-blue ring-2 ring-ui-blue/30 shadow-md -translate-y-0.5"
-                      : "border-ui-border-decorative hover:border-ui-blue/50 hover:shadow-md hover:-translate-y-0.5"
+                      : "border-ui-border-decorative hover:border-ui-blue/50 hover:shadow-md"
                   }`}
                 >
-                  <div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStore(store)}
+                    aria-pressed={isSelected}
+                    className="text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ui-blue rounded-lg transition-colors group"
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className={`text-[9px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}`}>
@@ -806,15 +831,15 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                       )}
                     </div>
 
-                    <h4 className="font-serif font-bold text-lg text-ui-text mt-2.5">
+                    <h4 className="font-serif font-bold text-lg text-ui-text mt-2.5 group-hover:text-ui-blue transition-colors">
                       {store.name}
                     </h4>
-                    <p className="font-sans text-xs text-ui-text-muted mt-1 leading-relaxed">
+                    <p className="font-sans text-xs text-ui-text-secondary mt-1 leading-relaxed">
                       {store.address}
                     </p>
 
                     {store.provenance?.source && (
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-ui-text-muted mt-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-ui-text-secondary mt-2">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                         <span className="truncate">{store.provenance.source}</span>
                       </div>
@@ -827,23 +852,13 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                           <span>{store.opening_hours}</span>
                         </div>
                       )}
-                      {store.phone && (
-                        <div className="flex items-center gap-1.5 text-ui-text font-bold">
-                          <Phone className="w-3.5 h-3.5 text-ui-blue" />
-                          <a href={`tel:${store.phone}`} className="hover:underline text-ui-blue font-mono">
-                            {store.phone}
-                          </a>
-                        </div>
-                      )}
                     </div>
-                  </div>
+                  </button>
 
                   <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-ui-border-decorative">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleGetRoute(store);
-                      }}
+                      type="button"
+                      onClick={() => handleGetRoute(store)}
                       className="flex-1 py-2 px-3 bg-ui-blue hover:bg-ui-blue-hover text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Navigation className="w-3.5 h-3.5 text-white/90" />
@@ -852,7 +867,6 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                     {isHospital && store.phone && (
                       <a
                         href={`tel:${store.phone}`}
-                        onClick={(e) => e.stopPropagation()}
                         className="py-2 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 text-rose-800"
                       >
                         <Phone className="w-3.5 h-3.5 text-rose-700" />
@@ -863,7 +877,6 @@ export default function StoresView({ hideNavbar = false, onNavigateTab, initialK
                       href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
                       className="py-2 px-3 bg-ui-surface hover:bg-ui-surface-subtle border border-ui-border-decorative font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 text-ui-text"
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-ui-blue" />
