@@ -11,12 +11,12 @@ function WorkspaceLoading({ label = "Opening workspace" }) {
   return (
     <div className="workspace-v2 min-h-screen flex bg-ui-canvas text-ui-text" role="status" aria-live="polite">
       <div className="hidden lg:flex w-[268px] shrink-0 flex-col gap-3 bg-ui-surface border-r border-ui-border-decorative p-4" aria-hidden="true">
-        <img src="/aayogya-logo.png" alt="" className="h-8 w-auto object-contain self-start mb-5" />
+        <img src="/aayogya-logo.png" alt="Ayogya" width="128" height="32" className="h-8 w-auto object-contain self-start mb-5" />
         {[0, 1, 2, 3].map((item) => <div key={item} className="h-10 rounded-lg bg-ui-surface-subtle" />)}
       </div>
       <div className="flex-1 min-w-0">
         <div className="h-16 bg-ui-surface border-b border-ui-border-decorative flex items-center px-4 sm:px-8">
-          <img src="/aayogya-logo.png" alt="" className="lg:hidden h-7 w-auto object-contain" />
+          <img src="/aayogya-logo.png" alt="Ayogya" width="112" height="28" className="lg:hidden h-7 w-auto object-contain" />
           <span className="ml-3 lg:ml-0 font-serif font-semibold text-lg">{label}</span>
         </div>
         <div className="max-w-[1200px] mx-auto p-4 sm:p-8">
@@ -97,7 +97,7 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-ui-canvas flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 text-center">
         <div className="w-full max-w-md bg-ui-surface border border-ui-border-decorative rounded-2xl p-8 shadow-ui-card">
-          <img src="/aayogya-logo.png" alt="Ayogya" className="h-10 w-auto object-contain mx-auto mb-4" />
+          <img src="/aayogya-logo.png" alt="Ayogya" width="140" height="40" className="h-10 w-auto object-contain mx-auto mb-4" />
           <h2 className="font-serif text-2xl font-semibold text-ui-text tracking-tight mb-2">
             Ayogya Workspace
           </h2>

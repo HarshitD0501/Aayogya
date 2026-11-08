@@ -3471,16 +3471,16 @@ body {
   top: 1rem;
 }
 
-/* Reduced motion preference gate */
+/* Reduced motion preference gate (U22 universal coverage) */
 @media (prefers-reduced-motion: reduce) {
   html,
   html.scroll-smooth {
     scroll-behavior: auto !important;
   }
 
-  .landing-v2 *,
-  .workspace-v2 *,
-  .ui-modal-root * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

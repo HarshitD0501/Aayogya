@@ -37,6 +37,7 @@ import {
   LogOut,
   Bot,
   Home,
+  Globe,
   Users,
   Phone,
   MessageCircle,
@@ -510,6 +511,7 @@ function PatientDetail({ patientCard, onBack, onContactSaved }) {
 
 export default function Caregiver({ caregiver, onLogout, onGoHome }) {
   const [openId, setOpenId] = useState(null);
+  const { language, setLanguage } = useLanguage();
   const [cards, setCards] = useState(null);
   const [gridErr, setGridErr] = useState("");
   const [version, setVersion] = useState(0); // bump to refetch the overview

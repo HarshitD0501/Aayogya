@@ -230,7 +230,7 @@ export default function LoginDialog({
         {/* Dialog Header */}
         <div className="flex items-center justify-between p-5 border-b border-ui-border-decorative/60 bg-ui-canvas/40">
           <div className="flex items-center gap-2.5">
-            <img src="/aayogya-logo.png" alt="Ayogya" className="h-7 w-auto object-contain" />
+            <img src="/aayogya-logo.png" alt="Ayogya" width="112" height="28" className="h-7 w-auto object-contain" />
             <span className="text-xs font-semibold uppercase tracking-wider text-ui-text-secondary">
               Secure Access
             </span>

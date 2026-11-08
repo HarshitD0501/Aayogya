@@ -81,12 +81,27 @@ async function handleRequest(request, params, method) {
     clearTimeout(timeout);
 
     const data = await res.arrayBuffer();
+
+    const responseHeaders = new Headers();
+    const contentType = res.headers.get("Content-Type") || "application/json";
+    responseHeaders.set("Content-Type", contentType);
+
+    // Forward caching, validation, and rate limit / retry headers (U21)
+    const etag = res.headers.get("ETag") || res.headers.get("etag");
+    if (etag) responseHeaders.set("ETag", etag);
+
+    const retryAfter = res.headers.get("Retry-After") || res.headers.get("retry-after");
+    if (retryAfter) responseHeaders.set("Retry-After", retryAfter);
+
+    const cacheControl = res.headers.get("Cache-Control") || res.headers.get("cache-control");
+    if (cacheControl) responseHeaders.set("Cache-Control", cacheControl);
+
+    const lastModified = res.headers.get("Last-Modified") || res.headers.get("last-modified");
+    if (lastModified) responseHeaders.set("Last-Modified", lastModified);
+
     return new NextResponse(data, {
       status: res.status,
-      headers: {
-        "Content-Type":
-          res.headers.get("Content-Type") || "application/json",
-      },
+      headers: responseHeaders,
     });
   } catch (err) {
     const isAbort =
